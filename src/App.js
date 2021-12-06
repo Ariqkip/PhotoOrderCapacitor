@@ -2,14 +2,22 @@
 import './App.css';
 
 //Components
-import AppScaffold from './components/AppScaffold';
 import Router from './components/Router';
+
+//UI
+import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+
+const theme = createMuiTheme({
+  typography: {
+    fontFamily: ['Nunito', 'cursive'].join(','),
+  },
+});
 
 function App() {
   return (
-    <Router>
-      <AppScaffold />;
-    </Router>
+    <ThemeProvider theme={theme}>
+      <Router />;
+    </ThemeProvider>
   );
 }
 

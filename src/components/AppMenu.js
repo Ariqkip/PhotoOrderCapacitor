@@ -1,5 +1,6 @@
 //Core
 import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 
 //Components
 import MenuDrawer from './MenuDrawer';
@@ -118,9 +119,32 @@ const useStyles = makeStyles((theme) => ({
       border: 0,
     },
   },
+  navButton: {
+    color: '#8f8f8f',
+    width: '100px',
+    textAlign: 'center',
+    marginLeft: '5px',
+    marginRight: '5px',
+    textDecoration: 'none',
+    fontSize: '1rem',
+  },
+  sectionDesktop: {
+    display: 'none',
+    alignItems: 'center',
+    [theme.breakpoints.up('md')]: {
+      display: 'flex',
+    },
+  },
+  sectionMobile: {
+    display: 'flex',
+    alignItems: 'center',
+    [theme.breakpoints.up('md')]: {
+      display: 'none',
+    },
+  },
 }));
 
-const AppMenu = (props) => {
+const AppMenu = ({ photographerId }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
@@ -134,30 +158,55 @@ const AppMenu = (props) => {
           [classes.appBarShift]: drawerOpen,
         })}
       >
-        <Toolbar className={classes.regular}>
-          <IconButton
-            color='inherit'
-            aria-label='open drawer'
-            onClick={() => {
-              setDrawerOpen(true);
-            }}
-            edge='start'
-            //hidden={currentLogin == null ? true : false}
-            className={clsx(classes.menuButton, {
-              [classes.hide]: drawerOpen,
-            })}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography
-            component='h1'
-            variant='h6'
-            color='inherit'
-            noWrap
-            className={classes.title}
-          >
-            {t('Menu')}
-          </Typography>
+        <Toolbar className={classes.toolbar}>
+          <div className={classes.sectionMobile}>
+            <IconButton
+              color='inherit'
+              aria-label='open drawer'
+              onClick={() => {
+                setDrawerOpen(true);
+              }}
+              edge='start'
+              //hidden={currentLogin == null ? true : false}
+              className={clsx(classes.menuButton, {
+                [classes.hide]: drawerOpen,
+              })}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography
+              component='h1'
+              variant='h6'
+              color='inherit'
+              noWrap
+              className={classes.title}
+            >
+              {t('Menu')}
+            </Typography>
+          </div>
+          <div className={classes.sectionDesktop}>
+            <NavLink
+              to={`/photographer/${photographerId}/products`}
+              activeStyle={{ fontWeight: 'bold' }}
+              className={classes.navButton}
+            >
+              Products
+            </NavLink>
+            <NavLink
+              to={`/photographer/${photographerId}/checkout`}
+              activeStyle={{ fontWeight: 'bold' }}
+              className={classes.navButton}
+            >
+              Finish order
+            </NavLink>
+            <NavLink
+              to={`/photographer/${photographerId}/contact`}
+              activeStyle={{ fontWeight: 'bold' }}
+              className={classes.navButton}
+            >
+              Contact
+            </NavLink>
+          </div>
         </Toolbar>
       </AppBar>
       <MenuDrawer

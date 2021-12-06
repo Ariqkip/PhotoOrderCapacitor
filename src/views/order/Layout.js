@@ -16,7 +16,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    height: '100vh',
+    backgroundColor: '#f8f8f8',
   },
   toolbar: {
     display: 'flex',
@@ -31,14 +31,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Layout = ({ children }) => {
+const Layout = ({ children, photographerId }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <AppMenu />
+      <AppMenu photographerId={photographerId} />
       <main className={classes.content}>
         <div className={classes.toolbar} />
         {children}
