@@ -8,6 +8,7 @@ import AppMenu from '../../components/AppMenu';
 import { useTranslation } from 'react-i18next';
 
 //Utils
+import { useGetPhotographer } from '../../services/OrderUtils';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -34,6 +35,9 @@ const useStyles = makeStyles((theme) => ({
 const Layout = ({ children, photographerId }) => {
   const classes = useStyles();
   const { t } = useTranslation();
+
+  const photographerQuery = useGetPhotographer(photographerId);
+  console.log('%cLQS logger: ', 'color: #c931eb', { photographerQuery });
 
   return (
     <div className={classes.root}>
