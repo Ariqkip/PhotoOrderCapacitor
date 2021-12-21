@@ -3,6 +3,7 @@ import './App.css';
 
 //Components
 import Router from './components/Router';
+import GlobalProviders from './core/GlobalProviders';
 
 //UI
 import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
@@ -15,9 +16,11 @@ const theme = createMuiTheme({
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <Router />;
-    </ThemeProvider>
+    <GlobalProviders>
+      <ThemeProvider theme={theme}>
+        <Router />
+      </ThemeProvider>
+    </GlobalProviders>
   );
 }
 

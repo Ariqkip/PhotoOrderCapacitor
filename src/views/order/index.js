@@ -1,7 +1,6 @@
 //Core
-import React, { useState, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
 
 //Components
 import Layout from './Layout';
@@ -12,70 +11,93 @@ import ContactView from './ContactView';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
+import { useGetPhotographer } from '../../services/OrderUtils';
 
 //Utils
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
+import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
   },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+  spinner: {
+    color: '#743c6e',
+  },
 }));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      useErrorBoundary: false,
-      refetchOnWindowFocus: false,
-      staleTime: 60 * 1000 * 10, //10 minutes
-      retry(failureCount, error) {
-        if (error.status === 404) return false;
-        else if (failureCount < 2) return true;
-        else return false;
-      },
-    },
-  },
-});
+const cleanMatchUrl = (match) => {
+  if (match.url.endsWith('/')) {
+    return match.url.slice(0, -1);
+  }
+
+  return match.url;
+};
 
 const OrderIndex = ({ match }) => {
   const classes = useStyles();
   const { t } = useTranslation();
+  const url = cleanMatchUrl(match);
+
+  const photographerQuery = useGetPhotographer(match?.params?.id ?? 0);
+  console.log('%cLQS logger: ', 'color: #c931eb', { photographerQuery });
+
+  function redirectCategoriesFlag(query) {
+    if (!query.isSuccess) return false;
+    if (!query.data?.Categories) return false;
+    if (query.data?.Categories?.length < 1) return false;
+
+    return true;
+  }
+
+  function isLoading(query) {
+    if (query.isLoading) return true;
+    if (query.isFetching) return true;
+
+    return false;
+  }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Layout photographerId={match?.params?.id ?? 0}>
-        <Suspense fallback={<CircularProgress />}>
-          <Switch>
-            <Redirect
-              exact
-              from={`${match.url}/`}
-              to={`${match.url}/categories`}
-            />
-            <Route
-              exact
-              path={`${match.url}/categories`}
-              render={(props) => <CategoriesView {...props} />}
-            />
-            <Route
-              exact
-              path={`${match.url}/products`}
-              render={(props) => <ProductsView {...props} />}
-            />
-            <Route
-              path={`${match.url}/checkout`}
-              render={(props) => <CheckoutView {...props} />}
-            />
-            <Route
-              path={`${match.url}/contact`}
-              render={(props) => <ContactView {...props} />}
-            />
-          </Switch>
-        </Suspense>
-      </Layout>
-    </QueryClientProvider>
+    <Layout photographerId={match?.params?.id ?? 0}>
+      <Backdrop
+        className={classes.backdrop}
+        open={isLoading(photographerQuery)}
+      >
+        <CircularProgress className={classes.spinner} />
+      </Backdrop>
+      <Suspense fallback={<CircularProgress />}>
+        <Switch>
+          {redirectCategoriesFlag(photographerQuery) && (
+            <Redirect exact from={`${url}/`} to={`${url}/categories`} />
+          )}
+          <Route
+            exact
+            path={`${url}/categories`}
+            render={(props) => <CategoriesView {...props} />}
+          />
+          <Route
+            exact
+            path={`${url}/products`}
+            render={(props) => <ProductsView {...props} />}
+          />
+          <Route
+            path={`${url}/checkout`}
+            render={(props) => <CheckoutView {...props} />}
+          />
+          <Route
+            path={`${url}/contact`}
+            render={(props) => <ContactView {...props} />}
+          />
+        </Switch>
+      </Suspense>
+    </Layout>
   );
 };
 
