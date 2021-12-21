@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 //Components
+import { PhotographerProvider } from '../contexts/PhotographerContext';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -38,7 +39,9 @@ const GlobalProviders = ({ children }) => {
   const { t } = useTranslation();
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <PhotographerProvider>{children}</PhotographerProvider>
+    </QueryClientProvider>
   );
 };
 

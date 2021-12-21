@@ -17,9 +17,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CategoryCard = (props) => {
+const CategoryCard = ({ category }) => {
   const classes = useStyles();
   const { t } = useTranslation();
+  console.log('%cLQS logger: ', 'color: #c931eb', { category });
 
   return <p>Default component</p>;
 };

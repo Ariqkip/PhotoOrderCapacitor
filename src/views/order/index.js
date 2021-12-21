@@ -1,5 +1,5 @@
 //Core
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
 //Components
@@ -12,6 +12,7 @@ import ContactView from './ContactView';
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { useGetPhotographer } from '../../services/OrderUtils';
+import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Utils
 
@@ -45,9 +46,9 @@ const OrderIndex = ({ match }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const url = cleanMatchUrl(match);
+  const [, dispatch] = usePhotographer();
 
   const photographerQuery = useGetPhotographer(match?.params?.id ?? 0);
-  console.log('%cLQS logger: ', 'color: #c931eb', { photographerQuery });
 
   function redirectCategoriesFlag(query) {
     if (!query.isSuccess) return false;
@@ -63,6 +64,13 @@ const OrderIndex = ({ match }) => {
 
     return false;
   }
+
+  const { data } = photographerQuery;
+  useEffect(() => {
+    if (data) {
+      dispatch({ type: 'SET_INFO', data: data });
+    }
+  }, [data, dispatch]);
 
   return (
     <Layout photographerId={match?.params?.id ?? 0}>

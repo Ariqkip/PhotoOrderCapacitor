@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 //Components
 import CategoryCard from '../../components/order/CategoryCard';
 import CategoryCardSkeleton from '../../components/order/CategoryCardSkeleton';
+import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -57,7 +58,36 @@ const CategoriesView = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
-  return <div className={classes.root}>{RenderSkeletonList()}</div>;
+  const [photographer] = usePhotographer();
+
+  const renderCategories = () => {
+    return (
+      <Grid container spacing={3}>
+        {photographer.productCategories.map((category) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={category.Id}>
+            <CategoryCard key={category.Id} category={category} />
+          </Grid>
+        ))}
+      </Grid>
+    );
+  };
+
+  const isLoading = () => {
+    if (
+      photographer.productCategories &&
+      photographer.productCategories.length > 0
+    )
+      return false;
+
+    return true;
+  };
+
+  return (
+    <div className={classes.root}>
+      {isLoading() && RenderSkeletonList()}
+      {!isLoading() && renderCategories()}
+    </div>
+  );
 };
 
 export default CategoriesView;
