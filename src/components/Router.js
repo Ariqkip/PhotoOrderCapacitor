@@ -12,6 +12,9 @@ import { useTranslation } from 'react-i18next';
 //UI
 import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Grid from '@material-ui/core/Grid';
+import Container from '@material-ui/core/Container';
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 //Views
 const ViewPhotographer = React.lazy(() =>
@@ -32,12 +35,34 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const SuspenseContainer = () => {
+  return (
+    <>
+      <CssBaseline />
+
+      <Grid
+        container
+        style={{ height: '100vh', paddingTop: '75px' }}
+        direction='column'
+        alignItems='center'
+        justifyContent='center'
+      >
+        <Grid item xs>
+          <CircularProgress />
+          <br />
+          Loading
+        </Grid>
+      </Grid>
+    </>
+  );
+};
+
 const Router = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
   return (
-    <Suspense fallback={<CircularProgress />}>
+    <Suspense fallback={<SuspenseContainer />}>
       <BrowserRouter>
         <Switch>
           <Route

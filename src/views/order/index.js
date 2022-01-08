@@ -20,6 +20,9 @@ import { usePhotographer } from '../../contexts/PhotographerContext';
 import { makeStyles } from '@material-ui/core/styles';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Typography from '@material-ui/core/Typography';
+import Container from '@material-ui/core/Container';
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,6 +43,20 @@ const cleanMatchUrl = (match) => {
   }
 
   return match.url;
+};
+
+const SuspenseContainer = () => {
+  return (
+    <>
+      <CssBaseline />
+      <Container maxWidth='sm'>
+        <Typography
+          component='div'
+          style={{ backgroundColor: '#cfe8fc', height: '100vh' }}
+        />
+      </Container>
+    </>
+  );
 };
 
 const OrderIndex = ({ match }) => {
@@ -80,10 +97,13 @@ const OrderIndex = ({ match }) => {
       >
         <CircularProgress className={classes.spinner} />
       </Backdrop>
-      <Suspense fallback={<CircularProgress />}>
+      <Suspense fallback={<SuspenseContainer />}>
         <Switch>
           {redirectCategoriesFlag(photographerQuery) && (
             <Redirect exact from={`${url}/`} to={`${url}/categories`} />
+          )}
+          {!redirectCategoriesFlag(photographerQuery) && (
+            <Redirect exact from={`${url}/`} to={`${url}/products`} />
           )}
           <Route
             exact

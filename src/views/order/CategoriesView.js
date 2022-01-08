@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 //Components
 import CategoryCard from '../../components/order/CategoryCard';
 import CategoryCardSkeleton from '../../components/order/CategoryCardSkeleton';
-import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
+import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Utils
 

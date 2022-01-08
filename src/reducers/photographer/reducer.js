@@ -48,6 +48,13 @@ export function PhotographerReducer(state = INIT_STATE, action) {
         appAppleStore: data.BrandingAppLinkApple,
         appHideToken: data.BrandingAppHideTokenText,
       };
+    case 'ADD_PRODUCTS':
+      var products = action.data;
+      if (products === undefined) {
+        return { ...state };
+      }
+      var newState = { ...state, products: products };
+      return newState;
 
     default:
       return { ...state };

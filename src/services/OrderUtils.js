@@ -32,4 +32,32 @@ function useGetPhotographer(id) {
   return { ...result };
 }
 
-export { useGetPhotographer };
+function useGetProducts(id) {
+  const service = OrderService();
+  let success = true;
+  const photographerId = Number(id);
+  const enabledOption = photographerId > 0;
+  const result = useQuery(
+    ['photographer-products', photographerId],
+    async () => {
+      const resp = await service.GetProducts(photographerId).then(
+        (res) => res.data,
+        (err) => {
+          success = false;
+          return err;
+        }
+      );
+      if (!success) {
+        throw new Error(resp);
+      }
+
+      return resp;
+    },
+    {
+      enabled: enabledOption,
+    }
+  );
+  return { ...result };
+}
+
+export { useGetPhotographer, useGetProducts };
