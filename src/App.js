@@ -10,7 +10,7 @@ import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
   typography: {
-    fontFamily: ['Nunito', 'cursive'].join(','),
+    fontFamily: ['Nunito', 'sans-serif'].join(','),
   },
 });
 

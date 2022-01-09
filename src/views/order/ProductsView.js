@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 
 //Components
 import CategoryCardSkeleton from '../../components/order/CategoryCardSkeleton';
-import ProductCard from '../../components/order/ProductCard';
+import ProductBasicCard from '../../components/order/ProductBasicCard';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -78,7 +78,7 @@ const ProductsView = (props) => {
       <Grid container spacing={3}>
         {photographer?.products?.map((product) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-            <ProductCard key={product.id} product={product} />
+            <ProductBasicCard key={product.id} product={product} />
           </Grid>
         ))}
       </Grid>
@@ -88,6 +88,8 @@ const ProductsView = (props) => {
   const { data } = productsQuery;
   useEffect(() => {
     if (data) {
+      console.log('%cLQS logger: ', 'color: #c931eb', { data });
+
       dispatch({ type: 'ADD_PRODUCTS', data: data });
     }
   }, [data, dispatch]);
