@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 
 //Components
+import BasicDialog from './BasicDialog';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -60,50 +61,58 @@ const ProductBasicCard = ({ product }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
+  const [isDialogOpen, setDialogOpen] = useState(false);
+
   return (
-    <Card className={classes.root} key={product.id}>
-      <CardActionArea
-        className={classes.cardArea}
-        onClick={() => {
-          console.log('%cLQS logger: ', 'color: #c931eb', {});
-        }}
-      >
-        <CardMedia
-          className={classes.media}
-          image={product.ImageUrl ?? placeholderImg}
-          title={product.name}
-        />
-        <CardContent className={classes.fullWidth}>
-          <Box
-            component='div'
-            className={[classes.cardTitleBox, classes.fullWidth]}
-          >
-            <Typography
-              gutterBottom
-              component='p'
-              className={classes.cardTitle}
+    <>
+      <Card className={classes.root} key={`basic_card_${product.id}`}>
+        <CardActionArea
+          className={classes.cardArea}
+          onClick={() => setDialogOpen(true)}
+        >
+          <CardMedia
+            className={classes.media}
+            image={product.ImageUrl ?? placeholderImg}
+            title={product.name}
+          />
+          <CardContent className={classes.fullWidth}>
+            <Box
+              component='div'
+              className={[classes.cardTitleBox, classes.fullWidth]}
             >
-              {product.name}
-            </Typography>
+              <Typography
+                gutterBottom
+                component='p'
+                className={classes.cardTitle}
+              >
+                {product.name}
+              </Typography>
+              <Typography
+                gutterBottom
+                component='p'
+                className={classes.cardTitle}
+              >
+                € {formatPrice(product.price)}
+              </Typography>
+            </Box>
             <Typography
-              gutterBottom
+              variant='body'
+              color='textSecondary'
               component='p'
-              className={classes.cardTitle}
+              className={classes.cardDesc}
             >
-              € {formatPrice(product.price)}
+              {product.description}
             </Typography>
-          </Box>
-          <Typography
-            variant='body'
-            color='textSecondary'
-            component='p'
-            className={classes.cardDesc}
-          >
-            {product.description}
-          </Typography>
-        </CardContent>
-      </CardActionArea>
-    </Card>
+          </CardContent>
+        </CardActionArea>
+      </Card>
+      <BasicDialog
+        product={product}
+        key={`basic_dialog_${product.id}`}
+        isOpen={isDialogOpen}
+        closeFn={() => setDialogOpen(false)}
+      />
+    </>
   );
 };
 
