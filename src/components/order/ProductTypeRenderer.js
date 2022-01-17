@@ -31,8 +31,7 @@ const ProductTypeRenderer = ({ product }) => {
 
   const calculateProductType = () => {
     if (product.productType === 1) return TYPES.RENDER_CUP;
-    if (product.quantityRangeMin > 0 || product.quantityRangeMax > 0)
-      return TYPES.RANGE;
+    if (product.productPrices.length > 0) return TYPES.RANGE;
 
     return TYPES.BASIC;
   };

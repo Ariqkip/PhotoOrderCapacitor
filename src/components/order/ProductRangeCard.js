@@ -60,59 +60,67 @@ const ProductRangeCard = ({ product }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
-  return (
-    <Card className={classes.root} key={product.id}>
-      <CardActionArea
-        className={classes.cardArea}
-        onClick={() => {
-          console.log('%cLQS logger: ', 'color: #c931eb', {});
-        }}
-      >
-        <CardMedia
-          className={classes.media}
-          image={product.ImageUrl ?? placeholderImg}
-          title={product.name}
-        />
-        <CardContent className={classes.fullWidth}>
-          <Box
-            component='div'
-            className={[classes.cardTitleBox, classes.fullWidth]}
-          >
-            <Typography
-              gutterBottom
-              component='p'
-              className={classes.cardTitle}
-            >
-              {product.name}
-            </Typography>
-            <Typography
-              gutterBottom
-              component='p'
-              className={classes.cardTitle}
-            >
-              € {formatPrice(product.price)}
-            </Typography>
-          </Box>
-          <Typography
-            variant='body'
-            color='textSecondary'
-            component='p'
-            className={classes.cardDesc}
-          >
-            {product.description}
+const renderPriceRange = (priceRange) => {
+  const prices = priceRange
+    .filter((item) => item.isDeleted === false)
+    .map((item) => (
+      <Box key={item.id}>
+        <span>
+          From <b>{item.priceLevelFrom}</b> to{' '}
+          <b>{item.priceLevelTo === 0 ? '∞' : item.priceLevelTo}</b> pcs:{' '}
+          <b>{formatPrice(item.price)} €</b>
+        </span>
+      </Box>
+    ));
+
+  return prices;
+};
+
+return (
+  <Card className={classes.root} key={product.id}>
+    <CardActionArea
+      className={classes.cardArea}
+      onClick={() => {
+        console.log('%cLQS logger: ', 'color: #c931eb', {});
+      }}
+    >
+      <CardMedia
+        className={classes.media}
+        image={product.ImageUrl ?? placeholderImg}
+        title={product.name}
+      />
+      <CardContent className={classes.fullWidth}>
+        <Box
+          component='div'
+          className={[classes.cardTitleBox, classes.fullWidth]}
+        >
+          <Typography gutterBottom component='p' className={classes.cardTitle}>
+            {product.name}
           </Typography>
-          <Typography
-            variant='body'
-            color='textSecondary'
-            component='p'
-            className={classes.cardDesc}
-          >
-            TODO: add price range list here
+          <Typography gutterBottom component='p' className={classes.cardTitle}>
+            € {formatPrice(product.price)}
           </Typography>
-        </CardContent>
-      </CardActionArea>
-    </Card>
-  );
+        </Box>
+        <Typography
+          variant='body'
+          color='textSecondary'
+          component='p'
+          className={classes.cardDesc}
+        >
+          {product.description}
+        </Typography>
+        <Typography
+          variant='body'
+          color='textSecondary'
+          component='p'
+          className={classes.cardDesc}
+        >
+          {renderPriceRange(product.productPrices)}
+        </Typography>
+      </CardContent>
+    </CardActionArea>
+  </Card>
+);
 };
 
 export default ProductRangeCard;
