@@ -1,5 +1,6 @@
 //Core
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 
 //Components
 import BasicDialog from './BasicDialog';
@@ -60,19 +61,44 @@ const useStyles = makeStyles((theme) => ({
 const ProductBasicCard = ({ product }) => {
   const classes = useStyles();
   const { t } = useTranslation();
+  const history = useHistory();
+  const location = useLocation();
+  const { itemId } = useParams();
 
   const [isDialogOpen, setDialogOpen] = useState(false);
+
+  const handleOpen = (itemId) => {
+    const url = history.location.pathname;
+    const newUrl = `${url}/${itemId}`;
+    history.push(newUrl);
+  };
+
+  const handleClose = (itemId) => {
+    const url = history.location.pathname;
+    const newUrl = url
+      .slice(0, url.length - itemId.toString().length)
+      .slice(0, -1);
+
+    setDialogOpen(false);
+    history.push(newUrl);
+  };
+
+  useLayoutEffect(() => {
+    if (product.id == itemId) {
+      setDialogOpen(true);
+    }
+  }, [itemId, product]);
 
   return (
     <>
       <Card className={classes.root} key={`basic_card_${product.id}`}>
         <CardActionArea
           className={classes.cardArea}
-          onClick={() => setDialogOpen(true)}
+          onClick={() => handleOpen(product.id)}
         >
           <CardMedia
             className={classes.media}
-            image={product.ImageUrl ?? placeholderImg}
+            image={product.imageUrl ?? placeholderImg}
             title={product.name}
           />
           <CardContent className={classes.fullWidth}>
@@ -110,7 +136,7 @@ const ProductBasicCard = ({ product }) => {
         product={product}
         key={`basic_dialog_${product.id}`}
         isOpen={isDialogOpen}
-        closeFn={() => setDialogOpen(false)}
+        closeFn={() => handleClose(product.id)}
       />
     </>
   );

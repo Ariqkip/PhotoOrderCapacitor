@@ -37,7 +37,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   return (
     <Dialog key={product.id} open={isOpen ?? false} onClose={closeFn}>
       <DialogTitle id='alert-dialog-title'>
-        {"Use Google's location service?"}
+        {`Dialog for product id: ${product.id}`}
       </DialogTitle>
       <DialogContent>
         <DialogContentText id='alert-dialog-description'>
