@@ -40,13 +40,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const RoundButton = ({ children }) => {
+const RoundButton = ({ children, onClick }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
   return (
     <Button
       className={[classes.rootBtn, classes.borderBtn, classes.paddingsBtn]}
+      onClick={onClick}
     >
       {children}
     </Button>

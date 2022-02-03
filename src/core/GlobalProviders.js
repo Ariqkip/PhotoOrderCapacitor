@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 //Components
 import { PhotographerProvider } from '../contexts/PhotographerContext';
+import { FileProvider } from '../contexts/FileContext';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -40,7 +41,9 @@ const GlobalProviders = ({ children }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PhotographerProvider>{children}</PhotographerProvider>
+      <PhotographerProvider>
+        <FileProvider>{children}</FileProvider>
+      </PhotographerProvider>
     </QueryClientProvider>
   );
 };

@@ -6,8 +6,10 @@ import RoundButton from './../core/RoundButton';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
+import { useFiles } from '../../contexts/FileContext';
 
 //Utils
+import { createGuid } from '../../core/helpers/guidHelper';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -62,7 +64,39 @@ const useStyles = makeStyles((theme) => ({
 const BasicDialog = ({ product, isOpen, closeFn }) => {
   const classes = useStyles();
   const { t } = useTranslation();
-  console.log('%cLQS logger: ', 'color: #c931eb', { product });
+
+  let fileInput = null;
+
+  const [set, setSet] = useState(1);
+  const [files, dispatch] = useFiles();
+
+  const fileInputHandler = (event) => {
+    const { files } = event.target;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const trackingGuid = createGuid();
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        const item = {
+          set: set,
+          productId: product.id,
+          fileAsBase64: reader.result,
+          fileName: file.name,
+          guid: trackingGuid,
+          tempURL: URL.createObjectURL(file),
+          status: 'idle',
+        };
+        //addFile(item);
+        dispatch({ type: 'ADD_FILE', data: item });
+      };
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInput.click();
+  };
 
   return (
     <Dialog
@@ -84,7 +118,17 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                 />
               </Container>
               <Box className={classes.centerContent}>
-                <RoundButton>
+                <input
+                  type='file'
+                  style={{ display: 'none' }}
+                  inputprops={{ accept: 'image/*' }}
+                  multiple
+                  onChange={fileInputHandler}
+                  ref={(input) => {
+                    fileInput = input;
+                  }}
+                />
+                <RoundButton onClick={() => handleUploadClick()}>
                   <Box className={classes.centerContent}>
                     <AddPhotoAlternateIcon />
                     <span>{t('Pick files')}</span>
