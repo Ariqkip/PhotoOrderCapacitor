@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 
 //Components
 import RoundButton from './../core/RoundButton';
+import FileListItem from './FileListItem';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -59,6 +60,9 @@ const useStyles = makeStyles((theme) => ({
   description: {
     marginBottom: '20px',
   },
+  mb24: {
+    marginBottom: '24px',
+  },
 }));
 
 const BasicDialog = ({ product, isOpen, closeFn }) => {
@@ -67,8 +71,10 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
 
   let fileInput = null;
 
-  const [set, setSet] = useState(1);
+  const [pack, setPack] = useState(1);
   const [files, dispatch] = useFiles();
+
+  console.log('%cLQS logger: ', 'color: #c931eb', { files });
 
   const fileInputHandler = (event) => {
     const { files } = event.target;
@@ -80,7 +86,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       reader.readAsDataURL(file);
       reader.onloadend = () => {
         const item = {
-          set: set,
+          set: pack,
           productId: product.id,
           fileAsBase64: reader.result,
           fileName: file.name,
@@ -98,6 +104,12 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     fileInput.click();
   };
 
+  const renderFiles = () => {
+    return files.filesQueue?.map((item) => (
+      <FileListItem key={item.guid} file={item} />
+    ));
+  };
+
   return (
     <Dialog
       key={product.id}
@@ -108,7 +120,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     >
       <DialogContent>
         <DialogContentText id='alert-dialog-description'>
-          <Grid container spacing={3}>
+          <Grid container spacing={3} className={classes.mb24}>
             <Grid item xs={12} md={6}>
               <Container>
                 <img
@@ -155,14 +167,18 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
               image list
             </Grid>
           </Grid>
+          {renderFiles()}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={closeFn} color='primary'>
-          Disagree
+          {t('REMOVE ALL FILES')}
+        </Button>
+        <Button onClick={closeFn} color='primary'>
+          {t('Choose other products')}
         </Button>
         <Button onClick={closeFn} color='primary' autoFocus>
-          Agree
+          {t('Next step')}
         </Button>
       </DialogActions>
     </Dialog>

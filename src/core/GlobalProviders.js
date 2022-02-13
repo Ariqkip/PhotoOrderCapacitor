@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 //Components
 import { PhotographerProvider } from '../contexts/PhotographerContext';
 import { FileProvider } from '../contexts/FileContext';
+import { OrderProvider } from '../contexts/OrderContext';
+import { AlertProvider } from '../contexts/AlertContext';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -40,11 +42,15 @@ const GlobalProviders = ({ children }) => {
   const { t } = useTranslation();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <PhotographerProvider>
-        <FileProvider>{children}</FileProvider>
-      </PhotographerProvider>
-    </QueryClientProvider>
+    <AlertProvider>
+      <QueryClientProvider client={queryClient}>
+        <PhotographerProvider>
+          <OrderProvider>
+            <FileProvider>{children}</FileProvider>
+          </OrderProvider>
+        </PhotographerProvider>
+      </QueryClientProvider>
+    </AlertProvider>
   );
 };
 

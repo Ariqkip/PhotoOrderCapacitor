@@ -13,8 +13,12 @@ import ContactView from './ContactView';
 import { useTranslation } from 'react-i18next';
 import { useGetPhotographer } from '../../services/OrderUtils';
 import { usePhotographer } from '../../contexts/PhotographerContext';
+import { useOrder } from '../../contexts/OrderContext';
+import { useAlerts } from '../../contexts/AlertContext';
 
 //Utils
+import OrderService from '../../services/OrderService';
+import { ADD } from '../../reducers/alert/reducer';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -64,73 +68,97 @@ const OrderIndex = ({ match }) => {
   const { t } = useTranslation();
   const url = cleanMatchUrl(match);
   const [, dispatch] = usePhotographer();
+  const [order, orderDispatch] = useOrder();
+  const [, alertDispatch] = useAlerts();
 
   const photographerQuery = useGetPhotographer(match?.params?.id ?? 0);
-console.log('%cLQS render order.index: ', 'color: #c931eb', {
-  photographerQuery,
-});
+  console.log('%cLQS render order.index: ', 'color: #c931eb', {
+    photographerQuery,
+  });
 
-function redirectCategoriesFlag(query) {
-  if (!query.isSuccess) return false;
-  if (!query.data?.Categories) return false;
-  if (query.data?.Categories?.length < 1) return false;
+  function redirectCategoriesFlag(query) {
+    if (!query.isSuccess) return false;
+    if (!query.data?.Categories) return false;
+    if (query.data?.Categories?.length < 1) return false;
 
-  return true;
-}
-
-function isLoading(query) {
-  if (query.isLoading) return true;
-  if (query.isFetching) return true;
-
-  return false;
-}
-
-const { data } = photographerQuery;
-useEffect(() => {
-  if (data) {
-    dispatch({ type: 'SET_INFO', data: data });
+    return true;
   }
-}, [data, dispatch]);
 
-return (
-  <Layout photographerId={match?.params?.id ?? 0}>
-    <Backdrop className={classes.backdrop} open={isLoading(photographerQuery)}>
-      <CircularProgress className={classes.spinner} />
-    </Backdrop>
-    <Suspense fallback={<SuspenseContainer />}>
-      <Switch>
-        {redirectCategoriesFlag(photographerQuery) && (
-          <Redirect exact from={`${url}/`} to={`${url}/categories`} />
-        )}
-        {!redirectCategoriesFlag(photographerQuery) && (
-          <Redirect exact from={`${url}/`} to={`${url}/products`} />
-        )}
-        <Route
-          exact
-          path={`${url}/categories`}
-          render={(props) => <CategoriesView {...props} />}
-        />
-        <Route
-          exact
-          path={`${url}/products`}
-          render={(props) => <ProductsView {...props} />}
-        />
-        <Route
-          path={`${url}/products/:itemId`}
-          render={(props) => <ProductsView {...props} />}
-        />
-        <Route
-          path={`${url}/checkout`}
-          render={(props) => <CheckoutView {...props} />}
-        />
-        <Route
-          path={`${url}/contact`}
-          render={(props) => <ContactView {...props} />}
-        />
-      </Switch>
-    </Suspense>
-  </Layout>
-);
+  function isLoading(query) {
+    if (query.isLoading) return true;
+    if (query.isFetching) return true;
+
+    return false;
+  }
+
+  const { data } = photographerQuery;
+  useEffect(() => {
+    if (data) {
+      dispatch({ type: 'SET_INFO', data: data });
+    }
+  }, [data, dispatch]);
+
+  useEffect(() => {
+    function initOrder(photographerId) {
+      //FIXME: if (photographerId < 1) return; should return ERROR STATE
+      if (order.state !== 'NEW') return;
+
+      OrderService()
+        .CreateOrder(photographerId)
+        .then((resp) => {
+          console.log('%cLQS logger SUCCESS: ', 'color: #c931eb', { resp });
+        })
+        .catch((err) => {
+          console.log('%cLQS logger: ERROR', 'color: #c931eb', { err });
+        });
+
+      return;
+    }
+    initOrder(-2320);
+  }, [order.state]);
+
+  return (
+    <Layout photographerId={match?.params?.id ?? 0}>
+      <Backdrop
+        className={classes.backdrop}
+        open={isLoading(photographerQuery)}
+      >
+        <CircularProgress className={classes.spinner} />
+      </Backdrop>
+      <Suspense fallback={<SuspenseContainer />}>
+        <Switch>
+          {redirectCategoriesFlag(photographerQuery) && (
+            <Redirect exact from={`${url}/`} to={`${url}/categories`} />
+          )}
+          {!redirectCategoriesFlag(photographerQuery) && (
+            <Redirect exact from={`${url}/`} to={`${url}/products`} />
+          )}
+          <Route
+            exact
+            path={`${url}/categories`}
+            render={(props) => <CategoriesView {...props} />}
+          />
+          <Route
+            exact
+            path={`${url}/products`}
+            render={(props) => <ProductsView {...props} />}
+          />
+          <Route
+            path={`${url}/products/:itemId`}
+            render={(props) => <ProductsView {...props} />}
+          />
+          <Route
+            path={`${url}/checkout`}
+            render={(props) => <CheckoutView {...props} />}
+          />
+          <Route
+            path={`${url}/contact`}
+            render={(props) => <ContactView {...props} />}
+          />
+        </Switch>
+      </Suspense>
+    </Layout>
+  );
 };
 
 export default OrderIndex;

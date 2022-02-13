@@ -12,7 +12,19 @@ const OrderService = () => {
     return api.get(endpoint);
   }
 
-  return { GetPhotographer, GetProducts };
+  function CreateOrder(id) {
+    const endpoint = `photographer/${id}/order`;
+    const body = {
+      email: 'missing',
+      firstName: 'missing',
+      lastName: 'missing',
+      phone: 'missing',
+      orderItems: [],
+    };
+    return legacy.post(endpoint, body);
+  }
+
+  return { GetPhotographer, GetProducts, CreateOrder };
 };
 
 export default OrderService;

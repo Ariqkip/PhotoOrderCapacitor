@@ -14,6 +14,7 @@
     "i18next": "^20.3.5",
     "material-ui-chip-input": "^2.0.0-beta.2",
     "react": "^17.0.2",
+    "react-data-table-component": "^6.11.5",
     "react-dom": "^17.0.2",
     "react-i18next": "^11.11.4",
     "react-material-ui-form-validator": "^2.1.1",
