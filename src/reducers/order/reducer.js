@@ -1,7 +1,13 @@
 export const INIT_STATE = {
+  photographerId: 0,
   orderId: '',
   orderGuid: '',
-  state: 'NEW',
+  status: 'NEW',
+  email: 'missing',
+  phone: 'missing',
+  firstName: 'missing',
+  lastName: 'missing',
+  shippingSelected: false,
   //orderInitialized: false,
   //orderRequestSend: false,
   //orderSending: false,
@@ -38,7 +44,25 @@ export const INIT_STATE = {
 export function OrderReducer(state = INIT_STATE, action) {
   switch (action.type) {
     case 'CREATE':
-      return INIT_STATE;
+      const { PhotographerId, OrderId, OrderGuid } = action.payload;
+      const { Email, FirstName, LastName, Phone } = action.payload;
+      const { IsShippingChoosen } = action.payload;
+
+      return {
+        ...state,
+        photographerId: PhotographerId,
+        orderId: OrderId,
+        orderGuid: OrderGuid,
+        phone: Phone,
+        email: Email,
+        firstName: FirstName,
+        lastName: LastName,
+        shippingSelected: IsShippingChoosen,
+        status: 'INITIALIZED',
+      };
+
+    case 'FAILED':
+      return { ...state, status: 'ERROR' };
 
     default:
       return state;

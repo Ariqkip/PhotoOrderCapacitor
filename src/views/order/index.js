@@ -98,24 +98,36 @@ const OrderIndex = ({ match }) => {
     }
   }, [data, dispatch]);
 
+  //create new order in shop, need that for file upload
   useEffect(() => {
     function initOrder(photographerId) {
-      //FIXME: if (photographerId < 1) return; should return ERROR STATE
-      if (order.state !== 'NEW') return;
+      if (order.status !== 'NEW') return;
 
       OrderService()
         .CreateOrder(photographerId)
         .then((resp) => {
-          console.log('%cLQS logger SUCCESS: ', 'color: #c931eb', { resp });
+          orderDispatch({
+            type: 'CREATE',
+            payload: {
+              PhotographerId: photographerId,
+              OrderId: resp.data.Id,
+              OrderGuid: resp.data.OrderGuid,
+              Phone: resp.data.Phone,
+              Email: resp.data.Email,
+              FirstName: resp.data.FirstName,
+              LastName: resp.data.LastName,
+              IsShippingChoosen: resp.data.IsShippingChoosen,
+            },
+          });
         })
         .catch((err) => {
-          console.log('%cLQS logger: ERROR', 'color: #c931eb', { err });
+          orderDispatch({ type: 'ERROR' });
         });
 
       return;
     }
-    initOrder(-2320);
-  }, [order.state]);
+    initOrder(match?.params?.id);
+  }, [match?.params?.id, order.status, orderDispatch]);
 
   return (
     <Layout photographerId={match?.params?.id ?? 0}>
