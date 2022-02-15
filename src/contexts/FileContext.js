@@ -1,13 +1,10 @@
 import React from 'react';
-import { FileReducer } from '../reducers/file/reducer';
+import { FileReducer, INIT_STATE } from '../reducers/file/reducer';
 
 const FileContext = React.createContext();
 
 function FileProvider(props) {
-  const state = {
-    filesQueue: [],
-  };
-  const [files, dispatch] = React.useReducer(FileReducer, state);
+  const [files, dispatch] = React.useReducer(FileReducer, INIT_STATE);
   const value = [files, dispatch];
 
   return <FileContext.Provider value={value} {...props} />;
