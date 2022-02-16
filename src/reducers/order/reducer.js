@@ -61,6 +61,47 @@ export function OrderReducer(state = INIT_STATE, action) {
         status: 'INITIALIZED',
       };
 
+    case 'ADD_ORDER_ITEM':
+      return { ...state, orderItems: [action.payload, ...state.orderItems] };
+
+    case 'INCREASE_ORDER_ITEM_QTY':
+      return {
+        ...state,
+        orderItems: [
+          ...state.orderItems.map((item) => {
+            if (item.guid === action.payload.guid) {
+              item.qty++;
+            }
+            return item;
+          }),
+        ],
+      };
+
+    case 'DECRESE_ORDER_ITEM_QTY':
+      return {
+        ...state,
+        orderItems: [
+          ...state.orderItems
+            .map((item) => {
+              if (item.guid === action.payload.guid) {
+                item.qty--;
+              }
+              return item;
+            })
+            .filter((item) => item.qty > 0),
+        ],
+      };
+
+    case 'REMOVE_ORDER_ITEMS_FOR_PRODUCT':
+      return {
+        ...state,
+        orderItems: [
+          ...state.orderItems.filter(
+            (item) => item.productId !== action.payload.productId
+          ),
+        ],
+      };
+
     case 'FAILED':
       return { ...state, status: 'ERROR' };
 

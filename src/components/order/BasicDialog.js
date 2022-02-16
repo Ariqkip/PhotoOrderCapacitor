@@ -8,6 +8,7 @@ import FileListItem from './FileListItem';
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { useFiles } from '../../contexts/FileContext';
+import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
 import { createGuid } from '../../core/helpers/guidHelper';
@@ -72,9 +73,10 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   let fileInput = null;
 
   const [pack, setPack] = useState(1);
-  const [files, dispatch] = useFiles();
+  const [files, fileDispatch] = useFiles();
+  const [order, orderDispatch] = useOrder();
 
-  console.log('%cLQS logger: ', 'color: #c931eb', { files });
+  console.log('%cLQS logger: ', 'color: #c931eb', { product, files, order });
 
   const fileInputHandler = (event) => {
     const { files } = event.target;
@@ -93,9 +95,19 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           guid: trackingGuid,
           tempURL: URL.createObjectURL(file),
           status: 'idle',
+          maxSize: product.size,
         };
-        //addFile(item);
-        dispatch({ type: 'ADD_FILE', data: item });
+        const orderItem = {
+          guid: trackingGuid,
+          fileUrl: URL.createObjectURL(file),
+          fileName: file.name,
+          productId: product.id,
+          set: pack,
+          qty: 1,
+          state: 'idle',
+        };
+        orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
+        fileDispatch({ type: 'ADD_FILE', data: item });
       };
     }
   };
@@ -105,9 +117,16 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   };
 
   const renderFiles = () => {
-    return files.filesQueue?.map((item) => (
-      <FileListItem key={item.guid} file={item} />
-    ));
+    return order.orderItems
+      .filter((item) => item.productId === product.id)
+      ?.map((item) => <FileListItem key={item.guid} file={item} />);
+  };
+
+  const handleRemoveAll = () => {
+    orderDispatch({
+      type: 'REMOVE_ORDER_ITEMS_FOR_PRODUCT',
+      payload: { productId: product.id },
+    });
   };
 
   return (
@@ -171,7 +190,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={closeFn} color='primary'>
+        <Button onClick={handleRemoveAll} color='primary'>
           {t('REMOVE ALL FILES')}
         </Button>
         <Button onClick={closeFn} color='primary'>
