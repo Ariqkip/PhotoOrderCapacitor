@@ -102,6 +102,46 @@ export function OrderReducer(state = INIT_STATE, action) {
         ],
       };
 
+    case 'ORDER_ITEM_SET_STATE_PROCESSING':
+      return {
+        ...state,
+        orderItems: [
+          ...state.orderItems.map((item) => {
+            if (item.guid === action.payload.guid) {
+              item.status = 'processing';
+            }
+            return item;
+          }),
+        ],
+      };
+
+    case 'ORDER_ITEM_SET_STATE_SUCCESS':
+      return {
+        ...state,
+        orderItems: [
+          ...state.orderItems.map((item) => {
+            if (item.guid === action.payload.guid) {
+              item.status = 'success';
+              item.fileAsBase64 = null; //release memory
+            }
+            return item;
+          }),
+        ],
+      };
+
+    case 'ORDER_ITEM_SET_STATE_FAILED':
+      return {
+        ...state,
+        orderItems: [
+          ...state.orderItems.map((item) => {
+            if (item.guid === action.payload.guid) {
+              item.status = 'failed';
+            }
+            return item;
+          }),
+        ],
+      };
+
     case 'FAILED':
       return { ...state, status: 'ERROR' };
 

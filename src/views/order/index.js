@@ -8,6 +8,7 @@ import CategoriesView from './CategoriesView';
 import ProductsView from './ProductsView';
 import CheckoutView from './CheckoutView';
 import ContactView from './ContactView';
+import UploadManager from '../../components/order/UploadManager';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -131,6 +132,7 @@ const OrderIndex = ({ match }) => {
 
   return (
     <Layout photographerId={match?.params?.id ?? 0}>
+      <UploadManager />
       <Backdrop
         className={classes.backdrop}
         open={isLoading(photographerQuery)}

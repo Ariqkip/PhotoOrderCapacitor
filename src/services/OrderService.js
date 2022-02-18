@@ -24,7 +24,20 @@ const OrderService = () => {
     return legacy.post(endpoint, body);
   }
 
-  return { GetPhotographer, GetProducts, CreateOrder };
+  function UploadImage(model) {
+    const endpoint = `photographer/order/${model.orderId}/photo`;
+    const body = {
+      OrderGuid: model.orderGuid,
+      ProductId: model.productId,
+      FileAsBase64: model.fileAsBase64,
+      FileName: model.fileName,
+      TrackingGuid: model.fileGuid,
+      Attributes: model.attributes,
+    };
+    return legacy.post(endpoint, body);
+  }
+
+  return { GetPhotographer, GetProducts, CreateOrder, UploadImage };
 };
 
 export default OrderService;

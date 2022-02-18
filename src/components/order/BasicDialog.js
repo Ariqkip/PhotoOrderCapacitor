@@ -94,7 +94,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           productId: product.id,
           set: pack,
           qty: 1,
-          state: 'idle',
+          status: 'idle',
         };
 
         orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });

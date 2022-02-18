@@ -16,6 +16,8 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import Paper from '@material-ui/core/Paper';
+import DoneIcon from '@material-ui/icons/Done';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,6 +42,12 @@ const useStyles = makeStyles((theme) => ({
   centerVertical: {
     display: 'flex',
     alignItems: 'center',
+  },
+  success: {
+    color: '#28a745',
+  },
+  failure: {
+    color: '#dc3545',
   },
 }));
 
@@ -73,7 +81,13 @@ const FileListItem = ({ file, key }) => {
       <div className={classes.aligner}>
         <span className={classes.fileName}>{file.fileName}</span>
         <div className={classes.centerVertical}>
-          {file.state === 'idle' && <CircularProgress size={18} />}
+          {file.status === 'idle' && <CircularProgress size={18} />}
+          {file.status === 'success' && (
+            <DoneIcon className={classes.success} />
+          )}
+          {file.status === 'failed' && (
+            <ErrorOutlineIcon className={classes.failure} />
+          )}
           <IconButton
             aria-label='delete'
             color='secondary'
