@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 //Components
 import { PhotographerProvider } from '../contexts/PhotographerContext';
-import { FileProvider } from '../contexts/FileContext';
 import { OrderProvider } from '../contexts/OrderContext';
 import { AlertProvider } from '../contexts/AlertContext';
 
@@ -45,9 +44,7 @@ const GlobalProviders = ({ children }) => {
     <AlertProvider>
       <QueryClientProvider client={queryClient}>
         <PhotographerProvider>
-          <OrderProvider>
-            <FileProvider>{children}</FileProvider>
-          </OrderProvider>
+          <OrderProvider>{children}</OrderProvider>
         </PhotographerProvider>
       </QueryClientProvider>
     </AlertProvider>

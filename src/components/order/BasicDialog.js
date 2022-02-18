@@ -7,7 +7,6 @@ import FileListItem from './FileListItem';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
-import { useFiles } from '../../contexts/FileContext';
 import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
@@ -73,10 +72,9 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   let fileInput = null;
 
   const [pack, setPack] = useState(1);
-  const [files, fileDispatch] = useFiles();
   const [order, orderDispatch] = useOrder();
 
-  console.log('%cLQS logger: ', 'color: #c931eb', { product, files, order });
+  console.log('%cLQS logger: ', 'color: #c931eb', { product, order });
 
   const fileInputHandler = (event) => {
     const { files } = event.target;
@@ -87,18 +85,10 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = () => {
-        const item = {
-          set: pack,
-          productId: product.id,
-          fileAsBase64: reader.result,
-          fileName: file.name,
-          guid: trackingGuid,
-          tempURL: URL.createObjectURL(file),
-          status: 'idle',
-          maxSize: product.size,
-        };
         const orderItem = {
+          maxSize: product.size,
           guid: trackingGuid,
+          fileAsBase64: reader.result,
           fileUrl: URL.createObjectURL(file),
           fileName: file.name,
           productId: product.id,
@@ -106,8 +96,8 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           qty: 1,
           state: 'idle',
         };
+
         orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
-        fileDispatch({ type: 'ADD_FILE', data: item });
       };
     }
   };
