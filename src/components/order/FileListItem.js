@@ -12,9 +12,9 @@ import { useOrder } from '../../contexts/OrderContext';
 //UI
 import { makeStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import Paper from '@material-ui/core/Paper';
 import DoneIcon from '@material-ui/icons/Done';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
@@ -88,20 +88,12 @@ const FileListItem = ({ file, key }) => {
           {file.status === 'failed' && (
             <ErrorOutlineIcon className={classes.failure} />
           )}
-          <IconButton
-            aria-label='delete'
-            color='secondary'
-            onClick={handleRemoveQuantity}
-          >
-            <RemoveCircleIcon />
+          <IconButton aria-label='delete' onClick={handleRemoveQuantity}>
+            <RemoveCircleOutlineIcon />
           </IconButton>
           <span>{file.qty}</span>
-          <IconButton
-            aria-label='delete'
-            color='primary'
-            onClick={handleAddQuantity}
-          >
-            <AddCircleIcon />
+          <IconButton aria-label='delete' onClick={handleAddQuantity}>
+            <AddCircleOutlineIcon />
           </IconButton>
         </div>
       </div>

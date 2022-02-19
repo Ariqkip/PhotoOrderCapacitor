@@ -142,6 +142,30 @@ export function OrderReducer(state = INIT_STATE, action) {
         ],
       };
 
+    case 'ORDER_SET_FIRST_NAME':
+      return {
+        ...state,
+        firstName: action.payload.firstName,
+      };
+
+    case 'ORDER_SET_LAST_NAME':
+      return {
+        ...state,
+        lastName: action.payload.lastName,
+      };
+
+    case 'ORDER_SET_EMAIL':
+      return {
+        ...state,
+        email: action.payload.email,
+      };
+
+    case 'ORDER_SET_PHONE':
+      return {
+        ...state,
+        phone: action.payload.phone,
+      };
+
     case 'FAILED':
       return { ...state, status: 'ERROR' };
 

@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 
 //Components
+import SummaryTab from '../../components/order/SummaryTab';
+import UserBasicInfo from '../../components/order/UserBasicInfo';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -21,7 +23,12 @@ const CheckoutView = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
-  return <p>Checkout view</p>;
+  return (
+    <>
+      <SummaryTab />
+      <UserBasicInfo />
+    </>
+  );
 };
 
 export default CheckoutView;
