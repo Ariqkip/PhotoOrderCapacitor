@@ -73,7 +73,7 @@ const Router = (props) => {
             path='/share3d/:guid'
             render={(props) => <View3dPresenter {...props} />}
           />
-          <Route path='/404' render={(props) => <View404 {...props} />} />
+          <Route render={(props) => <View404 {...props} />} />
         </Switch>
       </BrowserRouter>
     </Suspense>
