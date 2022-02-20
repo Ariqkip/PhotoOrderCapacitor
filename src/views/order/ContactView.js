@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 
 //Components
+import ContactCard from '../../components/order/ContactCard';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -21,7 +22,7 @@ const ContactView = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
-  return <p>Contact view.</p>;
+  return <ContactCard />;
 };
 
 export default ContactView;
