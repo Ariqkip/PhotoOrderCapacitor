@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 //Components
 import SummaryTab from '../../components/order/SummaryTab';
 import UserBasicInfo from '../../components/order/UserBasicInfo';
+import UserDeliveryInfo from '../../components/order/UserDeliveryInfo';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -27,6 +28,7 @@ const CheckoutView = (props) => {
     <>
       <SummaryTab />
       <UserBasicInfo />
+      <UserDeliveryInfo />
     </>
   );
 };

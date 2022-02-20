@@ -8,6 +8,9 @@ export const INIT_STATE = {
   firstName: 'missing',
   lastName: 'missing',
   shippingSelected: false,
+  shippingName: '',
+  shippingAddress: '',
+  shippingEmail: '',
   //orderInitialized: false,
   //orderRequestSend: false,
   //orderSending: false,
@@ -164,6 +167,30 @@ export function OrderReducer(state = INIT_STATE, action) {
       return {
         ...state,
         phone: action.payload.phone,
+      };
+
+    case 'ORDER_SET_SHIPPING':
+      return {
+        ...state,
+        shippingSelected: action.payload.shipping,
+      };
+
+    case 'ORDER_SET_SHIPPING_NAME':
+      return {
+        ...state,
+        shippingName: action.payload.shippingName,
+      };
+
+    case 'ORDER_SET_SHIPPING_ADDRESS':
+      return {
+        ...state,
+        shippingAddress: action.payload.shippingAddress,
+      };
+
+    case 'ORDER_SET_SHIPPING_EMAIL':
+      return {
+        ...state,
+        shippingEmail: action.payload.shippingEmail,
       };
 
     case 'FAILED':
