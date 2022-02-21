@@ -7,6 +7,7 @@ import FileListItem from './FileListItem';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
@@ -68,13 +69,12 @@ const useStyles = makeStyles((theme) => ({
 const BasicDialog = ({ product, isOpen, closeFn }) => {
   const classes = useStyles();
   const { t } = useTranslation();
+  const history = useHistory();
 
   let fileInput = null;
 
   const [pack, setPack] = useState(1);
   const [order, orderDispatch] = useOrder();
-
-  console.log('%cLQS logger: ', 'color: #c931eb', { product, order });
 
   const fileInputHandler = (event) => {
     const { files } = event.target;
@@ -117,6 +117,11 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       type: 'REMOVE_ORDER_ITEMS_FOR_PRODUCT',
       payload: { productId: product.id },
     });
+  };
+
+  const handleNext = () => {
+    closeFn();
+    history.push(`/photographer/${product.photographerId}/checkout`);
   };
 
   return (
@@ -186,7 +191,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
         <Button onClick={closeFn} color='primary'>
           {t('Choose other products')}
         </Button>
-        <Button onClick={closeFn} color='primary' autoFocus>
+        <Button onClick={handleNext} color='primary'>
           {t('Next step')}
         </Button>
       </DialogActions>
