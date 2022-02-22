@@ -9,7 +9,7 @@ import { usePhotographer } from '../../contexts/PhotographerContext';
 import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
-import formValidationHelper from '../../core/helpers/formValidationHelper';
+import { formValidationHelper } from '../../core/helpers/formValidationHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';

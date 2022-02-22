@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
-import formValidationHelper from '../../core/helpers/formValidationHelper';
+import { formValidationHelper } from '../../core/helpers/formValidationHelper';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';

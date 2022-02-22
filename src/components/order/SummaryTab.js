@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 
 //Components
+import SendOrderButton from './SendOrderButton';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -115,7 +116,7 @@ const SummaryTab = (props) => {
           </Grid>
         </Grid>
         <Grid container spacing={3} className={classes.gridContainer}>
-          SEND ORDER BTN
+          <SendOrderButton />
         </Grid>
       </Paper>
     </Container>
