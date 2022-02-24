@@ -1,5 +1,5 @@
 //Core
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 //Components
 
@@ -23,10 +23,14 @@ const UploadManager = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
+  const [sending, setSending] = useState(false);
   const [order, orderDispatch] = useOrder();
 
   const uploadFiles = async () => {
-    if (order.status !== 'INITIALIZED') return;
+    if (!order.status) return;
+    if (order.status === '') return;
+    if (order.status === 'SUCCESS') return;
+    if (order.status === 'FAILED') return;
 
     const uploadInProcess = order.orderItems.find(
       (item) => item.status === 'processing'
@@ -76,10 +80,40 @@ const UploadManager = (props) => {
       });
   };
 
+  const tryFinalizeOrder = async () => {
+    if (order.status !== 'FINALIZING') return;
+
+    const notDeliveredFiles = order.orderItems.filter(
+      (item) => item.status !== 'success'
+    );
+    if (!notDeliveredFiles) return;
+    if (notDeliveredFiles.length > 0) return;
+
+    console.log('%cLQS logger: - start', 'color: #c931eb', {});
+    orderDispatch({ type: 'FINALIZE_REQUESTED' });
+
+    const service = OrderService();
+    await service
+      .FinalizeOrder(order)
+      .then(
+        (res) => {
+          service.MarkOrderAsDone(order);
+          orderDispatch({ type: 'SUCCESS' });
+        },
+        (err) => {
+          orderDispatch({ type: 'FAILED' });
+        }
+      )
+      .catch((err) => {
+        orderDispatch({ type: 'FAILED' });
+      });
+    console.log('%cLQS logger: - end', 'color: #c931eb', {});
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       uploadFiles();
-      //tryFinalizeOrder();
+      tryFinalizeOrder();
     }, 200);
     return () => clearInterval(interval);
   });

@@ -193,6 +193,24 @@ export function OrderReducer(state = INIT_STATE, action) {
         shippingEmail: action.payload.shippingEmail,
       };
 
+    case 'FINALIZE':
+      return {
+        ...state,
+        status: 'FINALIZING',
+      };
+
+    case 'FINALIZE_REQUESTED':
+      return {
+        ...state,
+        status: 'PROCESSING',
+      };
+
+    case 'SUCCESS':
+      return {
+        ...state,
+        status: 'SUCCESS',
+      };
+
     case 'FAILED':
       return { ...state, status: 'ERROR' };
 

@@ -44,7 +44,6 @@ const ContactCard = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const [photographer] = usePhotographer();
-  console.log('%cLQS logger: ', 'color: #c931eb', { photographer });
 
   return (
     <Container maxWidth='md'>

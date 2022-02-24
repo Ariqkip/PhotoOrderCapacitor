@@ -16,6 +16,8 @@ import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,10 +26,15 @@ const useStyles = makeStyles((theme) => ({
   error: {
     color: '#dc3545',
   },
+  progress: {
+    marginLeft: '8px',
+  },
 }));
 
 const ActiveButton = withStyles((theme) => ({
   root: {
+    width: '100%',
+    maxWidth: '320px',
     color: 'white',
     borderRadius: '50px',
     padding: '12px 28px',
@@ -40,6 +47,8 @@ const ActiveButton = withStyles((theme) => ({
 
 const DisabledButton = withStyles((theme) => ({
   root: {
+    width: '100%',
+    maxWidth: '320px',
     color: '#d4d4d4',
     borderRadius: '50px',
     padding: '12px 28px',
@@ -136,8 +145,31 @@ const SendOrderButton = (props) => {
 
   function RenderButton({ children }) {
     const errors = validateSendOrder();
+
+    const renderChildren = () => {
+      if (order.status === 'FINALIZING')
+        return (
+          <>
+            {t('Sending')}{' '}
+            <CircularProgress size={22} className={classes.progress} />
+          </>
+        );
+
+      if (order.status === 'SUCCESS') return <>{t('SUCCESS')}</>;
+
+      return children;
+    };
+
     if (errors.length === 0)
-      return <ActiveButton size='large'>{children}</ActiveButton>;
+      return (
+        <ActiveButton
+          size='large'
+          onClick={() => orderDispatch({ type: 'FINALIZE' })}
+          disabled={order.status !== 'INITIALIZED'}
+        >
+          {renderChildren()}
+        </ActiveButton>
+      );
 
     return (
       <ClickAwayListener onClickAway={() => setTooltipOpen(false)}>

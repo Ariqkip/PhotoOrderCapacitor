@@ -24,6 +24,38 @@ const OrderService = () => {
     return legacy.post(endpoint, body);
   }
 
+  function FinalizeOrder(order) {
+    const endpoint = `photographer/order/${order.orderId}`;
+
+    const orderedItems = order.orderItems.map((item) => {
+      return {
+        FileName: item.fileName,
+        FileGuid: item.guid,
+        ProductId: item.productId,
+        Quantity: item.qty,
+        Attributes: item.attributes,
+      };
+    });
+
+    const body = {
+      FirstName: order.firstName,
+      LastName: order.lastName,
+      Phone: order.phone,
+      Email: order.email,
+      StreetAddress: order.shippingAddress,
+      IsShippingChoosen: order.shippingSelected,
+      OrderGuid: order.orderGuid,
+      OrderItems: orderedItems,
+    };
+
+    return legacy.put(endpoint, body);
+  }
+
+  function MarkOrderAsDone(order) {
+    const endpoint = `orders/${order.orderId}/done`;
+    return legacy.post(endpoint, '');
+  }
+
   function UploadImage(model) {
     const endpoint = `photographer/order/${model.orderId}/photo`;
     const body = {
@@ -37,7 +69,14 @@ const OrderService = () => {
     return legacy.post(endpoint, body);
   }
 
-  return { GetPhotographer, GetProducts, CreateOrder, UploadImage };
+  return {
+    GetPhotographer,
+    GetProducts,
+    CreateOrder,
+    FinalizeOrder,
+    MarkOrderAsDone,
+    UploadImage,
+  };
 };
 
 export default OrderService;

@@ -73,9 +73,6 @@ const OrderIndex = ({ match }) => {
   const [, alertDispatch] = useAlerts();
 
   const photographerQuery = useGetPhotographer(match?.params?.id ?? 0);
-  console.log('%cLQS render order.index: ', 'color: #c931eb', {
-    photographerQuery,
-  });
 
   function redirectCategoriesFlag(query) {
     if (!query.isSuccess) return false;

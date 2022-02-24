@@ -42,7 +42,7 @@ export function formValidationHelper(name, value, schema) {
 
 export function valueValidationHelper(name, value, rules) {
   const { validate, minLength, maxLength } = rules;
-  let error = '';
+  let error = undefined;
 
   if (minLength && value === undefined) return `${name}: Value not provided`;
 
