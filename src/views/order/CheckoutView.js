@@ -6,9 +6,11 @@ import SummaryTab from '../../components/order/SummaryTab';
 import UserBasicInfo from '../../components/order/UserBasicInfo';
 import UserDeliveryInfo from '../../components/order/UserDeliveryInfo';
 import UserPaymentInfo from '../../components/order/UserPaymentInfo';
+import ThankYouCard from '../../components/order/ThankYouCard';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
+import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
 
@@ -25,12 +27,22 @@ const CheckoutView = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
+  const [order] = useOrder();
+
+  const showThankYou = order.status === 'SUCCESS';
+  console.log('%cLQS logger: ', 'color: #c931eb', { showThankYou });
+
   return (
     <>
-      <SummaryTab />
-      <UserBasicInfo />
-      <UserDeliveryInfo />
-      <UserPaymentInfo />
+      {showThankYou && <ThankYouCard />}
+      {!showThankYou && (
+        <>
+          <SummaryTab />
+          <UserBasicInfo />
+          <UserDeliveryInfo />
+          <UserPaymentInfo />
+        </>
+      )}
     </>
   );
 };

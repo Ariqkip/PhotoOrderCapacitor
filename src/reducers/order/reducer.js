@@ -46,6 +46,9 @@ export const INIT_STATE = {
 
 export function OrderReducer(state = INIT_STATE, action) {
   switch (action.type) {
+    case 'NEW':
+      return { ...INIT_STATE };
+
     case 'CREATE':
       const { PhotographerId, OrderId, OrderGuid } = action.payload;
       const { Email, FirstName, LastName, Phone } = action.payload;
