@@ -14,7 +14,7 @@ import { useOrder } from '../../contexts/OrderContext';
 import { createGuid } from '../../core/helpers/guidHelper';
 
 //UI
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import Container from '@material-ui/core/Container';
@@ -26,6 +26,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Grid from '@material-ui/core/Grid';
 import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
 import Typography from '@material-ui/core/Typography';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import Divider from '@material-ui/core/Divider';
 
 const placeholderImg = 'https://via.placeholder.com/400?text=No%20image';
 
@@ -65,6 +67,50 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: '24px',
   },
 }));
+
+const NextButton = withStyles((theme) => ({
+  root: {
+    width: '100%',
+    maxWidth: '400px',
+    color: 'white',
+    borderRadius: '50px',
+    padding: '12px 28px',
+    backgroundColor: '#28a745',
+    '&:hover': {
+      backgroundColor: '#218838',
+    },
+  },
+}))(Button);
+
+const OtherButton = withStyles((theme) => ({
+  root: {
+    width: '100%',
+    maxWidth: '400px',
+    color: '#28a745',
+    borderRadius: '50px',
+    padding: '12px 28px',
+    border: '1px solid #28a745',
+    '&:hover': {
+      color: 'white',
+      backgroundColor: '#28a745',
+    },
+  },
+}))(Button);
+
+const RemoveButton = withStyles((theme) => ({
+  root: {
+    width: '100%',
+    maxWidth: '400px',
+    color: '#dc3545',
+    borderRadius: '50px',
+    padding: '12px 28px',
+    border: '1px solid #dc3545',
+    '&:hover': {
+      color: 'white',
+      backgroundColor: '#dc3545',
+    },
+  },
+}))(Button);
 
 const BasicDialog = ({ product, isOpen, closeFn }) => {
   const classes = useStyles();
@@ -178,22 +224,22 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
               <Typography variant='body2' className={classes.description}>
                 {product.description}
               </Typography>
-              image list
             </Grid>
           </Grid>
           {renderFiles()}
         </DialogContentText>
+        <Divider />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleRemoveAll} color='primary'>
+        <RemoveButton onClick={handleRemoveAll} color='primary'>
           {t('REMOVE ALL FILES')}
-        </Button>
-        <Button onClick={closeFn} color='primary'>
+        </RemoveButton>
+        <OtherButton onClick={closeFn} color='primary'>
           {t('Choose other products')}
-        </Button>
-        <Button onClick={handleNext} color='primary'>
-          {t('Next step')}
-        </Button>
+        </OtherButton>
+        <NextButton onClick={handleNext} color='primary'>
+          {t('Next step')} <ShoppingCartIcon fontSize='small' />
+        </NextButton>
       </DialogActions>
     </Dialog>
   );
