@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 
 //Components
+import ProductAttributesCard from './ProductAttributesCard';
 import ProductBasicCard from './ProductBasicCard';
 import ProductRangeCard from './ProductRangeCard';
 
@@ -22,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
 const TYPES = {
   BASIC: 0,
   RANGE: 1,
+  ATTRIBUTES: 2,
   RENDER_CUP: 3,
 };
 
@@ -31,17 +33,22 @@ const ProductTypeRenderer = ({ product }) => {
 
   const calculateProductType = () => {
     if (product.productType === 1) return TYPES.RENDER_CUP;
+    if (product.attributes?.length > 0) return TYPES.ATTRIBUTES;
     if (product.productPrices.length > 0) return TYPES.RANGE;
 
     return TYPES.BASIC;
   };
 
   const productType = calculateProductType();
+  console.log('%cLQS logger: ', 'color: #c931eb', { product, productType });
 
   return (
     <>
       {productType === TYPES.BASIC && <ProductBasicCard product={product} />}
       {productType === TYPES.RANGE && <ProductRangeCard product={product} />}
+      {productType === TYPES.ATTRIBUTES && (
+        <ProductAttributesCard product={product} />
+      )}
     </>
   );
 };

@@ -23,6 +23,9 @@ const useStyles = makeStyles((theme) => ({
     height: 240,
     marginBottom: '28px',
   },
+  short: {
+    width: '35%',
+  },
 }));
 
 const CategoryCardSkeleton = ({ key }) => {
@@ -37,6 +40,8 @@ const CategoryCardSkeleton = ({ key }) => {
           <Skeleton animation='wave' width='60%' />
         </Typography>
         <Skeleton animation='wave' />
+        <Skeleton animation='wave' />
+        <Skeleton animation='wave' className={classes.short} />
       </CardContent>
     </Card>
   );
