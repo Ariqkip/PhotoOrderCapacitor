@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 //Components
 import RoundButton from './../core/RoundButton';
 import FileListItem from './FileListItem';
+import PriceRangeList from './PriceRangeList';
+import AttributesList from './AttributesList';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -224,6 +226,8 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
               <Typography variant='body2' className={classes.description}>
                 {product.description}
               </Typography>
+              <PriceRangeList product={product} />
+              <AttributesList product={product} />
             </Grid>
           </Grid>
           {renderFiles()}
