@@ -1,3 +1,9 @@
+import {
+  addProductAttributesConfig,
+  addAttributesGroupConfig,
+  updateAttributesGroupItemSelection,
+} from '../../core/helpers/attributesConfigHelper';
+
 export const INIT_STATE = {
   photographerId: 0,
   orderId: '',
@@ -41,6 +47,16 @@ export const INIT_STATE = {
     //   productId: 4400,
     //   quantity: 1,
     // },
+  ],
+  orderItemsConfig: [
+    // {
+    //   productId: 1,
+    //   pack: 1,
+    //   configs: [
+    //     {groupId: 1, selected: 12},
+    //     {groupId: 2, selected: 32}
+    //   ]
+    // }
   ],
 };
 
@@ -194,6 +210,28 @@ export function OrderReducer(state = INIT_STATE, action) {
       return {
         ...state,
         shippingEmail: action.payload.shippingEmail,
+      };
+
+    case 'ORDER_ITEM_SET_ATTRIBUTES':
+      //check if config container is on the list, add if needed
+      let newOrderItemsConfig = addProductAttributesConfig(
+        state.orderItemsConfig,
+        action.payload
+      );
+
+      //foreach config container check if attribute config is on the list, add if needed
+      newOrderItemsConfig = newOrderItemsConfig.map((item) => {
+        let newConfig = addAttributesGroupConfig(item, action.payload);
+        newConfig.configs = newConfig.configs.map((cfg) =>
+          updateAttributesGroupItemSelection(cfg, action.payload)
+        );
+
+        return newConfig;
+      });
+
+      return {
+        ...state,
+        orderItemsConfig: [...newOrderItemsConfig],
       };
 
     case 'FINALIZE':

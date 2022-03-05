@@ -1,11 +1,12 @@
 //Core
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 //Components
 
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { usePhotographer } from '../../contexts/PhotographerContext';
+import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
 
@@ -35,15 +36,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AttributesList = ({ product }) => {
+const AttributesList = ({ product, pack }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
+  const [order, orderDispatch] = useOrder();
   const [photographer] = usePhotographer();
-  console.log('%cLQS logger: ', 'color: #c931eb', { photographer });
-
-  if (!product) return null;
-  if (product.attributes?.length < 1) return null;
 
   const calculateAttributeGroups = () => {
     const groupIds = [
@@ -62,6 +60,39 @@ const AttributesList = ({ product }) => {
       .sort((a, b) => a.position < b.position);
   };
 
+  const handleAttributeClick = (groupId, attributeId) => {
+    const newConfig = {
+      productId: product.id,
+      pack: pack,
+      groupId: groupId,
+      selected: attributeId,
+    };
+    orderDispatch({ type: 'ORDER_ITEM_SET_ATTRIBUTES', payload: newConfig });
+  };
+
+  const getButtonVariant = (groupId, attributeId) => {
+    const config = order?.orderItemsConfig.find(
+      (c) => c.productId === product.id && c.pack === pack
+    );
+
+    if (config) {
+      const group = config.configs.find((opt) => opt.groupId === groupId);
+      if (group) {
+        if (group.selected === attributeId) return 'contained';
+        else return 'outlined';
+      }
+    }
+
+    const attributes = product.attributes.filter(
+      (a) => a.attributesGroupId === groupId
+    );
+    if (attributes) {
+      if (attributes[0].id === attributeId) return 'contained';
+    }
+
+    return 'outlined';
+  };
+
   const renderAttributes = (group) => {
     const att = calculateAttributes(group);
 
@@ -76,7 +107,13 @@ const AttributesList = ({ product }) => {
           className={classes.groupSelection}
         >
           {att.map((a) => (
-            <Button key={a.id}>{a.name}</Button>
+            <Button
+              key={a.id}
+              variant={getButtonVariant(group.Id, a.id)}
+              onClick={() => handleAttributeClick(group.Id, a.id)}
+            >
+              {a.name}
+            </Button>
           ))}
         </ButtonGroup>
       </>
@@ -85,10 +122,14 @@ const AttributesList = ({ product }) => {
 
   return (
     <>
-      <Typography gutterBottom component='p' className={classes.title}>
-        {t('Options')}:
-      </Typography>
-      {attributesGroups.map((g) => renderAttributes(g))}
+      {product && product.attributes?.length > 0 && (
+        <>
+          <Typography gutterBottom component='p' className={classes.title}>
+            {t('Options')}:
+          </Typography>
+          {attributesGroups.map((g) => renderAttributes(g))}
+        </>
+      )}
     </>
   );
 };
