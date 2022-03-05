@@ -127,10 +127,6 @@ const AttributesDialog = ({ product, isOpen, closeFn }) => {
   const [productAttributes, setProductAttributes] = useState([
     ...product.attributes,
   ]);
-  console.log('%cLQS logger: ', 'color: #c931eb', {
-    productAttributes,
-    photographer,
-  });
 
   const fileInputHandler = (event) => {
     const { files } = event.target;

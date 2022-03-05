@@ -42,56 +42,55 @@ const AttributesList = ({ product, pack }) => {
 
   const [order, orderDispatch] = useOrder();
   const [photographer] = usePhotographer();
+console.log('%cLQS logger: ', 'color: #c931eb', { order, photographer });
 
-  const calculateAttributeGroups = () => {
-    const groupIds = [
-      ...new Set(product.attributes.map((p) => p.attributesGroupId)),
-    ];
-    return photographer.productAttributes.filter((a) =>
-      groupIds.includes(a.Id)
-    );
+const calculateAttributeGroups = () => {
+  const groupIds = [
+    ...new Set(product.attributes.map((p) => p.attributesGroupId)),
+  ];
+  return photographer.productAttributes.filter((a) => groupIds.includes(a.Id));
+};
+
+const attributesGroups = calculateAttributeGroups();
+
+const calculateAttributes = (group) => {
+  return product.attributes
+    .filter((a) => a.attributesGroupId === group.Id)
+    .sort((a, b) => a.position < b.position);
+};
+
+const handleAttributeClick = (groupId, attributeId) => {
+  const newConfig = {
+    productId: product.id,
+    pack: pack,
+    groupId: groupId,
+    selected: attributeId,
   };
+  orderDispatch({ type: 'ORDER_ITEM_SET_ATTRIBUTES', payload: newConfig });
+};
 
-  const attributesGroups = calculateAttributeGroups();
+const getButtonVariant = (groupId, attributeId) => {
+  const config = order?.orderItemsConfig.find(
+    (c) => c.productId === product.id && c.pack === pack
+  );
 
-  const calculateAttributes = (group) => {
-    return product.attributes
-      .filter((a) => a.attributesGroupId === group.Id)
-      .sort((a, b) => a.position < b.position);
-  };
-
-  const handleAttributeClick = (groupId, attributeId) => {
-    const newConfig = {
-      productId: product.id,
-      pack: pack,
-      groupId: groupId,
-      selected: attributeId,
-    };
-    orderDispatch({ type: 'ORDER_ITEM_SET_ATTRIBUTES', payload: newConfig });
-  };
-
-  const getButtonVariant = (groupId, attributeId) => {
-    const config = order?.orderItemsConfig.find(
-      (c) => c.productId === product.id && c.pack === pack
-    );
-
-    if (config) {
-      const group = config.configs.find((opt) => opt.groupId === groupId);
-      if (group) {
-        if (group.selected === attributeId) return 'contained';
-        else return 'outlined';
-      }
+  if (config) {
+    const group = config.configs.find((opt) => opt.groupId === groupId);
+    if (group) {
+      if (group.selected === attributeId) return 'contained';
+      else return 'outlined';
     }
+  }
 
-    const attributes = product.attributes.filter(
-      (a) => a.attributesGroupId === groupId
-    );
-    if (attributes) {
-      if (attributes[0].id === attributeId) return 'contained';
-    }
+  const attributes = product.attributes.filter(
+    (a) => a.attributesGroupId === groupId
+  );
+  if (attributes) {
+    if (attributes[0].id === attributeId) return 'contained';
+  }
 
-    return 'outlined';
-  };
+  return 'outlined';
+};
 
   const renderAttributes = (group) => {
     const att = calculateAttributes(group);

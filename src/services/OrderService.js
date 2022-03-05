@@ -24,16 +24,58 @@ const OrderService = () => {
     return legacy.post(endpoint, body);
   }
 
-  function FinalizeOrder(order) {
+  function FinalizeOrder(order, photographer) {
     const endpoint = `photographer/order/${order.orderId}`;
 
+    const { productAttributes } = photographer;
+    const { orderItemsConfig } = order;
+
+    //get greoups and default values
+    let defaultAttributes = productAttributes.map((group) => {
+      let att;
+      if (group.Attributes.length > 0) {
+        att = group.Attributes[0];
+      }
+      return {
+        groupId: group.Id,
+        selected: att?.Id,
+      };
+    });
+
     const orderedItems = order.orderItems.map((item) => {
+      let itemAttributes = [];
+
+      const productInfo = photographer.products.find(
+        (pa) => pa.id === item.productId
+      );
+      if (productInfo && productInfo.attributes?.length > 0) {
+        const groupIds = [
+          ...new Set(productInfo.attributes.map((p) => p.attributesGroupId)),
+        ];
+        //get item config from context:
+        const config = orderItemsConfig.find(
+          (c) => c.productId === item.productId
+        );
+        //read all selected items
+        groupIds.map((id) => {
+          const selectedValue = config.configs.find((c) => c.groupId === id);
+          if (selectedValue) itemAttributes.push(selectedValue.selected);
+          else {
+            const defaultSelection = defaultAttributes.find(
+              (a) => a.groupId === id
+            );
+            if (defaultSelection)
+              itemAttributes.push(defaultSelection.selected);
+          }
+        });
+      }
+
       return {
         FileName: item.fileName,
         FileGuid: item.guid,
         ProductId: item.productId,
         Quantity: item.qty,
-        Attributes: item.attributes,
+        Attributes: itemAttributes,
       };
     });
 

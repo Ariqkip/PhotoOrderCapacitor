@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { useOrder } from '../../contexts/OrderContext';
+import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Utils
 import OrderService from '../../services/OrderService';
@@ -25,6 +26,7 @@ const UploadManager = (props) => {
 
   const [sending, setSending] = useState(false);
   const [order, orderDispatch] = useOrder();
+  const [photographer] = usePhotographer();
 
   const uploadFiles = async () => {
     if (!order.status) return;
@@ -89,12 +91,11 @@ const UploadManager = (props) => {
     if (!notDeliveredFiles) return;
     if (notDeliveredFiles.length > 0) return;
 
-    console.log('%cLQS logger: - start', 'color: #c931eb', {});
     orderDispatch({ type: 'FINALIZE_REQUESTED' });
 
     const service = OrderService();
     await service
-      .FinalizeOrder(order)
+      .FinalizeOrder(order, photographer)
       .then(
         (res) => {
           service.MarkOrderAsDone(order);
@@ -107,7 +108,6 @@ const UploadManager = (props) => {
       .catch((err) => {
         orderDispatch({ type: 'FAILED' });
       });
-    console.log('%cLQS logger: - end', 'color: #c931eb', {});
   };
 
   useEffect(() => {

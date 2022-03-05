@@ -34,7 +34,6 @@ const ProductTypeRenderer = ({ product }) => {
   };
 
   const productType = calculateProductType();
-  console.log('%cLQS logger: ', 'color: #c931eb', { product, productType });
 
   return (
     <>{productType === TYPES.BASIC && <ProductBasicCard product={product} />}</>

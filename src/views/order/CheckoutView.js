@@ -30,7 +30,6 @@ const CheckoutView = (props) => {
   const [order] = useOrder();
 
   const showThankYou = order.status === 'SUCCESS';
-  console.log('%cLQS logger: ', 'color: #c931eb', { showThankYou });
 
   return (
     <>
