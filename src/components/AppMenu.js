@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    //justifyContent: 'flex-end',
     padding: theme.spacing(0, 1),
     minHeight: 48,
     //  height: 35
@@ -133,11 +133,14 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     [theme.breakpoints.up('md')]: {
       display: 'flex',
+      width: '100%',
+      justifyContent: 'flex-end',
     },
   },
   sectionMobile: {
     display: 'flex',
     alignItems: 'center',
+    marginLeft: '16px',
     [theme.breakpoints.up('md')]: {
       display: 'none',
     },
@@ -167,22 +170,12 @@ const AppMenu = ({ photographerId }) => {
                 setDrawerOpen(true);
               }}
               edge='start'
-              //hidden={currentLogin == null ? true : false}
               className={clsx(classes.menuButton, {
                 [classes.hide]: drawerOpen,
               })}
             >
               <MenuIcon />
             </IconButton>
-            <Typography
-              component='h1'
-              variant='h6'
-              color='inherit'
-              noWrap
-              className={classes.title}
-            >
-              {t('Menu')}
-            </Typography>
           </div>
           <div className={classes.sectionDesktop}>
             <NavLink
@@ -211,6 +204,7 @@ const AppMenu = ({ photographerId }) => {
       </AppBar>
       <MenuDrawer
         draweropen={drawerOpen}
+        photographerId={photographerId}
         requestClose={() => setDrawerOpen(false)}
       />
     </>

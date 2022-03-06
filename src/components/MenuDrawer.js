@@ -73,6 +73,7 @@ const MenuDrawer = (props) => {
     >
       <MenuList
         requestClose={() => props.requestClose && props.requestClose()}
+        photographerId={props.photographerId}
       />
     </Drawer>
   );

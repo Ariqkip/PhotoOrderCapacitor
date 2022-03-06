@@ -15,7 +15,9 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import HomeIcon from '@material-ui/icons/Home';
+import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import ContactPhoneIcon from '@material-ui/icons/ContactPhone';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,12 +36,36 @@ const MenuList = (props) => {
         button
         onClick={() => props.requestClose && props.requestClose()}
         component={Link}
-        to='/'
+        to={`/photographer/${props.photographerId}/products`}
       >
         <ListItemIcon>
-          <HomeIcon />
+          <AddShoppingCartIcon />
         </ListItemIcon>
-        <ListItemText>Dashboard</ListItemText>
+        <ListItemText>{t('Products')}</ListItemText>
+      </ListItem>
+      <ListItem
+        className={classes.gutters}
+        button
+        onClick={() => props.requestClose && props.requestClose()}
+        component={Link}
+        to={`/photographer/${props.photographerId}/checkout`}
+      >
+        <ListItemIcon>
+          <ShoppingCartIcon />
+        </ListItemIcon>
+        <ListItemText>{t('Finish order')}</ListItemText>
+      </ListItem>
+      <ListItem
+        className={classes.gutters}
+        button
+        onClick={() => props.requestClose && props.requestClose()}
+        component={Link}
+        to={`/photographer/${props.photographerId}/contact`}
+      >
+        <ListItemIcon>
+          <ContactPhoneIcon />
+        </ListItemIcon>
+        <ListItemText>{t('Contact')}</ListItemText>
       </ListItem>
     </List>
   );
