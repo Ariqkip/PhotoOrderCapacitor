@@ -3,7 +3,6 @@ import React, { useState, useLayoutEffect } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 
 //Components
-import AttributesDialog from './AttributesDialog';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -58,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ProductAttributesCard = ({ product }) => {
+const ProductRenderCard = ({ product }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const history = useHistory();
@@ -88,10 +87,11 @@ const ProductAttributesCard = ({ product }) => {
       setDialogOpen(true);
     }
   }, [itemId, product]);
+  console.log('%cLQS logger: RENDER_CUP', 'color: #c931eb', { product });
 
   return (
     <>
-      <Card className={classes.root} key={`attr_card_${product.id}`}>
+      <Card className={classes.root} key={`render_card_${product.id}`}>
         <CardActionArea
           className={classes.cardArea}
           onClick={() => handleOpen(product.id)}
@@ -132,14 +132,8 @@ const ProductAttributesCard = ({ product }) => {
           </CardContent>
         </CardActionArea>
       </Card>
-      <AttributesDialog
-        product={product}
-        key={`attr_dialog_${product.id}`}
-        isOpen={isDialogOpen}
-        closeFn={() => handleClose(product.id)}
-      />
     </>
   );
 };
 
-export default ProductAttributesCard;
+export default ProductRenderCard;

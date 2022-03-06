@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 
 //Components
 import ProductBasicCard from './ProductBasicCard';
+import ProductRenderCard from './ProductRenderCard';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -36,7 +37,12 @@ const ProductTypeRenderer = ({ product }) => {
   const productType = calculateProductType();
 
   return (
-    <>{productType === TYPES.BASIC && <ProductBasicCard product={product} />}</>
+    <>
+      {productType === TYPES.BASIC && <ProductBasicCard product={product} />}
+      {productType === TYPES.RENDER_CUP && (
+        <ProductRenderCard product={product} />
+      )}
+    </>
   );
 };
 
