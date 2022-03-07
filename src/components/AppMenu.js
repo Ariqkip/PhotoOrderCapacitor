@@ -6,7 +6,9 @@ import { NavLink } from 'react-router-dom';
 import MenuDrawer from './MenuDrawer';
 
 //Hooks
+import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { usePhotographer } from '../contexts/PhotographerContext';
 
 //Utils
 import clsx from 'clsx';
@@ -19,6 +21,13 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import Fade from '@material-ui/core/Fade';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import ArrowRightIcon from '@material-ui/icons/ArrowRight';
+import Divider from '@material-ui/core/Divider';
 
 const drawerWidth = 260;
 
@@ -127,6 +136,7 @@ const useStyles = makeStyles((theme) => ({
     marginRight: '5px',
     textDecoration: 'none',
     fontSize: '1rem',
+    cursor: 'pointer',
   },
   sectionDesktop: {
     display: 'none',
@@ -150,8 +160,95 @@ const useStyles = makeStyles((theme) => ({
 const AppMenu = ({ photographerId }) => {
   const classes = useStyles();
   const { t } = useTranslation();
+  const history = useHistory();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [photographer] = usePhotographer();
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleProductMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleProductMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const redirectToCategoriesList = () => {
+    handleProductMenuClose();
+    history.push(`/photographer/${photographer.photographId}/categories`);
+  };
+
+  const redirectToCategory = (id) => {
+    handleProductMenuClose();
+    history.push(`/photographer/${photographer.photographId}/categories/${id}`);
+  };
+
+  const renderCategories = () => {
+    return (
+      <div>
+        <p
+          aria-controls='categories-menu'
+          aria-haspopup='true'
+          onClick={handleProductMenuClick}
+          className={classes.navButton}
+        >
+          {t('Categories')}
+        </p>
+        <Menu
+          id='categories-menu'
+          anchorEl={anchorEl}
+          keepMounted
+          open={open}
+          onClose={handleProductMenuClose}
+          TransitionComponent={Fade}
+        >
+          <MenuItem key='show_categories' onClick={redirectToCategoriesList}>
+            <ListItemIcon>
+              <ArrowRightIcon fontSize='small' />
+            </ListItemIcon>
+            <ListItemText primary={t('Show categoires')} />
+          </MenuItem>
+          <Divider />
+          {photographer.productCategories.map((category) => {
+            return (
+              <MenuItem
+                key={category.Id}
+                onClick={() => redirectToCategory(category.Id)}
+              >
+                <ListItemIcon>
+                  <ArrowRightIcon fontSize='small' />
+                </ListItemIcon>
+                <ListItemText primary={category.Name} />
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      </div>
+    );
+  };
+
+  const renderProducts = () => {
+    return (
+      <NavLink
+        to={`/photographer/${photographerId}/products`}
+        activeStyle={{ fontWeight: 'bold' }}
+        className={classes.navButton}
+      >
+        {t('Products')}
+      </NavLink>
+    );
+  };
+
+  const renderProductsOrCategories = () => {
+    if (photographer && photographer.productCategories?.length > 0) {
+      return renderCategories();
+    } else {
+      return renderProducts();
+    }
+  };
 
   return (
     <>
@@ -178,26 +275,20 @@ const AppMenu = ({ photographerId }) => {
             </IconButton>
           </div>
           <div className={classes.sectionDesktop}>
-            <NavLink
-              to={`/photographer/${photographerId}/products`}
-              activeStyle={{ fontWeight: 'bold' }}
-              className={classes.navButton}
-            >
-              Products
-            </NavLink>
+            {renderProductsOrCategories()}
             <NavLink
               to={`/photographer/${photographerId}/checkout`}
               activeStyle={{ fontWeight: 'bold' }}
               className={classes.navButton}
             >
-              Finish order
+              {t('Finish order')}
             </NavLink>
             <NavLink
               to={`/photographer/${photographerId}/contact`}
               activeStyle={{ fontWeight: 'bold' }}
               className={classes.navButton}
             >
-              Contact
+              {t('Contact')}
             </NavLink>
           </div>
         </Toolbar>
