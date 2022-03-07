@@ -151,6 +151,15 @@ const OrderIndex = ({ match }) => {
           />
           <Route
             exact
+            path={`${url}/categories/:categoryId`}
+            render={(props) => <ProductsView {...props} />}
+          />
+          <Route
+            path={`${url}/categories/:categoryId/:itemId`}
+            render={(props) => <ProductsView {...props} />}
+          />
+          <Route
+            exact
             path={`${url}/products`}
             render={(props) => <ProductsView {...props} />}
           />
