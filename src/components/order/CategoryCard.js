@@ -4,7 +4,9 @@ import React, { useState } from 'react';
 //Components
 
 //Hooks
+import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Utils
 
@@ -28,14 +30,19 @@ const useStyles = makeStyles((theme) => ({
 const CategoryCard = ({ category }) => {
   const classes = useStyles();
   const { t } = useTranslation();
+  const history = useHistory();
+
+  const [photographer] = usePhotographer();
+
+  const handleCardClick = () => {
+    history.push(
+      `/photographer/${photographer.photographId}/categories/${category.Id}`
+    );
+  };
 
   return (
     <Card className={classes.root} key={category.Id}>
-      <CardActionArea
-        onClick={() => {
-          console.log('%cLQS logger: ', 'color: #c931eb', {});
-        }}
-      >
+      <CardActionArea onClick={handleCardClick}>
         <CardMedia
           className={classes.media}
           image={category.FileUrl}
