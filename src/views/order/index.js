@@ -9,6 +9,7 @@ import ProductsView from './ProductsView';
 import CheckoutView from './CheckoutView';
 import ContactView from './ContactView';
 import UploadManager from '../../components/order/UploadManager';
+import UncategorizedView from './UncategorizedView';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -157,6 +158,15 @@ const OrderIndex = ({ match }) => {
           <Route
             path={`${url}/categories/:categoryId/:itemId`}
             render={(props) => <ProductsView {...props} />}
+          />
+          <Route
+            exact
+            path={`${url}/uncategorized`}
+            render={(props) => <UncategorizedView {...props} />}
+          />
+          <Route
+            path={`${url}/uncategorized/:itemId`}
+            render={(props) => <UncategorizedView {...props} />}
           />
           <Route
             exact

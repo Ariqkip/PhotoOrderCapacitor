@@ -112,6 +112,19 @@ const MenuList = (props) => {
                 </ListItem>
               );
             })}
+            <ListItem
+              key={`mobile_uncategorized`}
+              className={classes.gutters}
+              button
+              onClick={() => props.requestClose && props.requestClose()}
+              component={Link}
+              to={`/photographer/${photographer.photographId}/uncategorized`}
+            >
+              <ListItemIcon>
+                <ArrowRightIcon />
+              </ListItemIcon>
+              <ListItemText>{t('Others')}</ListItemText>
+            </ListItem>
           </List>
         </Collapse>
       </>

@@ -186,6 +186,11 @@ const AppMenu = ({ photographerId }) => {
     history.push(`/photographer/${photographer.photographId}/categories/${id}`);
   };
 
+  const redirectToUncategorized = () => {
+    handleProductMenuClose();
+    history.push(`/photographer/${photographer.photographId}/uncategorized`);
+  };
+
   const renderCategories = () => {
     return (
       <div>
@@ -209,7 +214,7 @@ const AppMenu = ({ photographerId }) => {
             <ListItemIcon>
               <ArrowRightIcon fontSize='small' />
             </ListItemIcon>
-            <ListItemText primary={t('Show categoires')} />
+            <ListItemText primary={t('All categoires')} />
           </MenuItem>
           <Divider />
           {photographer.productCategories.map((category) => {
@@ -225,6 +230,12 @@ const AppMenu = ({ photographerId }) => {
               </MenuItem>
             );
           })}
+          <MenuItem key='show_uncategorized' onClick={redirectToUncategorized}>
+            <ListItemIcon>
+              <ArrowRightIcon fontSize='small' />
+            </ListItemIcon>
+            <ListItemText primary={t('Others')} />
+          </MenuItem>
         </Menu>
       </div>
     );
