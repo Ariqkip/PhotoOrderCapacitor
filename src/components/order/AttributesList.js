@@ -42,7 +42,6 @@ const AttributesList = ({ product, pack }) => {
 
   const [order, orderDispatch] = useOrder();
   const [photographer] = usePhotographer();
-console.log('%cLQS logger: ', 'color: #c931eb', { order, photographer });
 
 const calculateAttributeGroups = () => {
   const groupIds = [

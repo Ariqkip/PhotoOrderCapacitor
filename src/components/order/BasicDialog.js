@@ -11,9 +11,11 @@ import AttributesList from './AttributesList';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { useOrder } from '../../contexts/OrderContext';
+import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Utils
 import { createGuid } from '../../core/helpers/guidHelper';
+import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -123,6 +125,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
 
   const [pack, setPack] = useState(1);
   const [order, orderDispatch] = useOrder();
+  const [photographer] = usePhotographer();
 
   const fileInputHandler = (event) => {
     const { files } = event.target;
@@ -172,81 +175,88 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     history.push(`/photographer/${product.photographerId}/checkout`);
   };
 
-return (
-  <Dialog
-    key={product.id}
-    fullWidth={true}
-    maxWidth={'md'}
-    open={isOpen ?? false}
-    onClose={closeFn}
-  >
-    <DialogContent>
-      <DialogContentText id='alert-dialog-description'>
-        <Grid container spacing={3} className={classes.mb24}>
-          <Grid item xs={12} md={6}>
-            <Container>
-              <img
-                src={product.imageUrl ?? placeholderImg}
-                alt=''
-                style={{ width: '100%', maxHeight: '800px' }}
-              />
-            </Container>
-            <Box className={classes.centerContent}>
-              <input
-                type='file'
-                style={{ display: 'none' }}
-                inputprops={{ accept: 'image/*' }}
-                multiple
-                onChange={fileInputHandler}
-                ref={(input) => {
-                  fileInput = input;
-                }}
-              />
-              <RoundButton onClick={() => handleUploadClick()}>
-                <Box className={classes.centerContent}>
-                  <AddPhotoAlternateIcon />
-                  <span>{t('Pick files')}</span>
+  const calculatePrice = () => {
+    const quantity = order.orderItems
+      .filter((item) => item.productId === product.id)
+      .reduce((sum, item) => sum + item.qty, 0);
+    return getLabelPrice(product.id, quantity, photographer, order);
+  };
+
+  return (
+    <Dialog
+      key={product.id}
+      fullWidth={true}
+      maxWidth={'md'}
+      open={isOpen ?? false}
+      onClose={closeFn}
+    >
+      <DialogContent>
+        <DialogContentText id='alert-dialog-description'>
+          <Grid container spacing={3} className={classes.mb24}>
+            <Grid item xs={12} md={6}>
+              <Container>
+                <img
+                  src={product.imageUrl ?? placeholderImg}
+                  alt=''
+                  style={{ width: '100%', maxHeight: '800px' }}
+                />
+              </Container>
+              <Box className={classes.centerContent}>
+                <input
+                  type='file'
+                  style={{ display: 'none' }}
+                  inputprops={{ accept: 'image/*' }}
+                  multiple
+                  onChange={fileInputHandler}
+                  ref={(input) => {
+                    fileInput = input;
+                  }}
+                />
+                <RoundButton onClick={() => handleUploadClick()}>
+                  <Box className={classes.centerContent}>
+                    <AddPhotoAlternateIcon />
+                    <span>{t('Pick files')}</span>
+                  </Box>
+                </RoundButton>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box className={classes.spaceBetweenContent}>
+                <Box>
+                  <Typography variant='h6' className={classes.title}>
+                    {product.name}
+                  </Typography>
                 </Box>
-              </RoundButton>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Box className={classes.spaceBetweenContent}>
-              <Box>
-                <Typography variant='h6' className={classes.title}>
-                  {product.name}
-                </Typography>
+                <Box>
+                  <Typography variant='h6' className={classes.title}>
+                    {formatPrice(calculatePrice())} €
+                  </Typography>
+                </Box>
               </Box>
-              <Box>
-                <Typography variant='h6' className={classes.title}>
-                  {product.price} €
-                </Typography>
-              </Box>
-            </Box>
-            <Typography variant='body2' className={classes.description}>
-              {product.description}
-            </Typography>
-            <PriceRangeList product={product} />
-            <AttributesList product={product} pack={pack} />
+              <Typography variant='body2' className={classes.description}>
+                {product.description}
+              </Typography>
+              <PriceRangeList product={product} />
+              <AttributesList product={product} pack={pack} />
+            </Grid>
           </Grid>
-        </Grid>
-        {renderFiles()}
-      </DialogContentText>
-      <Divider />
-    </DialogContent>
-    <DialogActions>
-      <RemoveButton onClick={handleRemoveAll} color='primary'>
-        {t('REMOVE ALL FILES')}
-      </RemoveButton>
-      <OtherButton onClick={closeFn} color='primary'>
-        {t('Choose other products')}
-      </OtherButton>
-      <NextButton onClick={handleNext} color='primary'>
-        {t('Next step')} <ShoppingCartIcon fontSize='small' />
-      </NextButton>
-    </DialogActions>
-  </Dialog>
-);
+          {renderFiles()}
+        </DialogContentText>
+        <Divider />
+      </DialogContent>
+      <DialogActions>
+        <RemoveButton onClick={handleRemoveAll} color='primary'>
+          {t('REMOVE ALL FILES')}
+        </RemoveButton>
+        <OtherButton onClick={closeFn} color='primary'>
+          {t('Choose other products')}
+        </OtherButton>
+        <NextButton onClick={handleNext} color='primary'>
+          {t('Next step')} <ShoppingCartIcon fontSize='small' />
+        </NextButton>
+      </DialogActions>
+    </Dialog>
+  );
 };
 
 export default BasicDialog;

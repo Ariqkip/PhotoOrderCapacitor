@@ -57,45 +57,45 @@ const SummaryTab = (props) => {
   const [photographer] = usePhotographer();
   const [order, orderDispatch] = useOrder();
 
-  const renderUploadedFilesinfo = () => {
-    const uploadedFiles = order.orderItems.length;
-    return (
-      <Typography className={classes.typoLeft}>
-        Uploaded {uploadedFiles} photos
-      </Typography>
-    );
-  };
+const renderUploadedFilesinfo = () => {
+  const uploadedFiles = order.orderItems.length;
+  return (
+    <Typography className={classes.typoLeft}>
+      Uploaded {uploadedFiles} photos
+    </Typography>
+  );
+};
 
-  const renderPrintsInfo = () => {
-    const printsOrdered = order.orderItems.reduce(
-      (sum, item) => sum + item.qty,
-      0
-    );
-    return (
-      <Typography className={classes.typoCenter}>
-        Ordered {printsOrdered} prints
-      </Typography>
-    );
-  };
+const renderPrintsInfo = () => {
+  const printsOrdered = order.orderItems.reduce(
+    (sum, item) => sum + item.qty,
+    0
+  );
+  return (
+    <Typography className={classes.typoCenter}>
+      Ordered {printsOrdered} prints
+    </Typography>
+  );
+};
 
-  const renderTotalCost = () => {
-    return (
-      <Typography className={classes.typoRight}>
-        Total cost {formatPrice(total)} €
-      </Typography>
-    );
-  };
+const renderTotalCost = () => {
+  return (
+    <Typography className={classes.typoRight}>
+      Total cost {formatPrice(total)} €
+    </Typography>
+  );
+};
 
-  useEffect(() => {
-    const bill = order.orderItems.map((item) => {
-      return getPrice(item, photographer);
-    });
-    let newTotal = bill.reduce((sum, item) => sum + item, 0);
-    if (order.shippingSelected) {
-      newTotal += photographer.shippingPrice;
-    }
-    setTotal(newTotal);
-  }, [order.orderItems, order.shippingSelected, photographer]);
+useEffect(() => {
+  const bill = order.orderItems.map((item) => {
+    return getPrice(item.productId, item.qty, photographer);
+  });
+  let newTotal = bill.reduce((sum, item) => sum + item, 0);
+  if (order.shippingSelected) {
+    newTotal += photographer.shippingPrice;
+  }
+  setTotal(newTotal);
+}, [order.orderItems, order.shippingSelected, photographer]);
 
   return (
     <Container maxWidth='md'>

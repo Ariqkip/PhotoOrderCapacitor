@@ -7,9 +7,10 @@ import BasicDialog from './BasicDialog';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
+import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Utils
-import { formatPrice } from '../../core/helpers/priceHelper';
+import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -66,6 +67,7 @@ const ProductBasicCard = ({ product }) => {
   const { itemId } = useParams();
 
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const [photographer] = usePhotographer();
 
   const handleOpen = (itemId) => {
     const url = history.location.pathname;
@@ -118,7 +120,7 @@ const ProductBasicCard = ({ product }) => {
                 component='p'
                 className={classes.cardTitle}
               >
-                € {formatPrice(product.price)}
+                € {formatPrice(getLabelPrice(product.id, 1, photographer))}
               </Typography>
             </Box>
             <Typography

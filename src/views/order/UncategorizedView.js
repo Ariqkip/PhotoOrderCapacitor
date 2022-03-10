@@ -95,7 +95,6 @@ const UncategorizedView = (props) => {
   };
 
   const { data } = productsQuery;
-  console.log('%cLQS logger: ', 'color: #c931eb', { data });
   useEffect(() => {
     if (data) {
       dispatch({ type: 'ADD_PRODUCTS', data: data });
