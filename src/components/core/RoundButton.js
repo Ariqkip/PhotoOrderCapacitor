@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const RoundButton = ({ children, onClick }) => {
+const RoundButton = ({ children, onClick, ...props }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
@@ -48,6 +48,7 @@ const RoundButton = ({ children, onClick }) => {
     <Button
       className={[classes.rootBtn, classes.borderBtn, classes.paddingsBtn]}
       onClick={onClick}
+      {...props}
     >
       {children}
     </Button>

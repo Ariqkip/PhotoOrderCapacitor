@@ -85,8 +85,7 @@ i18n.init({
           'min. order {{minAmount}}-{{maxAmount}} or multiple',
         Prices: 'Prices',
         Options: 'Options',
-        filesLimit: 'Maximum one file',
-        filesLimit_plural: 'Maximum {{limit}} files',
+        filesLimit: 'Maximum files: {{limit}}',
 
         // Thankyou page
         'Your order no: {{number}} has been accepted':
@@ -181,8 +180,7 @@ i18n.init({
           'ελάχ. παραγγελία {{minAmount}}-{{maxAmount}} η πολλαπλάσια',
         Prices: 'Prices',
         Options: 'Options',
-        filesLimit: 'Maximum one file',
-        filesLimit_plural: 'Maximum {{limit}} files',
+        filesLimit: 'Maximum files: {{limit}}',
 
         // Thankyou page
         'Your order no: {{number}} has been accepted':

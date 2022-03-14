@@ -31,6 +31,7 @@ const UploadManager = (props) => {
   const uploadFiles = async () => {
     if (!order.status) return;
     if (order.status === '') return;
+    if (order.status === 'SKIP') return;
     if (order.status === 'SUCCESS') return;
     if (order.status === 'FAILED') return;
 
@@ -84,8 +85,10 @@ const UploadManager = (props) => {
 
   const tryFinalizeOrder = async () => {
     if (order.status !== 'FINALIZING') return;
-
-    const notDeliveredFiles = order.orderItems.filter(
+    const filesWithousSkipped = order.orderItems.filter(
+      (i) => i.status !== 'SKIP'
+    );
+    const notDeliveredFiles = filesWithousSkipped.filter(
       (item) => item.status !== 'success'
     );
     if (!notDeliveredFiles) return;

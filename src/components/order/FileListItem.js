@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const FileListItem = ({ file, key }) => {
+const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
@@ -91,10 +91,12 @@ const FileListItem = ({ file, key }) => {
           <IconButton aria-label='delete' onClick={handleRemoveQuantity}>
             <RemoveCircleOutlineIcon />
           </IconButton>
-          <span>{file.qty}</span>
-          <IconButton aria-label='delete' onClick={handleAddQuantity}>
-            <AddCircleOutlineIcon />
-          </IconButton>
+          {!hideQuantity && <span>{file.qty}</span>}
+          {!hideIncrease && (
+            <IconButton aria-label='delete' onClick={handleAddQuantity}>
+              <AddCircleOutlineIcon />
+            </IconButton>
+          )}
         </div>
       </div>
     </Paper>

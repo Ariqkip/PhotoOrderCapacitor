@@ -3,6 +3,7 @@ import React, { useState, useLayoutEffect } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 
 //Components
+import Basic3dDialog from './Basic3dDialog';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -132,6 +133,12 @@ const ProductRenderCard = ({ product }) => {
           </CardContent>
         </CardActionArea>
       </Card>
+      <Basic3dDialog
+        product={product}
+        key={`3d_dialog_${product.id}`}
+        isOpen={isDialogOpen}
+        closeFn={() => handleClose(product.id)}
+      />
     </>
   );
 };
