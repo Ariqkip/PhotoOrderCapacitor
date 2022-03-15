@@ -6,6 +6,7 @@ import RoundButton from '../core/RoundButton';
 import FileListItem from './FileListItem';
 import PriceRangeList from './PriceRangeList';
 import AttributesList from './AttributesList';
+import Presenter3d from './Presenter3d';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -68,6 +69,11 @@ const useStyles = makeStyles((theme) => ({
   mb24: {
     marginBottom: '24px',
   },
+  btnContainer: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
 }));
 
 const NextButton = withStyles((theme) => ({
@@ -99,22 +105,7 @@ const OtherButton = withStyles((theme) => ({
   },
 }))(Button);
 
-const RemoveButton = withStyles((theme) => ({
-  root: {
-    width: '100%',
-    maxWidth: '400px',
-    color: '#dc3545',
-    borderRadius: '50px',
-    padding: '12px 28px',
-    border: '1px solid #dc3545',
-    '&:hover': {
-      color: 'white',
-      backgroundColor: '#dc3545',
-    },
-  },
-}))(Button);
-
-const Render3dDialog = ({ model, isOpen, closeFn }) => {
+const Render3dDialog = ({ product, isOpen, closeFn }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
@@ -126,19 +117,20 @@ const Render3dDialog = ({ model, isOpen, closeFn }) => {
       onClose={closeFn}
     >
       <DialogContent>
-        <DialogContentText id='alert-dialog-description'></DialogContentText>
+        <div className={classes.centerContent}>
+          <Presenter3d product={product} />
+        </div>
         <Divider />
       </DialogContent>
       <DialogActions>
-        <RemoveButton onClick={() => {}} color='primary'>
-          {t('REMOVE ALL FILES')}
-        </RemoveButton>
-        <OtherButton onClick={() => {}} color='primary'>
-          {t('Choose other products')}
-        </OtherButton>
-        <NextButton onClick={() => {}} color='primary'>
-          {t('Next step')}
-        </NextButton>
+        <div className={classes.btnContainer}>
+          <OtherButton onClick={() => {}} color='primary'>
+            {t('Back')}
+          </OtherButton>
+          <NextButton onClick={() => {}} color='primary'>
+            {t('Next step')}
+          </NextButton>
+        </div>
       </DialogActions>
     </Dialog>
   );

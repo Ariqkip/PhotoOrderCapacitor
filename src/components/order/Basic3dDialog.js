@@ -301,6 +301,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
         key={`3d_pr_dialog_${product.id}`}
         isOpen={open3d}
         closeFn={() => setOpen3d(false)}
+        product={product}
       />
     </>
   );
