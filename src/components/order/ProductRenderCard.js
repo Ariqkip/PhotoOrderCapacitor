@@ -4,9 +4,11 @@ import { useParams, useHistory, useLocation } from 'react-router-dom';
 
 //Components
 import Basic3dDialog from './Basic3dDialog';
+import CardBadge from './CardBadge';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
+import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
 import { formatPrice } from '../../core/helpers/priceHelper';
@@ -66,6 +68,7 @@ const ProductRenderCard = ({ product }) => {
   const { itemId } = useParams();
 
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const [order] = useOrder();
 
   const handleOpen = (itemId) => {
     const url = history.location.pathname;
@@ -83,15 +86,35 @@ const ProductRenderCard = ({ product }) => {
     history.push(newUrl);
   };
 
+  const getFilesCount = () => {
+    const orderedItems = order.orderItems.filter(
+      (i) => i.productId === product.id && i.status !== 'SKIP'
+    );
+
+    return orderedItems.length;
+  };
+
+  const getPrintsCount = () => {
+    const orderedItems = order.orderItems.filter(
+      (i) => i.productId === product.id && i.status !== 'SKIP'
+    );
+    const orderedPrints = orderedItems.reduce((sum, item) => sum + item.qty, 0);
+    return orderedPrints;
+  };
+
   useLayoutEffect(() => {
     if (product.id == itemId) {
       setDialogOpen(true);
     }
   }, [itemId, product]);
-  console.log('%cLQS logger: RENDER_CUP', 'color: #c931eb', { product });
 
   return (
     <>
+      <CardBadge
+        key={`badge_${product.id}`}
+        files={getFilesCount()}
+        prints={getPrintsCount()}
+      />
       <Card className={classes.root} key={`render_card_${product.id}`}>
         <CardActionArea
           className={classes.cardArea}

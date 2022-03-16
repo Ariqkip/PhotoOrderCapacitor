@@ -4,10 +4,12 @@ import { useParams, useHistory, useLocation } from 'react-router-dom';
 
 //Components
 import BasicDialog from './BasicDialog';
+import CardBadge from './CardBadge';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { usePhotographer } from '../../contexts/PhotographerContext';
+import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
 import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
@@ -68,6 +70,7 @@ const ProductBasicCard = ({ product }) => {
 
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [photographer] = usePhotographer();
+  const [order] = useOrder();
 
   const handleOpen = (itemId) => {
     const url = history.location.pathname;
@@ -85,6 +88,22 @@ const ProductBasicCard = ({ product }) => {
     history.push(newUrl);
   };
 
+  const getFilesCount = () => {
+    const orderedItems = order.orderItems.filter(
+      (i) => i.productId === product.id && i.status !== 'SKIP'
+    );
+
+    return orderedItems.length;
+  };
+
+  const getPrintsCount = () => {
+    const orderedItems = order.orderItems.filter(
+      (i) => i.productId === product.id && i.status !== 'SKIP'
+    );
+    const orderedPrints = orderedItems.reduce((sum, item) => sum + item.qty, 0);
+    return orderedPrints;
+  };
+
   useLayoutEffect(() => {
     if (product.id == itemId) {
       setDialogOpen(true);
@@ -93,6 +112,11 @@ const ProductBasicCard = ({ product }) => {
 
   return (
     <>
+      <CardBadge
+        key={`badge_${product.id}`}
+        files={getFilesCount()}
+        prints={getPrintsCount()}
+      />
       <Card className={classes.root} key={`basic_card_${product.id}`}>
         <CardActionArea
           className={classes.cardArea}
