@@ -31,7 +31,6 @@ const UploadManager = (props) => {
   const uploadFiles = async () => {
     if (!order.status) return;
     if (order.status === '') return;
-    if (order.status === 'SKIP') return;
     if (order.status === 'SUCCESS') return;
     if (order.status === 'FAILED') return;
 
@@ -117,7 +116,7 @@ const UploadManager = (props) => {
     const interval = setInterval(() => {
       uploadFiles();
       tryFinalizeOrder();
-    }, 200);
+    }, 500);
     return () => clearInterval(interval);
   });
 

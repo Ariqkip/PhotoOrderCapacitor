@@ -32,7 +32,6 @@ const View3d = ({ textureUrl, modelUrl, initialTemplate }) => {
   const [curentModel, setCurentModel] = useState(null);
 
   useLayoutEffect(() => {
-    console.log('THREE', THREE);
     const materials = {
       shadow: new THREE.MeshBasicMaterial({
         color: '0x000000',

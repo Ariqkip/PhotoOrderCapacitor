@@ -115,6 +115,7 @@ const Render3dDialog = ({ product, isOpen, closeFn }) => {
       maxWidth={'lg'}
       open={isOpen ?? false}
       onClose={closeFn}
+      scroll='body'
     >
       <DialogContent>
         <div className={classes.centerContent}>

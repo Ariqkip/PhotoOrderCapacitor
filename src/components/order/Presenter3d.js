@@ -15,6 +15,7 @@ import useImage from 'use-image';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
+import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 
 //Assets
@@ -24,6 +25,7 @@ import sampleImg from '../../assets/sample01.jpg';
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
+    minHeight: '80px',
   },
 }));
 
@@ -40,6 +42,14 @@ const OtherButton = withStyles((theme) => ({
       color: 'white',
       backgroundColor: '#28a745',
     },
+    w100: {
+      width: '100%',
+    },
+    canvasWrapper: {
+      width: '100% !important',
+      height: '200px !important',
+      minHeight: '160px',
+    },
   },
 }))(Button);
 
@@ -55,7 +65,7 @@ const Presenter3d = ({ product }) => {
   const [selectedMode, setSelectedMode] = useState(true);
   const [rectangles, setRectangles] = useState([]);
 
-  const [image] = useImage(product.imageUrl, 'anonymous');
+  const [image] = useImage(product.layerImageUrl, 'anonymous');
   console.log('%cLQS logger: ', 'color: #c931eb', { product, order });
 
   const scale = 0.4215686275;
@@ -63,6 +73,10 @@ const Presenter3d = ({ product }) => {
   let widthValue = container?.offsetWidth ?? 1122;
   if (widthValue > 561) widthValue = 561;
   const heightValue = widthValue * scale;
+  console.log('%cLQS logger: ', 'color: #c931eb', {
+    heightValue,
+    widthValue,
+  });
 
   const getModelUrl = () => {
     if (!product.objUrl) return defaultObj;
@@ -76,8 +90,8 @@ const Presenter3d = ({ product }) => {
   useLayoutEffect(() => {
     const testLayer = [
       {
-        x: 16,
-        y: 20,
+        x: 0,
+        y: 0,
         width: 390,
         height: 260,
         url: sampleImg,
@@ -110,42 +124,46 @@ const Presenter3d = ({ product }) => {
           {t('Hide editor')}
         </OtherButton>
       )}
-
-      <div id='js-stage-root'>
-        <Stage
-          width={widthValue}
-          height={heightValue}
-          onMouseDown={() => setSelectedMode(true)}
-          onTouchStart={() => setSelectedMode(true)}
-          style={{
-            border: '5px solid #ccc',
-            margin: '10px auto',
-            width: '100%',
-            maxWidth: widthValue,
-            display: showEditor ? 'block' : 'none',
-          }}
-        >
-          <Layer ref={stageLayerRef}>
-            {rectangles.map((rect, i) => {
-              return (
-                <Rectangle
-                  key={i}
-                  layer={rect}
-                  isSelected={selectedMode}
-                  onChange={(newAttrs) => {
-                    const rects = rectangles.slice();
-                    rects[i] = newAttrs;
-                    setRectangles(rects);
-                    const uri = stageLayerRef.current.toDataURL();
-                    setTextureUrl(uri);
-                  }}
-                />
-              );
-            })}
-            <Image image={image} width={widthValue} height={heightValue} />
-          </Layer>
-        </Stage>
-      </div>
+      <Box className={classes.canvasWrapper}>
+        <div id='js-stage-root' className={classes.w100}>
+          <Stage
+            width={widthValue}
+            height={heightValue}
+            onMouseDown={() => setSelectedMode(true)}
+            onTouchStart={() => setSelectedMode(true)}
+            style={{
+              border: '5px solid #ccc',
+              margin: '10px auto',
+              width: '100%',
+              maxWidth: widthValue,
+              height: '100%',
+              maxHeight: heightValue,
+              display: showEditor ? 'block' : 'none',
+            }}
+          >
+            <Layer ref={stageLayerRef}>
+              {rectangles.map((rect, i) => {
+                return (
+                  <Rectangle
+                    key={i}
+                    layer={rect}
+                    isSelected={selectedMode}
+                    onChange={(newAttrs) => {
+                      const rects = rectangles.slice();
+                      rects[i] = newAttrs;
+                      setRectangles(rects);
+                      const uri = stageLayerRef.current.toDataURL();
+                      setTextureUrl(uri);
+                    }}
+                  />
+                );
+              })}
+              <Image image={image} width={widthValue} height={heightValue} />
+            </Layer>
+            <Layer name='top-layer' />
+          </Stage>
+        </div>
+      </Box>
     </>
   );
 };
