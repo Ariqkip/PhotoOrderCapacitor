@@ -73,10 +73,6 @@ const Presenter3d = ({ product }) => {
   let widthValue = container?.offsetWidth ?? 1122;
   if (widthValue > 561) widthValue = 561;
   const heightValue = widthValue * scale;
-  console.log('%cLQS logger: ', 'color: #c931eb', {
-    heightValue,
-    widthValue,
-  });
 
   const getModelUrl = () => {
     if (!product.objUrl) return defaultObj;
@@ -88,19 +84,21 @@ const Presenter3d = ({ product }) => {
   };
 
   useLayoutEffect(() => {
-    const testLayer = [
-      {
-        x: 0,
-        y: 0,
-        width: 390,
-        height: 260,
-        url: sampleImg,
-      },
-    ];
-    setRectangles(testLayer);
+    const { sizes } = product;
+    const images = order.orderItems.filter((i) => i.productId === product.id);
+    const layers = images.map((img, index) => {
+      return {
+        x: sizes[index].positionX,
+        y: sizes[index].positionY,
+        width: sizes[index].width,
+        height: sizes[index].height,
+        url: img.fileUrl,
+      };
+    });
+    setRectangles([...layers]);
     const uri = stageLayerRef.current.toDataURL();
     setTextureUrl(uri);
-  }, []);
+  }, [order.orderItems, product]);
 
   useEffect(() => {
     const uri = stageLayerRef.current.toDataURL();

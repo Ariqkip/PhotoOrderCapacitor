@@ -2,36 +2,20 @@
 import React, { useState, useEffect } from 'react';
 
 //Components
-import RoundButton from '../core/RoundButton';
-import FileListItem from './FileListItem';
-import PriceRangeList from './PriceRangeList';
-import AttributesList from './AttributesList';
 import Presenter3d from './Presenter3d';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { useOrder } from '../../contexts/OrderContext';
-import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Utils
-import { createGuid } from '../../core/helpers/guidHelper';
-import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import Box from '@material-ui/core/Box';
-import Container from '@material-ui/core/Container';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Grid from '@material-ui/core/Grid';
-import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
-import Typography from '@material-ui/core/Typography';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Divider from '@material-ui/core/Divider';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
@@ -109,8 +93,14 @@ const OtherButton = withStyles((theme) => ({
 const Render3dDialog = ({ product, isOpen, closeFn }) => {
   const classes = useStyles();
   const { t } = useTranslation();
+  const history = useHistory();
 
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleNext = () => {
+    closeFn();
+    history.push(`/photographer/${product.photographerId}/checkout`);
+  };
 
   const cacheImages = async (srcArray) => {
     const promises = await srcArray.map((src) => {
@@ -131,7 +121,6 @@ const Render3dDialog = ({ product, isOpen, closeFn }) => {
     const layerImg = product.layerImageUrl;
     const objUrl = product.objUrl;
     const imgs = [layerImg, objUrl];
-    console.log('%cLQS logger: ', 'color: #c931eb', { imgs });
 
     cacheImages(imgs);
   }, [product.layerImageUrl, product.objUrl]);
@@ -158,10 +147,10 @@ const Render3dDialog = ({ product, isOpen, closeFn }) => {
       </DialogContent>
       <DialogActions>
         <div className={classes.btnContainer}>
-          <OtherButton onClick={() => {}} color='primary'>
+          <OtherButton onClick={closeFn} color='primary'>
             {t('Back')}
           </OtherButton>
-          <NextButton onClick={() => {}} color='primary'>
+          <NextButton onClick={handleNext} color='primary'>
             {t('Next step')}
           </NextButton>
         </div>
