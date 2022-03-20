@@ -61,7 +61,7 @@ const Presenter3d = ({ product }) => {
 
   const [order, orderDispatch] = useOrder();
   const [textureUrl, setTextureUrl] = useState(null);
-  const [showEditor, setShowEditr] = useState(false);
+  const [showEditor, setShowEditr] = useState(true);
   const [selectedMode, setSelectedMode] = useState(true);
   const [rectangles, setRectangles] = useState([]);
 
@@ -124,7 +124,11 @@ const Presenter3d = ({ product }) => {
           {t('Hide editor')}
         </OtherButton>
       )}
-      <Box className={classes.canvasWrapper}>
+      <Box
+        style={{
+          width: '100%',
+        }}
+      >
         <div id='js-stage-root' className={classes.w100}>
           <Stage
             width={widthValue}

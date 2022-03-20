@@ -1,5 +1,5 @@
 //Core
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 //Components
 import RoundButton from '../core/RoundButton';
@@ -33,6 +33,7 @@ import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
 import Typography from '@material-ui/core/Typography';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Divider from '@material-ui/core/Divider';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -109,6 +110,32 @@ const Render3dDialog = ({ product, isOpen, closeFn }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
+  const [isLoading, setIsLoading] = useState(true);
+
+  const cacheImages = async (srcArray) => {
+    const promises = await srcArray.map((src) => {
+      return new Promise(function (resolve, reject) {
+        const img = new Image();
+        img.src = src;
+        img.onload = resolve();
+        img.onerror = reject();
+      });
+    });
+
+    await Promise.all(promises);
+
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    const layerImg = product.layerImageUrl;
+    const objUrl = product.objUrl;
+    const imgs = [layerImg, objUrl];
+    console.log('%cLQS logger: ', 'color: #c931eb', { imgs });
+
+    cacheImages(imgs);
+  }, [product.layerImageUrl, product.objUrl]);
+
   return (
     <Dialog
       fullWidth={true}
@@ -118,9 +145,15 @@ const Render3dDialog = ({ product, isOpen, closeFn }) => {
       scroll='body'
     >
       <DialogContent>
-        <div className={classes.centerContent}>
-          <Presenter3d product={product} />
-        </div>
+        {isLoading ? (
+          <div className={classes.centerContent}>
+            <CircularProgress />
+          </div>
+        ) : (
+          <div className={classes.centerContent}>
+            <Presenter3d product={product} />
+          </div>
+        )}
         <Divider />
       </DialogContent>
       <DialogActions>
