@@ -29,7 +29,11 @@ const ProductTypeRenderer = ({ product }) => {
   const { t } = useTranslation();
 
   const calculateProductType = () => {
-    if (product.productType === 1) return TYPES.RENDER_CUP;
+    if (product.objUrl) {
+      console.log('%cLQS logger: RENDER_CUP > ', 'color: #c931eb', { product });
+
+      return TYPES.RENDER_CUP;
+    }
 
     return TYPES.BASIC;
   };

@@ -186,7 +186,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
 
   const renderFiles = () => {
     return order.orderItems
-      .filter((item) => item.productId === product.id)
+      .filter((item) => item.productId === product.id && item.status === 'SKIP')
       ?.map((item) => (
         <FileListItem
           key={item.guid}
@@ -204,9 +204,13 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
     });
   };
 
-  const handleNext = () => {
-    closeFn();
-    history.push(`/photographer/${product.photographerId}/checkout`);
+  const isNextDisabled = () => {
+    const files = order.orderItems.filter(
+      (item) => item.productId === product.id
+    );
+    const limit = getMaxFileLimit();
+
+    return files.length !== limit;
   };
 
   const calculatePrice = () => {
@@ -292,7 +296,11 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
           <OtherButton onClick={closeFn} color='primary'>
             {t('Choose other products')}
           </OtherButton>
-          <NextButton onClick={() => setOpen3d(true)} color='primary'>
+          <NextButton
+            onClick={() => setOpen3d(true)}
+            color='primary'
+            disabled={isNextDisabled()}
+          >
             {t('Next step')}
           </NextButton>
         </DialogActions>
@@ -302,6 +310,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
         isOpen={open3d}
         closeFn={() => setOpen3d(false)}
         product={product}
+        pack={pack}
       />
     </>
   );

@@ -12,6 +12,7 @@ import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
 import useImage from 'use-image';
+import { createGuid } from '../../core/helpers/guidHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -53,7 +54,7 @@ const OtherButton = withStyles((theme) => ({
   },
 }))(Button);
 
-const Presenter3d = ({ product }) => {
+const Presenter3d = ({ product, pack }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
@@ -67,6 +68,7 @@ const Presenter3d = ({ product }) => {
 
   const [image] = useImage(product.layerImageUrl, 'anonymous');
   console.log('%cLQS logger: ', 'color: #c931eb', { product, order });
+  console.log('%cLQS logger: ', 'color: blue', { rectangles });
 
   const scale = 0.4215686275;
   var container = document.querySelector('#js-stage-root');
@@ -83,22 +85,63 @@ const Presenter3d = ({ product }) => {
     return product.objUrl;
   };
 
+  const saveTexture = (model) => {
+    const trackingGuid = createGuid();
+    const orderItem = {
+      maxSize: product.size,
+      guid: trackingGuid,
+      fileAsBase64: model.fileAsBase64,
+      fileUrl: '',
+      fileName: trackingGuid,
+      productId: product.id,
+      set: pack,
+      qty: 1,
+      status: 'idle',
+    };
+    console.log('%cLQS logger: ', 'color: #c931eb', { orderItem });
+
+    orderDispatch({ type: 'ADD_ORDER_ITEM_TEXTURE_3D', payload: orderItem });
+  };
+
   useLayoutEffect(() => {
     const { sizes } = product;
-    const images = order.orderItems.filter((i) => i.productId === product.id);
+    const images = order.orderItems.filter(
+      (i) => i.productId === product.id && i.status === 'SKIP'
+    );
     const layers = images.map((img, index) => {
-      return {
-        x: sizes[index].positionX,
-        y: sizes[index].positionY,
-        width: sizes[index].width,
-        height: sizes[index].height,
-        url: img.fileUrl,
-      };
+      let tempLayer;
+      if (!img.renderConfig) {
+        const newConfig = {
+          x: sizes[index].positionX,
+          y: sizes[index].positionY,
+          width: sizes[index].width,
+          height: sizes[index].height,
+        };
+        tempLayer = { ...newConfig };
+        orderDispatch({
+          type: 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG',
+          payload: newConfig,
+        });
+      } else {
+        tempLayer = { ...img.renderConfig };
+      }
+      tempLayer.url = img.fileUrl;
+      return tempLayer;
     });
+
+    // const layers = images.map((img, index) => {
+    //   return {
+    //     x: sizes[index].positionX,
+    //     y: sizes[index].positionY,
+    //     width: sizes[index].width,
+    //     height: sizes[index].height,
+    //     url: img.fileUrl,
+    //   };
+    // });
     setRectangles([...layers]);
     const uri = stageLayerRef.current.toDataURL();
     setTextureUrl(uri);
-  }, [order.orderItems, product]);
+  }, [order.orderItems, orderDispatch, product]);
 
   useEffect(() => {
     const uri = stageLayerRef.current.toDataURL();
@@ -110,7 +153,7 @@ const Presenter3d = ({ product }) => {
       <View3d
         textureUrl={textureUrl}
         modelUrl={getModelUrl()}
-        initialTemplate={rectangles}
+        saveFn={saveTexture}
       />
       {!showEditor && (
         <OtherButton onClick={() => setShowEditr(true)} color='primary'>

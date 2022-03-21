@@ -86,6 +86,27 @@ export function OrderReducer(state = INIT_STATE, action) {
     case 'ADD_ORDER_ITEM':
       return { ...state, orderItems: [action.payload, ...state.orderItems] };
 
+    case 'ADD_ORDER_ITEM_TEXTURE_3D':
+      const newOrderItems = [
+        ...state.orderItems.map((item) => {
+          if (item.productId !== action.payload.productId) return item;
+          if (item.status === 'SKIP') return item;
+
+          return action.payload;
+        }),
+      ];
+      const textureAdded = newOrderItems.find(
+        (i) => i.productId === action.payload.productId && i.status !== 'SKIP'
+      );
+      if (!textureAdded) newOrderItems.push(action.payload);
+
+      return { ...state, orderItems: [...newOrderItems] };
+
+    case 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG':
+      console.log('%cLQS logger: STATE UPD ', 'color: #c931eb', { state });
+
+      return { ...state };
+
     case 'INCREASE_ORDER_ITEM_QTY':
       return {
         ...state,

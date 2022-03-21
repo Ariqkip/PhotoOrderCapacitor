@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const View3d = ({ textureUrl, modelUrl, initialTemplate }) => {
+const View3d = ({ textureUrl, modelUrl, saveFn }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
@@ -87,8 +87,15 @@ const View3d = ({ textureUrl, modelUrl, initialTemplate }) => {
 
   useEffect(() => {
     if (!textureUrl) return;
+    console.log('%cLQS logger: - texture changed', 'color: #c931eb', {
+      textureUrl,
+    });
 
     curentModel.setTexture(textureUrl);
+    const model = {
+      fileAsBase64: textureUrl,
+    };
+    saveFn(model);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [textureUrl]);
 

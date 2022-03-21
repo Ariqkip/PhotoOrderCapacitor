@@ -90,7 +90,7 @@ const OtherButton = withStyles((theme) => ({
   },
 }))(Button);
 
-const Render3dDialog = ({ product, isOpen, closeFn }) => {
+const Render3dDialog = ({ product, isOpen, closeFn, pack }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const history = useHistory();
@@ -140,7 +140,7 @@ const Render3dDialog = ({ product, isOpen, closeFn }) => {
           </div>
         ) : (
           <div className={classes.centerContent}>
-            <Presenter3d product={product} />
+            <Presenter3d product={product} pack={pack} />
           </div>
         )}
         <Divider />
