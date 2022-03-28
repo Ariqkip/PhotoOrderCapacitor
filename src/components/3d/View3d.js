@@ -87,9 +87,6 @@ const View3d = ({ textureUrl, modelUrl, saveFn }) => {
 
   useEffect(() => {
     if (!textureUrl) return;
-    console.log('%cLQS logger: - texture changed', 'color: #c931eb', {
-      textureUrl,
-    });
 
     curentModel.setTexture(textureUrl);
     const model = {

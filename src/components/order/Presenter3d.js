@@ -67,8 +67,6 @@ const Presenter3d = ({ product, pack }) => {
   const [rectangles, setRectangles] = useState([]);
 
   const [image] = useImage(product.layerImageUrl, 'anonymous');
-  console.log('%cLQS logger: ', 'color: #c931eb', { product, order });
-  console.log('%cLQS logger: ', 'color: blue', { rectangles });
 
   const scale = 0.4215686275;
   var container = document.querySelector('#js-stage-root');
@@ -98,7 +96,6 @@ const Presenter3d = ({ product, pack }) => {
       qty: 1,
       status: 'idle',
     };
-    console.log('%cLQS logger: ', 'color: #c931eb', { orderItem });
 
     orderDispatch({ type: 'ADD_ORDER_ITEM_TEXTURE_3D', payload: orderItem });
   };
@@ -110,8 +107,10 @@ const Presenter3d = ({ product, pack }) => {
     );
     const layers = images.map((img, index) => {
       let tempLayer;
-      if (!img.renderConfig) {
+      if (!img.layerConfig) {
         const newConfig = {
+          guid: img.guid,
+          index: index,
           x: sizes[index].positionX,
           y: sizes[index].positionY,
           width: sizes[index].width,
@@ -123,21 +122,14 @@ const Presenter3d = ({ product, pack }) => {
           payload: newConfig,
         });
       } else {
-        tempLayer = { ...img.renderConfig };
+        tempLayer = { ...img.layerConfig };
       }
       tempLayer.url = img.fileUrl;
+      console.log('%cLQS logger: ', 'color: #c931eb', { tempLayer });
+
       return tempLayer;
     });
 
-    // const layers = images.map((img, index) => {
-    //   return {
-    //     x: sizes[index].positionX,
-    //     y: sizes[index].positionY,
-    //     width: sizes[index].width,
-    //     height: sizes[index].height,
-    //     url: img.fileUrl,
-    //   };
-    // });
     setRectangles([...layers]);
     const uri = stageLayerRef.current.toDataURL();
     setTextureUrl(uri);
@@ -196,6 +188,15 @@ const Presenter3d = ({ product, pack }) => {
                     onChange={(newAttrs) => {
                       const rects = rectangles.slice();
                       rects[i] = newAttrs;
+                      console.log('%cLQS logger: ', 'color: #c931eb', {
+                        newAttrs,
+                      });
+
+                      orderDispatch({
+                        type: 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG_MULTI',
+                        payload: rects,
+                      });
+
                       setRectangles(rects);
                       const uri = stageLayerRef.current.toDataURL();
                       setTextureUrl(uri);

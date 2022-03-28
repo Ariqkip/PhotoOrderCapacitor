@@ -50,6 +50,8 @@ const Rectangle = ({ layer, isSelected, onSelect, onChange }) => {
         width={layer.width}
         height={layer.height}
         onDragEnd={(e) => {
+          
+          
           onChange({
             ...layer,
             x: e.target.x(),
@@ -57,10 +59,14 @@ const Rectangle = ({ layer, isSelected, onSelect, onChange }) => {
           });
         }}
         onTransformEnd={(e) => {
+          const scaleX = e.target.scaleX();
+          const scaleY = e.target.scaleY();
           onChange({
             ...layer,
             x: e.target.x(),
             y: e.target.y(),
+            width: Math.max(5, layer.width * scaleX),
+            height: Math.max(layer.height * scaleY),
           });
         }}
 

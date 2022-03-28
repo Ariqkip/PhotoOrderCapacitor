@@ -103,9 +103,27 @@ export function OrderReducer(state = INIT_STATE, action) {
       return { ...state, orderItems: [...newOrderItems] };
 
     case 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG':
-      console.log('%cLQS logger: STATE UPD ', 'color: #c931eb', { state });
+      const newOrderItemsWithConfig = [
+        ...state.orderItems.map((item) => {
+          if (item.guid !== action.payload.guid) return item;
 
-      return { ...state };
+          item.layerConfig = action.payload;
+          return item;
+        })
+      ] 
+      return { ...state, orderItems: [...newOrderItemsWithConfig] };
+
+      case 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG_MULTI':
+        const newOrderItemsWithConfigMulti = [
+          ...state.orderItems.map((item) => {
+            if (action.payload.filter(c => c.guid === item.guid).length === 0) return item;
+  
+            const newConfig = action.payload.find(i => i.guid === item.guid);
+            item.layerConfig = newConfig;
+            return item;
+          })
+        ] 
+        return { ...state, orderItems: [...newOrderItemsWithConfigMulti] };
 
     case 'INCREASE_ORDER_ITEM_QTY':
       return {

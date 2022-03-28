@@ -206,7 +206,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
 
   const isNextDisabled = () => {
     const files = order.orderItems.filter(
-      (item) => item.productId === product.id
+      (item) => item.productId === product.id && item.status === 'SKIP'
     );
     const limit = getMaxFileLimit();
 
