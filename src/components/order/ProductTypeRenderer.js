@@ -30,8 +30,6 @@ const ProductTypeRenderer = ({ product }) => {
 
   const calculateProductType = () => {
     if (product.objUrl) {
-      console.log('%cLQS logger: RENDER_CUP > ', 'color: #c931eb', { product });
-
       return TYPES.RENDER_CUP;
     }
 

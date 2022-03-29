@@ -70,13 +70,19 @@ const OrderService = () => {
         });
       }
 
-      return {
+      let result = {
         FileName: item.fileName,
         FileGuid: item.guid,
         ProductId: item.productId,
         Quantity: item.qty,
         Attributes: itemAttributes,
       };
+
+      if (item.isLayerItem === true) {
+        result.sizes = item.layerConfig;
+      }
+
+      return result;
     });
 
     const body = {

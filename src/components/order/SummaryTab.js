@@ -58,7 +58,7 @@ const SummaryTab = (props) => {
   const [order, orderDispatch] = useOrder();
 
 const renderUploadedFilesinfo = () => {
-  const uploadedFiles = order.orderItems.length;
+  const uploadedFiles = order.orderItems.filter((i) => !i.isLayerItem).length;
   return (
     <Typography className={classes.typoLeft}>
       Uploaded {uploadedFiles} photos
@@ -67,10 +67,8 @@ const renderUploadedFilesinfo = () => {
 };
 
 const renderPrintsInfo = () => {
-  const printsOrdered = order.orderItems.reduce(
-    (sum, item) => sum + item.qty,
-    0
-  );
+  const filesToCount = order.orderItems.filter((i) => !i.isLayerItem);
+  const printsOrdered = filesToCount.reduce((sum, item) => sum + item.qty, 0);
   return (
     <Typography className={classes.typoCenter}>
       Ordered {printsOrdered} prints
@@ -88,6 +86,7 @@ const renderTotalCost = () => {
 
 useEffect(() => {
   const bill = order.orderItems.map((item) => {
+    if (item.isLayerItem === true) return 0;
     return getPrice(item.productId, item.qty, photographer);
   });
   let newTotal = bill.reduce((sum, item) => sum + item, 0);

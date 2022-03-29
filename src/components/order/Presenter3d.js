@@ -103,7 +103,7 @@ const Presenter3d = ({ product, pack }) => {
   useLayoutEffect(() => {
     const { sizes } = product;
     const images = order.orderItems.filter(
-      (i) => i.productId === product.id && i.status === 'SKIP'
+      (i) => i.productId === product.id && i.isLayerItem === true
     );
     const layers = images.map((img, index) => {
       let tempLayer;
@@ -125,7 +125,6 @@ const Presenter3d = ({ product, pack }) => {
         tempLayer = { ...img.layerConfig };
       }
       tempLayer.url = img.fileUrl;
-      console.log('%cLQS logger: ', 'color: #c931eb', { tempLayer });
 
       return tempLayer;
     });
@@ -188,9 +187,6 @@ const Presenter3d = ({ product, pack }) => {
                     onChange={(newAttrs) => {
                       const rects = rectangles.slice();
                       rects[i] = newAttrs;
-                      console.log('%cLQS logger: ', 'color: #c931eb', {
-                        newAttrs,
-                      });
 
                       orderDispatch({
                         type: 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG_MULTI',

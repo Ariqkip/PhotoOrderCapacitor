@@ -173,7 +173,8 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
           productId: product.id,
           set: pack,
           qty: 1,
-          status: 'SKIP',
+          status: 'idle',
+          isLayerItem: true,
         };
         orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
       };
@@ -186,7 +187,9 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
 
   const renderFiles = () => {
     return order.orderItems
-      .filter((item) => item.productId === product.id && item.status === 'SKIP')
+      .filter(
+        (item) => item.productId === product.id && item.isLayerItem === true
+      )
       ?.map((item) => (
         <FileListItem
           key={item.guid}
@@ -206,7 +209,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
 
   const isNextDisabled = () => {
     const files = order.orderItems.filter(
-      (item) => item.productId === product.id && item.status === 'SKIP'
+      (item) => item.productId === product.id && item.isLayerItem === true
     );
     const limit = getMaxFileLimit();
 

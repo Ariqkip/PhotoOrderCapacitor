@@ -90,13 +90,14 @@ export function OrderReducer(state = INIT_STATE, action) {
       const newOrderItems = [
         ...state.orderItems.map((item) => {
           if (item.productId !== action.payload.productId) return item;
-          if (item.status === 'SKIP') return item;
+          if (item.isLayerItem === true) return item;
 
           return action.payload;
         }),
       ];
       const textureAdded = newOrderItems.find(
-        (i) => i.productId === action.payload.productId && i.status !== 'SKIP'
+        (i) =>
+          i.productId === action.payload.productId && i.isLayerItem !== true
       );
       if (!textureAdded) newOrderItems.push(action.payload);
 

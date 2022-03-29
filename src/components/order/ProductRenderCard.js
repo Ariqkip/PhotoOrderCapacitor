@@ -88,7 +88,7 @@ const ProductRenderCard = ({ product }) => {
 
   const getFilesCount = () => {
     const orderedItems = order.orderItems.filter(
-      (i) => i.productId === product.id && i.status !== 'SKIP'
+      (i) => i.productId === product.id && i.isLayerItem !== true
     );
 
     return orderedItems.length;
@@ -96,7 +96,7 @@ const ProductRenderCard = ({ product }) => {
 
   const getPrintsCount = () => {
     const orderedItems = order.orderItems.filter(
-      (i) => i.productId === product.id && i.status !== 'SKIP'
+      (i) => i.productId === product.id && i.isLayerItem !== true
     );
     const orderedPrints = orderedItems.reduce((sum, item) => sum + item.qty, 0);
     return orderedPrints;
