@@ -92,13 +92,21 @@ export function OrderReducer(state = INIT_STATE, action) {
           if (item.productId !== action.payload.productId) return item;
           if (item.isLayerItem === true) return item;
 
-          return action.payload;
+          if (
+            item.productId === action.payload.productId &&
+            !item.isLayerItem
+          ) {
+            item = { ...action.payload };
+          }
+
+          return item;
         }),
       ];
       const textureAdded = newOrderItems.find(
         (i) =>
           i.productId === action.payload.productId && i.isLayerItem !== true
       );
+
       if (!textureAdded) newOrderItems.push(action.payload);
 
       return { ...state, orderItems: [...newOrderItems] };
@@ -110,21 +118,22 @@ export function OrderReducer(state = INIT_STATE, action) {
 
           item.layerConfig = action.payload;
           return item;
-        })
-      ] 
+        }),
+      ];
       return { ...state, orderItems: [...newOrderItemsWithConfig] };
 
-      case 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG_MULTI':
-        const newOrderItemsWithConfigMulti = [
-          ...state.orderItems.map((item) => {
-            if (action.payload.filter(c => c.guid === item.guid).length === 0) return item;
-  
-            const newConfig = action.payload.find(i => i.guid === item.guid);
-            item.layerConfig = newConfig;
+    case 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG_MULTI':
+      const newOrderItemsWithConfigMulti = [
+        ...state.orderItems.map((item) => {
+          if (action.payload.filter((c) => c.guid === item.guid).length === 0)
             return item;
-          })
-        ] 
-        return { ...state, orderItems: [...newOrderItemsWithConfigMulti] };
+
+          const newConfig = action.payload.find((i) => i.guid === item.guid);
+          item.layerConfig = newConfig;
+          return item;
+        }),
+      ];
+      return { ...state, orderItems: [...newOrderItemsWithConfigMulti] };
 
     case 'INCREASE_ORDER_ITEM_QTY':
       return {

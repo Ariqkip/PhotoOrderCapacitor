@@ -16,7 +16,7 @@ i18n.init({
         // Navigation
         'nav-Products': 'Products',
         'nav-Finish order': 'Finish order',
-        'nav-Contact': 'Contact',
+        Contact: 'Contact',
         'nav-Exit': 'Exit',
 
         // Buttons
@@ -108,7 +108,7 @@ i18n.init({
         // Navigation
         'nav-Products': 'Προϊόντα',
         'nav-Finish order': 'Αποστολή Παραγγελίας',
-        'nav-Contact': 'Επιλογή αρχείων',
+        Contact: 'Επιλογή αρχείων',
         'nav-Exit': 'Έξοδος',
 
         // Buttons

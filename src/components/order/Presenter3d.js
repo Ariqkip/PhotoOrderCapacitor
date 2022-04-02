@@ -83,9 +83,9 @@ const Presenter3d = ({ product, pack }) => {
     return product.objUrl;
   };
 
-  const saveTexture = (model) => {
+  function saveTexture(model) {
     const trackingGuid = createGuid();
-    const orderItem = {
+    const newOrderItem = {
       maxSize: product.size,
       guid: trackingGuid,
       fileAsBase64: model.fileAsBase64,
@@ -97,7 +97,7 @@ const Presenter3d = ({ product, pack }) => {
       status: 'idle',
     };
 
-    orderDispatch({ type: 'ADD_ORDER_ITEM_TEXTURE_3D', payload: orderItem });
+    orderDispatch({ type: 'ADD_ORDER_ITEM_TEXTURE_3D', payload: newOrderItem });
   };
 
   useLayoutEffect(() => {
