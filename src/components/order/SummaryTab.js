@@ -30,21 +30,16 @@ const useStyles = makeStyles((theme) => ({
   gridContainer: {
     alignItems: 'space-between',
     justifyContent: 'center',
+    [theme.breakpoints.down('sm')]: {
+      alignItems: 'center',
+    },
   },
   mb28: {
     marginBottom: '28px',
   },
-  typoLeft: {
-    flexGrow: 1,
-    textAlign: 'start',
-  },
   typoCenter: {
     flexGrow: 1,
     textAlign: 'center',
-  },
-  typoRight: {
-    flexGrow: 1,
-    textAlign: 'end',
   },
 }));
 
@@ -57,44 +52,44 @@ const SummaryTab = (props) => {
   const [photographer] = usePhotographer();
   const [order, orderDispatch] = useOrder();
 
-const renderUploadedFilesinfo = () => {
-  const uploadedFiles = order.orderItems.filter((i) => !i.isLayerItem).length;
-  return (
-    <Typography className={classes.typoLeft}>
-      Uploaded {uploadedFiles} photos
-    </Typography>
-  );
-};
+  const renderUploadedFilesinfo = () => {
+    const uploadedFiles = order.orderItems.filter((i) => !i.isLayerItem).length;
+    return (
+      <Typography className={classes.typoCenter}>
+        Uploaded {uploadedFiles} photos
+      </Typography>
+    );
+  };
 
-const renderPrintsInfo = () => {
-  const filesToCount = order.orderItems.filter((i) => !i.isLayerItem);
-  const printsOrdered = filesToCount.reduce((sum, item) => sum + item.qty, 0);
-  return (
-    <Typography className={classes.typoCenter}>
-      Ordered {printsOrdered} prints
-    </Typography>
-  );
-};
+  const renderPrintsInfo = () => {
+    const filesToCount = order.orderItems.filter((i) => !i.isLayerItem);
+    const printsOrdered = filesToCount.reduce((sum, item) => sum + item.qty, 0);
+    return (
+      <Typography className={classes.typoCenter}>
+        Ordered {printsOrdered} prints
+      </Typography>
+    );
+  };
 
-const renderTotalCost = () => {
-  return (
-    <Typography className={classes.typoRight}>
-      Total cost {formatPrice(total)} €
-    </Typography>
-  );
-};
+  const renderTotalCost = () => {
+    return (
+      <Typography className={classes.typoCenter}>
+        Total cost {formatPrice(total)} €
+      </Typography>
+    );
+  };
 
-useEffect(() => {
-  const bill = order.orderItems.map((item) => {
-    if (item.isLayerItem === true) return 0;
-    return getPrice(item.productId, item.qty, photographer);
-  });
-  let newTotal = bill.reduce((sum, item) => sum + item, 0);
-  if (order.shippingSelected) {
-    newTotal += photographer.shippingPrice;
-  }
-  setTotal(newTotal);
-}, [order.orderItems, order.shippingSelected, photographer]);
+  useEffect(() => {
+    const bill = order.orderItems.map((item) => {
+      if (item.isLayerItem === true) return 0;
+      return getPrice(item.productId, item.qty, photographer);
+    });
+    let newTotal = bill.reduce((sum, item) => sum + item, 0);
+    if (order.shippingSelected) {
+      newTotal += photographer.shippingPrice;
+    }
+    setTotal(newTotal);
+  }, [order.orderItems, order.shippingSelected, photographer]);
 
   return (
     <Container maxWidth='md'>
