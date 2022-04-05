@@ -37,7 +37,15 @@ const useStyles = makeStyles((theme) => ({
     height: '65px',
   },
   fileName: {
+    width: '100%',
+    flexGrow: 1,
     marginLeft: '8px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    wordWrap: 'break-word',
+    [theme.breakpoints.down('sm')]: {
+      width: '1px',
+    },
   },
   centerVertical: {
     display: 'flex',
