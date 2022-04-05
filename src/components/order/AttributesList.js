@@ -9,6 +9,7 @@ import { usePhotographer } from '../../contexts/PhotographerContext';
 import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -40,56 +41,60 @@ const AttributesList = ({ product, pack }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
+  const matches = useMediaQuery('(min-width:600px)');
+
   const [order, orderDispatch] = useOrder();
   const [photographer] = usePhotographer();
 
-const calculateAttributeGroups = () => {
-  const groupIds = [
-    ...new Set(product.attributes.map((p) => p.attributesGroupId)),
-  ];
-  return photographer.productAttributes.filter((a) => groupIds.includes(a.Id));
-};
-
-const attributesGroups = calculateAttributeGroups();
-
-const calculateAttributes = (group) => {
-  return product.attributes
-    .filter((a) => a.attributesGroupId === group.Id)
-    .sort((a, b) => a.position < b.position);
-};
-
-const handleAttributeClick = (groupId, attributeId) => {
-  const newConfig = {
-    productId: product.id,
-    pack: pack,
-    groupId: groupId,
-    selected: attributeId,
+  const calculateAttributeGroups = () => {
+    const groupIds = [
+      ...new Set(product.attributes.map((p) => p.attributesGroupId)),
+    ];
+    return photographer.productAttributes.filter((a) =>
+      groupIds.includes(a.Id)
+    );
   };
-  orderDispatch({ type: 'ORDER_ITEM_SET_ATTRIBUTES', payload: newConfig });
-};
 
-const getButtonVariant = (groupId, attributeId) => {
-  const config = order?.orderItemsConfig.find(
-    (c) => c.productId === product.id && c.pack === pack
-  );
+  const attributesGroups = calculateAttributeGroups();
 
-  if (config) {
-    const group = config.configs.find((opt) => opt.groupId === groupId);
-    if (group) {
-      if (group.selected === attributeId) return 'contained';
-      else return 'outlined';
+  const calculateAttributes = (group) => {
+    return product.attributes
+      .filter((a) => a.attributesGroupId === group.Id)
+      .sort((a, b) => a.position < b.position);
+  };
+
+  const handleAttributeClick = (groupId, attributeId) => {
+    const newConfig = {
+      productId: product.id,
+      pack: pack,
+      groupId: groupId,
+      selected: attributeId,
+    };
+    orderDispatch({ type: 'ORDER_ITEM_SET_ATTRIBUTES', payload: newConfig });
+  };
+
+  const getButtonVariant = (groupId, attributeId) => {
+    const config = order?.orderItemsConfig.find(
+      (c) => c.productId === product.id && c.pack === pack
+    );
+
+    if (config) {
+      const group = config.configs.find((opt) => opt.groupId === groupId);
+      if (group) {
+        if (group.selected === attributeId) return 'contained';
+        else return 'outlined';
+      }
     }
-  }
 
-  const attributes = product.attributes.filter(
-    (a) => a.attributesGroupId === groupId
-  );
-  if (attributes) {
-    if (attributes[0].id === attributeId) return 'contained';
-  }
+    const attributes = product.attributes.filter(
+      (a) => a.attributesGroupId === groupId
+    );
+    if (attributes) {
+      if (attributes[0].id === attributeId) return 'contained';
+    }
 
-  return 'outlined';
-};
+    return 'outlined';
+  };
 
   const renderAttributes = (group) => {
     const att = calculateAttributes(group);
@@ -103,6 +108,7 @@ const getButtonVariant = (groupId, attributeId) => {
           color='primary'
           aria-label='outlined primary button group'
           className={classes.groupSelection}
+          orientation={`${matches ? `horizontal` : `vertical`}`}
         >
           {att.map((a) => (
             <Button
