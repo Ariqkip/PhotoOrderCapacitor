@@ -40,6 +40,10 @@ const useStyles = makeStyles((theme) => ({
     margin: 0,
     padding: theme.spacing(2),
   },
+  actionButtons: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   closeButton: {
     position: 'absolute',
     right: theme.spacing(1),
@@ -245,15 +249,23 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
         <Divider />
       </DialogContent>
       <DialogActions>
-        <RemoveButton onClick={handleRemoveAll} color='primary'>
-          {t('REMOVE ALL FILES')}
-        </RemoveButton>
-        <OtherButton onClick={closeFn} color='primary'>
-          {t('Choose other products')}
-        </OtherButton>
-        <NextButton onClick={handleNext} color='primary'>
-          {t('Next step')} <ShoppingCartIcon fontSize='small' />
-        </NextButton>
+        <Grid container spacing={3} direction='row'>
+          <Grid item xs={12} md={4} className={classes.centerContent}>
+            <RemoveButton onClick={handleRemoveAll} color='primary'>
+              {t('REMOVE ALL FILES')}
+            </RemoveButton>
+          </Grid>
+          <Grid item xs={12} md={4} className={classes.centerContent}>
+            <OtherButton onClick={closeFn} color='primary'>
+              {t('Choose other products')}
+            </OtherButton>
+          </Grid>
+          <Grid item xs={12} md={4} className={classes.centerContent}>
+            <NextButton onClick={handleNext} color='primary'>
+              {t('Next step')} <ShoppingCartIcon fontSize='small' />
+            </NextButton>
+          </Grid>
+        </Grid>
       </DialogActions>
     </Dialog>
   );

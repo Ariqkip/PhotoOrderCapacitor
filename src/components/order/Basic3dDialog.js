@@ -293,19 +293,27 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
           <Divider />
         </DialogContent>
         <DialogActions>
-          <RemoveButton onClick={handleRemoveAll} color='primary'>
-            {t('REMOVE ALL FILES')}
-          </RemoveButton>
-          <OtherButton onClick={closeFn} color='primary'>
-            {t('Choose other products')}
-          </OtherButton>
-          <NextButton
-            onClick={() => setOpen3d(true)}
-            color='primary'
-            disabled={isNextDisabled()}
-          >
-            {t('Next step')}
-          </NextButton>
+          <Grid container spacing={3} direction='row'>
+            <Grid item xs={12} md={4} className={classes.centerContent}>
+              <RemoveButton onClick={handleRemoveAll} color='primary'>
+                {t('REMOVE ALL FILES')}
+              </RemoveButton>
+            </Grid>
+            <Grid item xs={12} md={4} className={classes.centerContent}>
+              <OtherButton onClick={closeFn} color='primary'>
+                {t('Choose other products')}
+              </OtherButton>
+            </Grid>
+            <Grid item xs={12} md={4} className={classes.centerContent}>
+              <NextButton
+                onClick={() => setOpen3d(true)}
+                color='primary'
+                disabled={isNextDisabled()}
+              >
+                {t('Next step')}
+              </NextButton>
+            </Grid>
+          </Grid>
         </DialogActions>
       </Dialog>
       <Render3dDialog
