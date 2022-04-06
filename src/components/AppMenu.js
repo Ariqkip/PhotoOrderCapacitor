@@ -28,6 +28,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import Divider from '@material-ui/core/Divider';
+import ExpandMore from '@material-ui/icons/ExpandMore';
 
 const drawerWidth = 260;
 
@@ -138,6 +139,10 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '1rem',
     cursor: 'pointer',
   },
+  categoryDiv: {
+    display: 'flex',
+    alignItems: 'center',
+  },
   sectionDesktop: {
     display: 'none',
     alignItems: 'center',
@@ -194,14 +199,16 @@ const AppMenu = ({ photographerId }) => {
   const renderCategories = () => {
     return (
       <div>
-        <p
+        <Typography
           aria-controls='categories-menu'
           aria-haspopup='true'
           onClick={handleProductMenuClick}
           className={classes.navButton}
         >
-          {t('Categories')}
-        </p>
+          <div className={classes.categoryDiv}>
+            {t('Categories')} <ExpandMore />
+          </div>
+        </Typography>
         <Menu
           id='categories-menu'
           anchorEl={anchorEl}
