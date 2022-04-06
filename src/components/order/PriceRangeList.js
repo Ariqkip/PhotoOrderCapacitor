@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 //Utils
-import { formatPrice } from '../../core/helpers/priceHelper';
+import { formatPrice, getRangePrice } from '../../core/helpers/priceHelper';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -25,12 +25,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const PriceRangeList = ({ product }) => {
+const PriceRangeList = ({ product, photographer, order }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
   if (!product) return null;
   if (product.productPrices?.length < 1) return null;
+
+  function calculateRangePrice(priceId) {
+    const result = getRangePrice(product.id, priceId, photographer, order);
+
+    return formatPrice(result);
+  }
 
   const renderPriceRange = (priceRange) => {
     const prices = priceRange
@@ -40,7 +46,7 @@ const PriceRangeList = ({ product }) => {
           <span>
             From <b>{item.priceLevelFrom}</b> to{' '}
             <b>{item.priceLevelTo === 0 ? '∞' : item.priceLevelTo}</b> pcs:{' '}
-            <b>{formatPrice(item.price)} €</b>
+            <b>{calculateRangePrice(item.id)} €</b>
           </span>
         </Box>
       ));

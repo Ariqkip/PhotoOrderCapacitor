@@ -240,7 +240,11 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
               <Typography variant='body2' className={classes.description}>
                 {product.description}
               </Typography>
-              <PriceRangeList product={product} />
+              <PriceRangeList
+                product={product}
+                photographer={photographer}
+                order={order}
+              />
               <AttributesList product={product} pack={pack} />
             </Grid>
           </Grid>

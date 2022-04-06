@@ -17,6 +17,8 @@ function priceCalculator(productId, quantity, photographer, order) {
   let estimatedPrice = 0;
   let estimatedQuantity = quantity;
 
+  let productBasePrices = null;
+
   const { price, productPrices } = product;
   if (price) priceUnitBase = price;
 
@@ -70,12 +72,24 @@ function priceCalculator(productId, quantity, photographer, order) {
     });
   }
 
+  //prepare product base range prices
+  if (productPrices && productPrices.length > 0) {
+    productBasePrices = productPrices.map((p) => {
+      let result = { ...p };
+      result.price =
+        (p.price + priceUnitModificator) * (priceUnitPercentModificator / 100);
+
+      return result;
+    });
+  }
+
   estimatedPrice =
     (priceUnitBase + priceUnitModificator) *
     (priceUnitPercentModificator / 100);
 
   return {
     priceUnitBase,
+    productBasePrices,
     priceUnitModificator,
     priceUnitPercentModificator,
     estimatedPrice,
@@ -86,6 +100,7 @@ function priceCalculator(productId, quantity, photographer, order) {
 
 export function getLabelPrice(productId, quantity, photographer, order) {
   const calculation = priceCalculator(productId, quantity, photographer, order);
+
   if (calculation) return calculation.estimatedPrice;
 
   return 0;
@@ -94,6 +109,18 @@ export function getLabelPrice(productId, quantity, photographer, order) {
 export function getPrice(productId, quantity, photographer, order) {
   const calculation = priceCalculator(productId, quantity, photographer, order);
   if (calculation) return calculation.finalPrice;
+
+  return 0;
+}
+
+export function getRangePrice(productId, priceId, photographer, order) {
+  const calculation = priceCalculator(productId, 1, photographer, order);
+  if (calculation && calculation.productBasePrices) {
+    const priceRange = calculation.productBasePrices.find(
+      (p) => p.id === priceId
+    );
+    if (priceRange) return priceRange.price;
+  }
 
   return 0;
 }

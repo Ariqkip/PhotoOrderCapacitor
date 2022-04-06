@@ -12,6 +12,7 @@ const calculateAttributes = (group, product) => {
 };
 
 export function getSelectedAttributes(productId, order, photographer) {
+  if (!photographer.products) return [];
   const product = photographer.products.find((p) => p.id === productId);
   if (!product) return [];
   if (!order) return [];
