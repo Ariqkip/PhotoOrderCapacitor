@@ -81,20 +81,6 @@ const MenuList = (props) => {
           unmountOnExit
         >
           <List component='div' disablePadding>
-            <ListItem
-              key={`mobile_category_all`}
-              className={classes.gutters}
-              button
-              onClick={() => props.requestClose && props.requestClose()}
-              component={Link}
-              to={`/photographer/${photographer.photographId}/categories`}
-            >
-              <ListItemIcon>
-                <ArrowRightIcon />
-              </ListItemIcon>
-              <ListItemText>{t('All categoires')}</ListItemText>
-            </ListItem>
-            <Divider />
             {photographer.productCategories.map((category) => {
               return (
                 <ListItem

@@ -142,9 +142,6 @@ const OrderIndex = ({ match }) => {
           {redirectCategoriesFlag(photographerQuery) && (
             <Redirect exact from={`${url}/`} to={`${url}/categories`} />
           )}
-          {!redirectCategoriesFlag(photographerQuery) && (
-            <Redirect exact from={`${url}/`} to={`${url}/products`} />
-          )}
           <Route
             exact
             path={`${url}/categories`}

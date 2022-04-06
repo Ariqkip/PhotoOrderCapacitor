@@ -217,13 +217,6 @@ const AppMenu = ({ photographerId }) => {
           onClose={handleProductMenuClose}
           TransitionComponent={Fade}
         >
-          <MenuItem key='show_categories' onClick={redirectToCategoriesList}>
-            <ListItemIcon>
-              <ArrowRightIcon fontSize='small' />
-            </ListItemIcon>
-            <ListItemText primary={t('All categoires')} />
-          </MenuItem>
-          <Divider />
           {photographer.productCategories.map((category) => {
             return (
               <MenuItem
