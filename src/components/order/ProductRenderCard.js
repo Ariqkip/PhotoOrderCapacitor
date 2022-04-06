@@ -35,6 +35,7 @@ const useStyles = makeStyles((theme) => ({
   media: {
     width: '100%',
     height: 340,
+    backgroundSize: 'contain',
   },
   cardArea: {
     height: '100%',
