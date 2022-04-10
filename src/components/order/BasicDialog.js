@@ -53,6 +53,9 @@ const useStyles = makeStyles((theme) => ({
   fillWidth: {
     width: '100%',
   },
+  p6: {
+    padding: '6px',
+  },
   centerContent: {
     display: 'flex',
     flexDirection: 'column',
@@ -254,17 +257,32 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       </DialogContent>
       <DialogActions>
         <Grid container spacing={0} direction='row'>
-          <Grid item xs={12} md={4} className={classes.centerContent}>
+          <Grid
+            item
+            xs={12}
+            md={4}
+            className={[classes.centerContent, classes.p6]}
+          >
             <RemoveButton onClick={handleRemoveAll} color='primary'>
               {t('REMOVE ALL FILES')}
             </RemoveButton>
           </Grid>
-          <Grid item xs={12} md={4} className={classes.centerContent}>
+          <Grid
+            item
+            xs={12}
+            md={4}
+            className={[classes.centerContent, classes.p6]}
+          >
             <OtherButton onClick={closeFn} color='primary'>
               {t('Choose other products')}
             </OtherButton>
           </Grid>
-          <Grid item xs={12} md={4} className={classes.centerContent}>
+          <Grid
+            item
+            xs={12}
+            md={4}
+            className={[classes.centerContent, classes.p6]}
+          >
             <NextButton onClick={handleNext} color='primary'>
               {t('Next step')} <ShoppingCartIcon fontSize='small' />
             </NextButton>

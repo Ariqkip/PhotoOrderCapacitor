@@ -15,6 +15,7 @@ import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
@@ -34,6 +35,15 @@ const useStyles = makeStyles((theme) => ({
   },
   groupSelection: {
     marginBottom: '8px',
+  },
+  attributeButton: {
+    width: '100%',
+  },
+  attributeRow: {
+    padding: '3px !important',
+  },
+  mb16: {
+    marginBottom: '16px',
   },
 }));
 
@@ -101,25 +111,29 @@ const AttributesList = ({ product, pack }) => {
 
     return (
       <>
-        <Typography gutterBottom component='p' className={classes.groupName}>
+        <Typography
+          gutterBottom
+          component='p'
+          className={[classes.groupName, classes.mb16]}
+        >
           {group.Name}:
         </Typography>
-        <ButtonGroup
-          color='primary'
-          aria-label='outlined primary button group'
-          className={classes.groupSelection}
-          orientation={`${matches ? `horizontal` : `vertical`}`}
-        >
+        <Grid container spacing={3} className={classes.mb16}>
           {att.map((a) => (
-            <Button
-              key={a.id}
-              variant={getButtonVariant(group.Id, a.id)}
-              onClick={() => handleAttributeClick(group.Id, a.id)}
-            >
-              {a.name}
-            </Button>
+            <Grid item xs={12} sm={6} md={4} className={classes.attributeRow}>
+              <Button
+                disableElevation
+                key={a.id}
+                color='primary'
+                variant={getButtonVariant(group.Id, a.id)}
+                onClick={() => handleAttributeClick(group.Id, a.id)}
+                className={classes.attributeButton}
+              >
+                {a.name}
+              </Button>
+            </Grid>
           ))}
-        </ButtonGroup>
+        </Grid>
       </>
     );
   };

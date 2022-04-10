@@ -33,6 +33,12 @@ const useStyles = makeStyles((theme) => ({
   fillWidth: {
     width: '100%',
   },
+  p6: {
+    padding: '6px',
+  },
+  m6: {
+    margin: '6px',
+  },
   centerContent: {
     display: 'flex',
     flexDirection: 'column',
@@ -147,10 +153,14 @@ const Render3dDialog = ({ product, isOpen, closeFn, pack }) => {
       </DialogContent>
       <DialogActions>
         <div className={classes.btnContainer}>
-          <OtherButton onClick={closeFn} color='primary'>
+          <OtherButton onClick={closeFn} color='primary' className={classes.m6}>
             {t('Back')}
           </OtherButton>
-          <NextButton onClick={handleNext} color='primary'>
+          <NextButton
+            onClick={handleNext}
+            color='primary'
+            className={classes.m6}
+          >
             {t('Next step')}
           </NextButton>
         </div>
