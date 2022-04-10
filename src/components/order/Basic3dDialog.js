@@ -297,7 +297,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
           <Divider />
         </DialogContent>
         <DialogActions>
-          <Grid container spacing={3} direction='row'>
+          <Grid container spacing={0} direction='row'>
             <Grid item xs={12} md={4} className={classes.centerContent}>
               <RemoveButton onClick={handleRemoveAll} color='primary'>
                 {t('REMOVE ALL FILES')}

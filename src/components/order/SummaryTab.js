@@ -82,14 +82,16 @@ const SummaryTab = (props) => {
   useEffect(() => {
     const bill = order.orderItems.map((item) => {
       if (item.isLayerItem === true) return 0;
-      return getPrice(item.productId, item.qty, photographer);
+
+      return getPrice(item.productId, item.qty, photographer, order);
     });
+
     let newTotal = bill.reduce((sum, item) => sum + item, 0);
     if (order.shippingSelected) {
       newTotal += photographer.shippingPrice;
     }
     setTotal(newTotal);
-  }, [order.orderItems, order.shippingSelected, photographer]);
+  }, [order, photographer]);
 
   return (
     <Container maxWidth='md'>
