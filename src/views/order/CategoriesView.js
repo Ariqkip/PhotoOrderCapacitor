@@ -29,25 +29,25 @@ const useStyles = makeStyles((theme) => ({
 function RenderSkeletonList() {
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
+      <Grid item xs={12} sm={6} md={4} lg={3} xl={2}>
         <CategoryCardSkeleton key={1} />
       </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
+      <Grid item xs={12} sm={6} md={4} lg={3} xl={2}>
         <CategoryCardSkeleton key={2} />
       </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
+      <Grid item xs={12} sm={6} md={4} lg={3} xl={2}>
         <CategoryCardSkeleton key={3} />
       </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
+      <Grid item xs={12} sm={6} md={4} lg={3} xl={2}>
         <CategoryCardSkeleton key={4} />
       </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
+      <Grid item xs={12} sm={6} md={4} lg={3} xl={2}>
         <CategoryCardSkeleton key={5} />
       </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
+      <Grid item xs={12} sm={6} md={4} lg={3} xl={2}>
         <CategoryCardSkeleton key={6} />
       </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
+      <Grid item xs={12} sm={6} md={4} lg={3} xl={2}>
         <CategoryCardSkeleton key={7} />
       </Grid>
     </Grid>
@@ -64,7 +64,7 @@ const CategoriesView = (props) => {
     return (
       <Grid container spacing={3}>
         {photographer.productCategories.map((category) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={category.Id}>
+          <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={category.Id}>
             <CategoryCard key={category.Id} category={category} />
           </Grid>
         ))}
