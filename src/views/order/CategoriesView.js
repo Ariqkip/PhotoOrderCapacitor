@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 //Components
 import CategoryCard from '../../components/order/CategoryCard';
 import CategoryCardSkeleton from '../../components/order/CategoryCardSkeleton';
+import BanerSlider from '../../components/order/BanerSlider';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -82,9 +83,17 @@ const CategoriesView = (props) => {
     return true;
   };
 
+  const showBanerForTesting = () => {
+    if (isLoading()) return;
+    if (photographer.photographId !== 2320) return;
+
+    return <BanerSlider />;
+  };
+
   return (
     <div className={classes.root}>
       {isLoading() && RenderSkeletonList()}
+      {showBanerForTesting()}
       {!isLoading() && renderCategories()}
     </div>
   );
