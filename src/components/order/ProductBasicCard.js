@@ -145,7 +145,8 @@ const ProductBasicCard = ({ product }) => {
                 component='p'
                 className={classes.cardTitle}
               >
-                € {formatPrice(getLabelPrice(product.id, 1, photographer))}
+                €{' '}
+                {formatPrice(getLabelPrice(product.id, 1, photographer, order))}
               </Typography>
             </Box>
             <Typography

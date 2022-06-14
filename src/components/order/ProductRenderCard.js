@@ -9,9 +9,10 @@ import CardBadge from './CardBadge';
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { useOrder } from '../../contexts/OrderContext';
+import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Utils
-import { formatPrice } from '../../core/helpers/priceHelper';
+import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -69,6 +70,7 @@ const ProductRenderCard = ({ product }) => {
   const { itemId } = useParams();
 
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const [photographer] = usePhotographer();
   const [order] = useOrder();
 
   const handleOpen = (itemId) => {
@@ -143,7 +145,8 @@ const ProductRenderCard = ({ product }) => {
                 component='p'
                 className={classes.cardTitle}
               >
-                € {formatPrice(product.price)}
+                €{' '}
+                {formatPrice(getLabelPrice(product.id, 1, photographer, order))}
               </Typography>
             </Box>
             <Typography
