@@ -111,8 +111,12 @@ const Presenter3d = ({ product, pack }) => {
         const newConfig = {
           guid: img.guid,
           index: index,
-          x: sizes[index].positionX,
-          y: sizes[index].positionY,
+          //x: sizes[index].positionX,
+          //HACK, cant calculate proper value
+          x: (index - 1) * 100,
+          //y: sizes[index].positionY,
+          //HACK, cant calculate proper value
+          y: (index - 1) * 10,
           width: sizes[index].width,
           height: sizes[index].height,
         };
