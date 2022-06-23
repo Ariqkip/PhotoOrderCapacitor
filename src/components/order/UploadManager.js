@@ -20,6 +20,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const UPLOAD_INTERVAL_DELAY_MS = 1000;
+
 const UploadManager = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
@@ -114,7 +116,7 @@ const UploadManager = (props) => {
     const interval = setInterval(() => {
       uploadFiles();
       tryFinalizeOrder();
-    }, 500);
+    }, UPLOAD_INTERVAL_DELAY_MS);
     return () => clearInterval(interval);
   });
 

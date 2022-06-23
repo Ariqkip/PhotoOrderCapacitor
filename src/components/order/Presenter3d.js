@@ -13,6 +13,12 @@ import { useOrder } from '../../contexts/OrderContext';
 //Utils
 import useImage from 'use-image';
 import { createGuid } from '../../core/helpers/guidHelper';
+import {
+  getScaleDownFactor,
+  getScaleUpFactor,
+  getPointTransformation,
+  getRectTransformation,
+} from '../../core/helpers/imageTransformationHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -66,11 +72,12 @@ const Presenter3d = ({ product, pack }) => {
   const [selectedMode, setSelectedMode] = useState(true);
   const [rectangles, setRectangles] = useState([]);
 
-  const [image] = useImage(product.layerImageUrl, 'anonymous');
+  const [image, status] = useImage(product.layerImageUrl, 'anonymous');
 
   const scale = 0.4215686275;
   var container = document.querySelector('#js-stage-root');
   let widthValue = container?.offsetWidth ?? 1122;
+
   if (widthValue > 561) widthValue = 561;
   const heightValue = widthValue * scale;
 
@@ -98,27 +105,72 @@ const Presenter3d = ({ product, pack }) => {
     };
 
     orderDispatch({ type: 'ADD_ORDER_ITEM_TEXTURE_3D', payload: newOrderItem });
-  };
+  }
 
   useLayoutEffect(() => {
     const { sizes } = product;
+
+    //scale factor section:
+    let scaleFactorDown = 1;
+    let scaleFactorUp = 1;
+
+    function calculateScaleFactors() {
+      if (status !== 'loaded') return;
+
+      var downFactor = getScaleDownFactor(image.width, widthValue);
+      if (downFactor > 0) scaleFactorDown = downFactor;
+
+      var upFactor = getScaleUpFactor(image.width, widthValue);
+      if (upFactor > 0) scaleFactorUp = upFactor;
+    }
+    calculateScaleFactors();
+
     const images = order.orderItems.filter(
       (i) => i.productId === product.id && i.isLayerItem === true
     );
     const layers = images.map((img, index) => {
       let tempLayer;
       if (!img.layerConfig) {
+        var rect_scaled = getRectTransformation(
+          sizes[index].positionX,
+          sizes[index].positionY,
+          sizes[index].width,
+          sizes[index].height,
+          scaleFactorDown
+        );
+
         const newConfig = {
           guid: img.guid,
           index: index,
-          //x: sizes[index].positionX,
-          //HACK, cant calculate proper value
-          x: (index - 1) * 100,
-          //y: sizes[index].positionY,
-          //HACK, cant calculate proper value
-          y: (index - 1) * 10,
-          width: sizes[index].width,
-          height: sizes[index].height,
+          x: rect_scaled.x,
+          y: rect_scaled.y,
+          width: rect_scaled.w,
+          height: rect_scaled.h,
+          scaled: scaleFactorDown !== 1 ? true : false,
+        };
+        tempLayer = { ...newConfig };
+        orderDispatch({
+          type: 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG',
+          payload: newConfig,
+        });
+      } else if (img.layerConfig.scaled === false && status == 'loaded') {
+        var rect_rescaled = getRectTransformation(
+          sizes[index].positionX,
+          sizes[index].positionY,
+          sizes[index].width,
+          sizes[index].height,
+          scaleFactorDown
+        );
+        const newConfig = {
+          guid: img.guid,
+          index: index,
+          x: rect_rescaled.x,
+          y: rect_rescaled.y,
+          width: rect_rescaled.w,
+          height: rect_rescaled.h,
+          scaled: true,
+          scaleFactorDown: scaleFactorDown,
+          scaleFactorUp: scaleFactorUp,
         };
         tempLayer = { ...newConfig };
         orderDispatch({
@@ -136,7 +188,7 @@ const Presenter3d = ({ product, pack }) => {
     setRectangles([...layers]);
     const uri = stageLayerRef.current.toDataURL();
     setTextureUrl(uri);
-  }, [order.orderItems, orderDispatch, product]);
+  }, [image, order.orderItems, orderDispatch, product, status, widthValue]);
 
   useEffect(() => {
     const uri = stageLayerRef.current.toDataURL();
