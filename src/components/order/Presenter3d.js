@@ -18,6 +18,7 @@ import {
   getScaleUpFactor,
   getPointTransformation,
   getRectTransformation,
+  getRectOrientTransformation,
 } from '../../core/helpers/imageTransformationHelper';
 
 //UI
@@ -130,13 +131,28 @@ const Presenter3d = ({ product, pack }) => {
     );
     const layers = images.map((img, index) => {
       let tempLayer;
+
       if (!img.layerConfig) {
-        var rect_scaled = getRectTransformation(
+        var windowScaled = getRectTransformation(
           sizes[index].positionX,
           sizes[index].positionY,
           sizes[index].width,
           sizes[index].height,
           scaleFactorDown
+        );
+        var rect_scaled = getRectOrientTransformation(
+          {
+            x: windowScaled.x,
+            y: windowScaled.y,
+            width: img.width,
+            height: img.height,
+          },
+          {
+            x: windowScaled.x,
+            y: windowScaled.y,
+            width: windowScaled.w,
+            height: windowScaled.h,
+          }
         );
 
         const newConfig = {
@@ -154,13 +170,29 @@ const Presenter3d = ({ product, pack }) => {
           payload: newConfig,
         });
       } else if (img.layerConfig.scaled === false && status == 'loaded') {
-        var rect_rescaled = getRectTransformation(
+        var windowRescaled = getRectTransformation(
           sizes[index].positionX,
           sizes[index].positionY,
           sizes[index].width,
           sizes[index].height,
           scaleFactorDown
         );
+
+        var rect_rescaled = getRectOrientTransformation(
+          {
+            x: windowRescaled.x,
+            y: windowRescaled.y,
+            width: img.width,
+            height: img.height,
+          },
+          {
+            x: windowRescaled.x,
+            y: windowRescaled.y,
+            width: windowRescaled.w,
+            height: windowRescaled.h,
+          }
+        );
+
         const newConfig = {
           guid: img.guid,
           index: index,
@@ -173,6 +205,7 @@ const Presenter3d = ({ product, pack }) => {
           scaleFactorUp: scaleFactorUp,
         };
         tempLayer = { ...newConfig };
+
         orderDispatch({
           type: 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG',
           payload: newConfig,

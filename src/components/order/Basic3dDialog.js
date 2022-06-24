@@ -167,19 +167,26 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = () => {
-        const orderItem = {
-          maxSize: product.size,
-          guid: trackingGuid,
-          fileAsBase64: reader.result,
-          fileUrl: URL.createObjectURL(file),
-          fileName: file.name,
-          productId: product.id,
-          set: pack,
-          qty: 1,
-          status: 'idle',
-          isLayerItem: true,
+        var tempImg = new Image();
+        tempImg.src = reader.result;
+        tempImg.onload = function () {
+          const orderItem = {
+            maxSize: product.size,
+            guid: trackingGuid,
+            fileAsBase64: reader.result,
+            fileUrl: URL.createObjectURL(file),
+            fileName: file.name,
+            productId: product.id,
+            set: pack,
+            qty: 1,
+            status: 'idle',
+            isLayerItem: true,
+            width: tempImg.width,
+            height: tempImg.height,
+          };
+
+          orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
         };
-        orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
       };
     }
   };

@@ -32,3 +32,39 @@ export function getRectTransformation(x, y, w, h, factor) {
   };
   return newRect;
 }
+
+export function getRectOrientTransformation(img, window) {
+  let factor = getScaleDownFactor(img.width, window.width);
+
+  let newImg = getRectTransformation(
+    img.x,
+    img.y,
+    img.width,
+    img.height,
+    factor
+  );
+
+  if (newImg.h < window.height) {
+    factor = getScaleDownFactor(img.height, window.height);
+    newImg = getRectTransformation(img.x, img.y, img.width, img.height, factor);
+  }
+
+  newImg.x = window.x;
+  newImg.y = window.y;
+
+  var position_delta_x = window.width - newImg.w;
+
+  if (position_delta_x != 0) {
+    var correction_x = Math.round(position_delta_x / 2);
+    newImg.x = newImg.x + correction_x;
+  }
+
+  var position_delta_y = window.height - newImg.h;
+
+  if (position_delta_y != 0) {
+    var correction_y = Math.round(position_delta_y / 2);
+    newImg.y = newImg.y + correction_y;
+  }
+
+  return newImg;
+}
