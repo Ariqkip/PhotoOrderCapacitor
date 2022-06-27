@@ -69,7 +69,7 @@ const Presenter3d = ({ product, pack }) => {
 
   const [order, orderDispatch] = useOrder();
   const [textureUrl, setTextureUrl] = useState(null);
-  const [showEditor, setShowEditr] = useState(true);
+  const [showEditor, setShowEditr] = useState(false);
   const [selectedMode, setSelectedMode] = useState(true);
   const [rectangles, setRectangles] = useState([]);
 

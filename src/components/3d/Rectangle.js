@@ -110,6 +110,13 @@ const Rectangle = ({ layer, isSelected, onSelect, onChange }) => {
           />
           <Transformer
             ref={trRef}
+            rotateEnabled={false}
+            enabledAnchors={[
+              'top-left',
+              'top-right',
+              'bottom-left',
+              'bottom-right',
+            ]}
             boundBoxFunc={(oldBox, newBox) => {
               // limit resize
               if (newBox.width < 10 || newBox.height < 10) {
