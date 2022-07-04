@@ -194,6 +194,7 @@ export function OrderReducer(state = INIT_STATE, action) {
             if (item.guid === action.payload.guid) {
               item.status = 'success';
               item.fileAsBase64 = null; //release memory
+              item.fileUrl = action.payload.url;
             }
             return item;
           }),

@@ -73,6 +73,7 @@ const OrderService = () => {
       let result = {
         FileName: item.fileName,
         FileGuid: item.guid,
+        FileUrl: item.fileUrl,
         ProductId: item.productId,
         Quantity: item.qty,
         Attributes: itemAttributes,
