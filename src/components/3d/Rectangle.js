@@ -59,44 +59,21 @@ const Rectangle = ({ layer, isSelected, onSelect, onChange }) => {
           });
         }}
         onTransformEnd={(e) => {
-          const scaleX = e.target.scaleX();
-          const scaleY = e.target.scaleY();
+          const node = imgRef.current;
+          const scaleX = node.scaleX();
+          const scaleY = node.scaleY();
+
+          node.scaleX(1);
+          node.scaleY(1);
           onChange({
             ...layer,
-            x: e.target.x(),
-            y: e.target.y(),
-            width: Math.max(5, layer.width * scaleX),
-            height: Math.max(layer.height * scaleY),
+            x: node.x(),
+            y: node.y(),
+            width: Math.max(5, node.width() * scaleX),
+            height: Math.max(node.height() * scaleY),
           });
         }}
 
-        // onTransformEnd={(e) => {
-        //     // transformer is changing scale of the node
-        //     // and NOT its width or height
-        //     // but in the store we have only width and height
-        //     // to match the data better we will reset scale on transform end
-        //     const node = imgRef.current;
-
-        //     const scaleX = node.scaleX();
-        //     const scaleY = node.scaleY();
-
-        //     const crop = getCrop(node.image(), {
-        //         width: node.width() * scaleX,
-        //         height: node.height() * scaleY
-        //     });
-        //     // console.log(crop);
-        //     onChange({
-        //         // ...crop,
-        //         ...layer,
-        //         x: node.x(),
-        //         y: node.y(),
-        //         // set minimal value
-        //         width: Math.max(5, node.width() * scaleX),
-        //         height: Math.max(node.height() * scaleY)
-        //     });
-        //     node.scaleX(1);
-        //     node.scaleY(1);
-        // }}
       />
       {isSelected && (
         <Portal selector='.top-layer' enabled>
