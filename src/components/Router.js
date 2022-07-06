@@ -70,7 +70,7 @@ const Router = (props) => {
             render={(props) => <ViewPhotographer {...props} />}
           />
           <Route
-            path='/share3d/:guid'
+            path='/share3d/:photographerId/:productId/:guid'
             render={(props) => <View3dPresenter {...props} />}
           />
           <Route render={(props) => <View404 {...props} />} />

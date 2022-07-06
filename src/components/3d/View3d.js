@@ -87,6 +87,7 @@ const View3d = ({ textureUrl, modelUrl, saveFn }) => {
 
   useEffect(() => {
     if (!textureUrl) return;
+    if (!curentModel) return;
 
     curentModel.setTexture(textureUrl);
     const model = {

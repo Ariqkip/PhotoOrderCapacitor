@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Helmet } from 'react-helmet';
 
 import i18n from './i18n';
 import { I18nextProvider } from 'react-i18next';
@@ -10,6 +11,11 @@ import { I18nextProvider } from 'react-i18next';
 ReactDOM.render(
   <React.StrictMode>
     <I18nextProvider i18n={i18n}>
+      <Helmet>
+        <meta charSet='utf-8' />
+        <meta property='og:title' content='oistigmes photo-order' />
+        <meta property='og:description' content='' />
+      </Helmet>
       <App />
     </I18nextProvider>
   </React.StrictMode>,

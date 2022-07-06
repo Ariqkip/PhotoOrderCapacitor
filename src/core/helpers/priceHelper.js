@@ -124,3 +124,14 @@ export function getRangePrice(productId, priceId, photographer, order) {
 
   return 0;
 }
+
+export function getShare3dPrice(product) {
+  if (!product) return 0;
+  var { productPrices } = product;
+  if (!productPrices || productPrices.length == 0) return 0;
+
+  const lowestPrice = productPrices.reduce((acc, loc) =>
+    acc.price < loc.price ? acc : loc
+  );
+  return lowestPrice.price;
+}

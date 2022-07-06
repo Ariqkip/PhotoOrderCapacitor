@@ -35,6 +35,9 @@ i18n.init({
         'Next step': 'Next step',
         'Back to cateogires': 'Back to cateogires',
         Sending: 'Sending ...',
+        'Create own': 'Create own',
+        Share: 'Share',
+        Copied: 'Copied!',
 
         // Inputs
         Address: 'Address',
@@ -127,6 +130,9 @@ i18n.init({
         'Next step': 'Επόμενο βήμα',
         'Back to cateogires': 'Κατηγορίες',
         Sending: 'Sending ...',
+        'Create own': 'Create own',
+        Share: 'Share',
+        Copied: 'Copied!',
 
         // Inputs
         Address: 'Διεύθυνση',

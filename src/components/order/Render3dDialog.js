@@ -7,8 +7,10 @@ import Presenter3d from './Presenter3d';
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -100,6 +102,8 @@ const Render3dDialog = ({ product, isOpen, closeFn, pack }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const history = useHistory();
+  const [order] = useOrder();
+  const [copied, setCopied] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -131,6 +135,46 @@ const Render3dDialog = ({ product, isOpen, closeFn, pack }) => {
     cacheImages(imgs);
   }, [product.layerImageUrl, product.objUrl]);
 
+  function getOrderItem(items) {
+    if (!items || items.length == 0) return null;
+
+    const result = items.find(
+      (i) =>
+        i.productId == product.id && !i.isLayerItem && i.status == 'success'
+    );
+
+    return result;
+  }
+
+  function isShareDisabled() {
+    if (!order) return true;
+
+    const { orderItems } = order;
+
+    const item = getOrderItem(orderItems);
+    if (!item) return true;
+
+    return false;
+  }
+
+  function handleCopy() {
+    setCopied(true);
+  }
+
+  const shareUrl = () => {
+    const baseUrl = window.location.origin;
+    const { photographerId } = product;
+    const { id } = product;
+
+    const item = getOrderItem(order.orderItems);
+    const fullGuidUrl = item?.fileUrl ?? '';
+    const storageUrl = `${process.env.REACT_APP_STORAGE_PATH}/customerorderphoto`;
+    const shortGuid = fullGuidUrl.replace(`${storageUrl}/`, '');
+    const encodedGuid = encodeURIComponent(shortGuid);
+
+    return `${baseUrl}/share3d/${photographerId}/${id}/${encodedGuid}`;
+  };
+
   return (
     <Dialog
       fullWidth={true}
@@ -156,6 +200,16 @@ const Render3dDialog = ({ product, isOpen, closeFn, pack }) => {
           <OtherButton onClick={closeFn} color='primary' className={classes.m6}>
             {t('Back')}
           </OtherButton>
+          <CopyToClipboard text={shareUrl()}>
+            <OtherButton
+              onClick={handleCopy}
+              color='primary'
+              className={classes.m6}
+              disabled={isShareDisabled()}
+            >
+              {copied ? t('Copied') : t('Share')}
+            </OtherButton>
+          </CopyToClipboard>
           <NextButton
             onClick={handleNext}
             color='primary'
