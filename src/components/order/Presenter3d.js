@@ -25,6 +25,9 @@ import {
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 
 //Assets
 import defaultObj from '../../assets/cup.obj';
@@ -34,6 +37,10 @@ const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     minHeight: '80px',
+  },
+  centerVertical: {
+    display: 'flex',
+    alignItems: 'center',
   },
 }));
 
@@ -165,6 +172,7 @@ const Presenter3d = ({ product, pack }) => {
           scaled: scaleFactorDown !== 1 ? true : false,
         };
         tempLayer = { ...newConfig };
+
         orderDispatch({
           type: 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG',
           payload: newConfig,
@@ -228,6 +236,43 @@ const Presenter3d = ({ product, pack }) => {
     setTextureUrl(uri);
   }, []);
 
+  function getOrderItem() {
+    if (!order) return null;
+    const { orderItems } = order;
+    if (!orderItems) return null;
+
+    const item = orderItems.find(
+      (x) => x.productId == product.id && !x.isLayerItem
+    );
+    return item;
+  }
+
+  const handleAddQuantity = () => {
+    const item = getOrderItem();
+    if (!item) return;
+
+    orderDispatch({
+      type: 'INCREASE_ORDER_ITEM_QTY',
+      payload: { guid: item.guid },
+    });
+  };
+
+  const handleRemoveQuantity = () => {
+    const item = getOrderItem();
+    if (!item) return;
+    orderDispatch({
+      type: 'DECRESE_ORDER_ITEM_QTY',
+      payload: { guid: item.guid },
+    });
+  };
+
+  function getQuantity() {
+    const item = getOrderItem();
+    if (!item) return 0;
+
+    return item.qty;
+  }
+
   return (
     <>
       <View3d
@@ -235,6 +280,16 @@ const Presenter3d = ({ product, pack }) => {
         modelUrl={getModelUrl()}
         saveFn={saveTexture}
       />
+      <div className={classes.centerVertical}>
+        <span>{t('quantity')}:</span>
+        <IconButton aria-label='delete' onClick={handleRemoveQuantity}>
+          <RemoveCircleOutlineIcon />
+        </IconButton>
+        <span>{getQuantity()}</span>
+        <IconButton aria-label='delete' onClick={handleAddQuantity}>
+          <AddCircleOutlineIcon />
+        </IconButton>
+      </div>
       {!showEditor && (
         <OtherButton onClick={() => setShowEditr(true)} color='primary'>
           {t('Adjustment')}
