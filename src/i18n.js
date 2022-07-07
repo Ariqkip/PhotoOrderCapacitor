@@ -95,6 +95,13 @@ i18n.init({
           'Your order no: {{number}} has been accepted',
         'Order more photos': 'Order more photos',
         'thankyou-exit': 'Exit',
+
+        //3d CUP - welcome modal
+        'Best gift': 'Best gift',
+        'See what I designed': 'See what I designed, this is awesome!',
+        'gift CTA': 'You too can design and order such a great gift!',
+        'how to order':
+          'Click CREATE OWN, add your own photos and order a personalized mug!',
       },
     },
     gr: {
@@ -193,6 +200,13 @@ i18n.init({
           'Η παραγγελία σας: {{number}} έγινε αποδεκτή',
         'Order more photos': 'Επιλέξτε περισσότερες φωτογραφίες',
         'thankyou-exit': 'Έξοδος',
+
+        //3d CUP - welcome modal
+        'Best gift': 'Best gift',
+        'See what I designed': 'See what I designed',
+        'gift CTA': 'You too can design and order such a great gift!',
+        'how to order':
+          'Click CREATE OWN, add your own photos and order a personalized mug!',
       },
     },
   },

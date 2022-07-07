@@ -12,10 +12,6 @@ import { formatPrice, getShare3dPrice } from '../../core/helpers/priceHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles((theme) => ({
@@ -26,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
   },
   card: {
     maxWidth: '600px',
+    position: 'fixed',
   },
   fullWidth: {
     width: '100%',
@@ -61,6 +58,7 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
+    position: 'fixed',
   },
 }));
 
@@ -92,45 +90,11 @@ const ProdyctInfoCard = ({ product }) => {
     <>
       {product && (
         <div className={classes.root}>
-          <Card
-            className={[classes.card, classes.fullWidth]}
-            key={`share_card_${product.id}`}
-          >
-            <CardContent className={classes.fullWidth}>
-              <Box
-                component='div'
-                className={[classes.cardTitleBox, classes.fullWidth]}
-              >
-                <Typography
-                  gutterBottom
-                  component='p'
-                  className={classes.cardTitle}
-                >
-                  {product.name}
-                </Typography>
-                <Typography
-                  gutterBottom
-                  component='p'
-                  className={classes.cardTitle}
-                >
-                  € {formatPrice(getShare3dPrice(product))}
-                </Typography>
-              </Box>
-              <Typography
-                variant='body'
-                color='textSecondary'
-                component='p'
-                className={classes.cardDesc}
-              >
-                {product.description}
-              </Typography>
-              <div className={classes.btnCenter}>
-                <ActiveButton size='large' onClick={handleCreateNew}>
-                  {t('Create own')}
-                </ActiveButton>
-              </div>
-            </CardContent>
-          </Card>
+          <div className={classes.btnCenter}>
+            <ActiveButton size='large' onClick={handleCreateNew}>
+              {t('Create own')}
+            </ActiveButton>
+          </div>
         </div>
       )}
     </>

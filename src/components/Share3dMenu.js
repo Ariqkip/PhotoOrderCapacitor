@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     padding: theme.spacing(0, 1),
     minHeight: 48,
     //  height: 35
@@ -145,52 +145,19 @@ const useStyles = makeStyles((theme) => ({
   },
   sectionDesktop: {
     display: 'flex',
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
 }));
 
 const Share3dMenu = ({ photographerId, productId }) => {
   const classes = useStyles();
   const { t } = useTranslation();
-  const history = useHistory();
-
-  function showPhotographLink() {
-    if (!photographerId) return false;
-
-    return true;
-  }
-
-  function showDirecrLink() {
-    if (!photographerId) return false;
-    if (!productId) return false;
-
-    return true;
-  }
 
   return (
     <>
       <AppBar position='fixed' className={classes.appBar}>
         <Toolbar className={classes.toolbar}>
-          <div className={classes.sectionDesktop}>
-            {showPhotographLink() && (
-              <NavLink
-                to={`/photographer/${photographerId}`}
-                activeStyle={{ fontWeight: 'bold' }}
-                className={classes.navButton}
-              >
-                {t('nav-Products')}
-              </NavLink>
-            )}
-            {showDirecrLink() && (
-              <NavLink
-                to={`/photographer/${photographerId}/products/${productId}`}
-                activeStyle={{ fontWeight: 'bold' }}
-                className={classes.navButton}
-              >
-                {t('Create own')}
-              </NavLink>
-            )}
-          </div>
+          <div className={classes.sectionDesktop}>{t('Best gift')}</div>
         </Toolbar>
       </AppBar>
     </>

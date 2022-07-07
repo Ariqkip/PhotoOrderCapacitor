@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet';
 import Layout from './Layout';
 import Presenter3d from '../../components/share3d/Presenter3d';
 import ProdyctInfoCard from '../../components/share3d/ProductInfoCard';
+import WelcomePopup from '../../components/share3d/WelcomePopup';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -98,6 +99,7 @@ const Show3dIndex = ({ match }) => {
         <Suspense fallback={<SuspenseContainer />}>
           <Presenter3d product={getProduct(data)} layerUrl={getLayoutUrl()} />
           <ProdyctInfoCard product={getProduct(data)} />
+          <WelcomePopup />
         </Suspense>
       </Layout>
     </>
