@@ -100,7 +100,13 @@ const View3d = ({ textureUrl, modelUrl, saveFn }) => {
   return (
     <div
       className='canvasContainer'
-      style={{ height: '100%', minHeight: '500px', width: '100%' }}
+      style={{
+        height: '100%',
+        minHeight: '500px',
+        width: '100%',
+        outline: 'none',
+        border: 'none',
+      }}
       ref={canvasContainer}
     >
       <canvas ref={canvas} />

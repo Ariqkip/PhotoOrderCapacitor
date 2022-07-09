@@ -147,6 +147,9 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
   },
+  gift: {
+    fontSize: '26px',
+  },
 }));
 
 const Share3dMenu = ({ photographerId, productId }) => {
@@ -157,7 +160,9 @@ const Share3dMenu = ({ photographerId, productId }) => {
     <>
       <AppBar position='fixed' className={classes.appBar}>
         <Toolbar className={classes.toolbar}>
-          <div className={classes.sectionDesktop}>{t('Best gift')}</div>
+          <div className={classes.sectionDesktop}>
+            <p className={classes.gift}>{t('Best gift')}</p>
+          </div>
         </Toolbar>
       </AppBar>
     </>
