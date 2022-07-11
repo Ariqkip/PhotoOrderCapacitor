@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: '100%',
     flexGrow: 1,
+    marginBottom: '12px',
   },
   header: {
     display: 'flex',
@@ -33,11 +34,11 @@ const useStyles = makeStyles((theme) => ({
     // backgroundColor: theme.palette.background.default,
   },
   img: {
-    maxHeight: '50%',
+    maxHeight: '480px',
     display: 'block',
     overflow: 'hidden',
     width: '100%',
-    objectFit: 'fit',
+    objectFit: 'cover !important',
     cursor: 'pointer',
   },
 }));
@@ -99,10 +100,11 @@ const BanerSlider = (props) => {
         index={activeStep}
         onChangeIndex={handleStepChange}
         enableMouseEvents
+        interval={6000}
       >
         {mockBaner.map((step, index) => (
           <div key={step.label}>
-            {Math.abs(activeStep - index) <= 2 ? (
+            {Math.abs(activeStep - index) <= maxSteps ? (
               <img
                 className={classes.img}
                 src={step.imgPath}
