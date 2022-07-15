@@ -32,6 +32,34 @@ function useGetPhotographer(id) {
   return { ...result };
 }
 
+function useGetBanners(id) {
+  const service = OrderService();
+  let success = true;
+  const photographerId = Number(id);
+  const enabledOption = photographerId > 0;
+  const result = useQuery(
+    ['photographer-banners', photographerId],
+    async () => {
+      const resp = await service.GetBanners(photographerId).then(
+        (res) => res.data,
+        (err) => {
+          success = false;
+          return err;
+        }
+      );
+      if (!success) {
+        throw new Error(resp);
+      }
+
+      return resp;
+    },
+    {
+      enabled: enabledOption,
+    }
+  );
+  return { ...result };
+}
+
 function useGetProducts(id) {
   const service = OrderService();
   let success = true;
@@ -60,4 +88,4 @@ function useGetProducts(id) {
   return { ...result };
 }
 
-export { useGetPhotographer, useGetProducts };
+export { useGetPhotographer, useGetProducts, useGetBanners };

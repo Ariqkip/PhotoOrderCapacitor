@@ -12,6 +12,11 @@ const OrderService = () => {
     return api.get(endpoint);
   }
 
+  function GetBanners(photographerId) {
+    const endpoint = `Advertisement/Photographer/${photographerId}`;
+    return api.get(endpoint);
+  }
+
   function CreateOrder(id) {
     const endpoint = `photographer/${id}/order`;
     const body = {
@@ -120,6 +125,7 @@ const OrderService = () => {
 
   return {
     GetPhotographer,
+    GetBanners,
     GetProducts,
     CreateOrder,
     FinalizeOrder,

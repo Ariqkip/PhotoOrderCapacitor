@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import CategoryCardSkeleton from '../../components/order/CategoryCardSkeleton';
 import ProductBasicCard from '../../components/order/ProductBasicCard';
 import ProductTypeRenderer from '../../components/order/ProductTypeRenderer';
+import BanerSlider from '../../components/order/BanerSlider';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -110,6 +111,7 @@ const ProductsView = (props) => {
   return (
     <div className={classes.root}>
       {isLoading() && RenderSkeletonList()}
+      <BanerSlider photographerId={photographer.photographId} />
       {!isLoading() && renderProducts()}
     </div>
   );

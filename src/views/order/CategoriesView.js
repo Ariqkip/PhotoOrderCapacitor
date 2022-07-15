@@ -83,17 +83,10 @@ const CategoriesView = (props) => {
     return true;
   };
 
-  const showBanerForTesting = () => {
-    if (isLoading()) return;
-    if (photographer.photographId !== 2320) return;
-
-    return <BanerSlider />;
-  };
-
   return (
     <div className={classes.root}>
       {isLoading() && RenderSkeletonList()}
-      {showBanerForTesting()}
+      <BanerSlider photographerId={photographer.photographId} />
       {!isLoading() && renderCategories()}
     </div>
   );

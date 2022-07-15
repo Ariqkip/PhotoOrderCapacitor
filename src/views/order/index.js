@@ -13,7 +13,7 @@ import UncategorizedView from './UncategorizedView';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
-import { useGetPhotographer } from '../../services/OrderUtils';
+import { useGetPhotographer, useGetBanners } from '../../services/OrderUtils';
 import { usePhotographer } from '../../contexts/PhotographerContext';
 import { useOrder } from '../../contexts/OrderContext';
 import { useAlerts } from '../../contexts/AlertContext';
@@ -74,6 +74,7 @@ const OrderIndex = ({ match }) => {
   const [, alertDispatch] = useAlerts();
 
   const photographerQuery = useGetPhotographer(match?.params?.id ?? 0);
+  const bannersQuery = useGetBanners(match?.params?.id ?? 0);
 
   function redirectCategoriesFlag(query) {
     if (!query.isSuccess) return false;

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 //Components
 import ProductTypeRenderer from '../../components/order/ProductTypeRenderer';
 import CategoryCardSkeleton from '../../components/order/CategoryCardSkeleton';
+import BanerSlider from '../../components/order/BanerSlider';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -104,6 +105,7 @@ const UncategorizedView = (props) => {
   return (
     <div className={classes.root}>
       {isLoading() && RenderSkeletonList()}
+      <BanerSlider photographerId={photographer.photographId} />
       {!isLoading() && renderProducts()}
     </div>
   );

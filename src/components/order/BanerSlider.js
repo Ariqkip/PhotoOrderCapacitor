@@ -1,11 +1,12 @@
 //Core
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 
 //Components
 
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import { useGetBanners } from '../../services/OrderUtils';
 
 //Utils
 
@@ -45,32 +46,15 @@ const useStyles = makeStyles((theme) => ({
 
 const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 
-const mockBaner = [
-  {
-    id: 1,
-    label: 'Brand new robot! Only today!',
-    photographerId: 2320,
-    productId: 7272,
-    imgPath:
-      'https://store-images.s-microsoft.com/image/apps.42747.13709482571966621.5e316da9-8395-4437-8282-7501e28d3ed3.9b0392ac-1883-444e-afd0-3e4be91f5d43?mode=scale&q=90&h=1080&w=1920',
-  },
-  {
-    label: 'SALE - get your own cup, last chance!',
-    photographerId: 2320,
-    productId: 5399,
-    imgPath:
-      'https://sklep.terradeco.com.pl/userdata/public/gfx/37963/Dado-Wallpapers-Golden-Fern-Rettificato-60x120.jpg',
-  },
-];
-
-const BanerSlider = (props) => {
+const BanerSlider = ({ photographerId }) => {
   const classes = useStyles();
   const theme = useTheme();
   const { t } = useTranslation();
   const history = useHistory();
 
   const [activeStep, setActiveStep] = React.useState(0);
-  const maxSteps = mockBaner.length;
+  const [banners, setBanners] = useState([]);
+  const [maxSteps, setMaxSteps] = useState(banners.length ?? 0);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -85,67 +69,98 @@ const BanerSlider = (props) => {
   };
 
   const handleClickBaner = (step) => {
-    history.push(
-      `/photographer/${step.photographerId}/products/${step.productId}`
-    );
+    if (!step) return;
+
+    if (step.productId) {
+      history.push(
+        `/photographer/${step.photographerId}/products/${step.productId}`
+      );
+    } else if (step.externalUrl) {
+      window.open(step.externalUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      return null;
+    }
   };
 
+  const bannersQuery = useGetBanners(photographerId ?? 0);
+  const { data } = bannersQuery;
+
+  useLayoutEffect(() => {
+    if (data) {
+      setBanners(data);
+      setMaxSteps(data.length);
+    }
+  }, [data]);
+
+  function showBanner(list) {
+    if (!list) return false;
+    return list.length > 0;
+  }
+
   return (
-    <div className={classes.root}>
-      <Paper square elevation={0} className={classes.header}>
-        <Typography>{mockBaner[activeStep].label}</Typography>
-      </Paper>
-      <AutoPlaySwipeableViews
-        axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
-        index={activeStep}
-        onChangeIndex={handleStepChange}
-        enableMouseEvents
-        interval={6000}
-      >
-        {mockBaner.map((step, index) => (
-          <div key={step.label}>
-            {Math.abs(activeStep - index) <= maxSteps ? (
-              <img
-                className={classes.img}
-                src={step.imgPath}
-                alt={step.label}
-                onClick={() => handleClickBaner(step)}
-              />
-            ) : null}
-          </div>
-        ))}
-      </AutoPlaySwipeableViews>
-      <MobileStepper
-        steps={maxSteps}
-        position='static'
-        variant='text'
-        activeStep={activeStep}
-        nextButton={
-          <Button
-            size='small'
-            onClick={handleNext}
-            disabled={activeStep === maxSteps - 1}
+    <>
+      {showBanner(banners) && (
+        <div className={classes.root}>
+          <Paper square elevation={0} className={classes.header}>
+            <Typography>{banners[activeStep].buttonText}</Typography>
+          </Paper>
+          <AutoPlaySwipeableViews
+            axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
+            index={activeStep}
+            onChangeIndex={handleStepChange}
+            enableMouseEvents
+            interval={6000}
           >
-            Next
-            {theme.direction === 'rtl' ? (
-              <KeyboardArrowLeft />
-            ) : (
-              <KeyboardArrowRight />
-            )}
-          </Button>
-        }
-        backButton={
-          <Button size='small' onClick={handleBack} disabled={activeStep === 0}>
-            {theme.direction === 'rtl' ? (
-              <KeyboardArrowRight />
-            ) : (
-              <KeyboardArrowLeft />
-            )}
-            Back
-          </Button>
-        }
-      />
-    </div>
+            {banners.map((step, index) => (
+              <div key={step.buttonText}>
+                {Math.abs(activeStep - index) <= maxSteps ? (
+                  <img
+                    className={classes.img}
+                    src={step.imageUrl}
+                    alt={step.buttonText}
+                    onClick={() => handleClickBaner(step)}
+                  />
+                ) : null}
+              </div>
+            ))}
+          </AutoPlaySwipeableViews>
+          <MobileStepper
+            steps={maxSteps}
+            position='static'
+            variant='text'
+            activeStep={activeStep}
+            nextButton={
+              <Button
+                size='small'
+                onClick={handleNext}
+                disabled={activeStep === maxSteps - 1}
+              >
+                Next
+                {theme.direction === 'rtl' ? (
+                  <KeyboardArrowLeft />
+                ) : (
+                  <KeyboardArrowRight />
+                )}
+              </Button>
+            }
+            backButton={
+              <Button
+                size='small'
+                onClick={handleBack}
+                disabled={activeStep === 0}
+              >
+                {theme.direction === 'rtl' ? (
+                  <KeyboardArrowRight />
+                ) : (
+                  <KeyboardArrowLeft />
+                )}
+                Back
+              </Button>
+            }
+          />
+        </div>
+      )}
+    </>
   );
 };
 
