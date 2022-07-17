@@ -275,31 +275,14 @@ const Presenter3d = ({ product, pack }) => {
 
   return (
     <>
-      <View3d
-        textureUrl={textureUrl}
-        modelUrl={getModelUrl()}
-        saveFn={saveTexture}
-      />
-      <div className={classes.centerVertical}>
-        <span>{t('quantity')}:</span>
-        <IconButton aria-label='delete' onClick={handleRemoveQuantity}>
-          <RemoveCircleOutlineIcon />
-        </IconButton>
-        <span>{getQuantity()}</span>
-        <IconButton aria-label='delete' onClick={handleAddQuantity}>
-          <AddCircleOutlineIcon />
-        </IconButton>
-      </div>
       {!showEditor && (
-        <OtherButton onClick={() => setShowEditr(true)} color='primary'>
-          {t('Adjustment')}
-        </OtherButton>
+        <View3d
+          textureUrl={textureUrl}
+          modelUrl={getModelUrl()}
+          saveFn={saveTexture}
+        />
       )}
-      {showEditor && (
-        <OtherButton onClick={() => setShowEditr(false)} color='primary'>
-          {t('Hide editor')}
-        </OtherButton>
-      )}
+
       <Box
         style={{
           width: '100%',
@@ -350,6 +333,28 @@ const Presenter3d = ({ product, pack }) => {
           </Stage>
         </div>
       </Box>
+      {showEditor && (
+        <div className={classes.centerVertical}>
+          <span>{t('Quantity')}:</span>
+          <IconButton aria-label='delete' onClick={handleRemoveQuantity}>
+            <RemoveCircleOutlineIcon />
+          </IconButton>
+          <span>{getQuantity()}</span>
+          <IconButton aria-label='delete' onClick={handleAddQuantity}>
+            <AddCircleOutlineIcon />
+          </IconButton>
+        </div>
+      )}
+      {!showEditor && (
+        <OtherButton onClick={() => setShowEditr(true)} color='primary'>
+          {t('Adjustment')}
+        </OtherButton>
+      )}
+      {showEditor && (
+        <OtherButton onClick={() => setShowEditr(false)} color='primary'>
+          {t('Preview')}
+        </OtherButton>
+      )}
     </>
   );
 };
