@@ -9,6 +9,7 @@ import { useHistory } from 'react-router-dom';
 import { useGetBanners } from '../../services/OrderUtils';
 
 //Utils
+import { isMobile } from 'react-device-detect';
 
 //UI
 import { makeStyles, useTheme } from '@material-ui/core/styles';
@@ -116,7 +117,7 @@ const BanerSlider = ({ photographerId }) => {
                 {Math.abs(activeStep - index) <= maxSteps ? (
                   <img
                     className={classes.img}
-                    src={step.imageUrl}
+                    src={isMobile ? step.mobileImageUrl : step.imageUrl}
                     alt={step.buttonText}
                     onClick={() => handleClickBaner(step)}
                   />
