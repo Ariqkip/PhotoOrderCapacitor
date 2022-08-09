@@ -111,6 +111,18 @@ export function OrderReducer(state = INIT_STATE, action) {
 
       return { ...state, orderItems: [...newOrderItems] };
 
+    case 'UPDATE_ORDER_ITEM_CROP':
+      const newOrderItemsWithCrop = [
+        ...state.orderItems.map((item) => {
+          if (item.guid !== action.payload.guid) return item;
+
+          item.cropObj = action.payload.crop;
+          return item;
+        }),
+      ];
+
+      return { ...state, orderItems: [...newOrderItemsWithCrop] };
+
     case 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG':
       const newOrderItemsWithConfig = [
         ...state.orderItems.map((item) => {
@@ -134,6 +146,23 @@ export function OrderReducer(state = INIT_STATE, action) {
         }),
       ];
       return { ...state, orderItems: [...newOrderItemsWithConfigMulti] };
+
+    case 'UPDATE_ORDER_ITEM_CROP_COMPLETE':
+      console.log('%cLQS logger 01: ', 'color: #c931eb', { action });
+
+      const newOrderItemsWithCompletedCrop = [
+        ...state.orderItems.map((item) => {
+          if (item.guid !== action.payload.guid) return item;
+          item.completedCropObj = action.payload.crop;
+          item.cropObj = action.payload.crop;
+          return item;
+        }),
+      ];
+      console.log('%cLQS logger: 02', 'color: #c931eb', {
+        newOrderItemsWithCompletedCrop,
+      });
+
+      return { ...state, orderItems: [...newOrderItemsWithCompletedCrop] };
 
     case 'INCREASE_ORDER_ITEM_QTY':
       return {

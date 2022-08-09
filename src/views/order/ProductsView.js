@@ -110,8 +110,8 @@ const ProductsView = (props) => {
 
   return (
     <div className={classes.root}>
-      {isLoading() && RenderSkeletonList()}
       <BanerSlider photographerId={photographer.photographId} />
+      {isLoading() && RenderSkeletonList()}
       {!isLoading() && renderProducts()}
     </div>
   );

@@ -7,6 +7,7 @@ import FileListItem from './FileListItem';
 import PriceRangeList from './PriceRangeList';
 import AttributesList from './AttributesList';
 import Render3dDialog from './Render3dDialog';
+import Render3dWizard from './Render3dWizard';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -345,7 +346,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
           </Grid>
         </DialogActions>
       </Dialog>
-      <Render3dDialog
+      <Render3dWizard
         key={`3d_pr_dialog_${product.id}`}
         isOpen={open3d}
         closeFn={() => setOpen3d(false)}
