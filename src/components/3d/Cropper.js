@@ -59,11 +59,11 @@ function centerAspectCrop(mediaWidth, mediaHeight, aspect) {
 const Cropper = ({ uniqKey, display, orderItem, cropConfig }) => {
   const classes = useStyles();
   const { t } = useTranslation();
-  console.log('%cLQS logger: ', 'color: #c931eb', {
-    cropConfig,
-    orderItem,
-    uniqKey,
-  });
+  // console.log('%cLQS logger: ', 'color: #c931eb', {
+  //   cropConfig,
+  //   orderItem,
+  //   uniqKey,
+  // });
 
   const imgRef = useRef(null);
   const previewCanvasRef = useRef(null);
@@ -149,12 +149,12 @@ const Cropper = ({ uniqKey, display, orderItem, cropConfig }) => {
 
     const newEndedCrop = calculatePxCrop();
 
-    handleSetCompletedCrop(newEndedCrop);
+    // handleSetCompletedCrop(newEndedCrop);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [crop]);
 
   useEffect(() => {
-    console.log('%cLQS logger 001: ', 'color: #c931eb', { completedCrop });
+    // console.log('%cLQS logger 001: ', 'color: #c931eb', { completedCrop });
     function executeCropUpdate() {
       if (!completedCrop) return;
       const cropSum =
@@ -223,7 +223,7 @@ const Cropper = ({ uniqKey, display, orderItem, cropConfig }) => {
 
   function handleSetCompletedCrop(e) {
     const model = { crop: e, guid: uniqKey };
-    console.log('%cLQS logger: ', 'color: red', { model });
+    // console.log('%cLQS logger: ', 'color: red', { model });
 
     //orderDispatch({ type: 'UPDATE_ORDER_ITEM_CROP_COMPLETE', payload: model });
     setCompletedCrop(e);
@@ -247,20 +247,6 @@ const Cropper = ({ uniqKey, display, orderItem, cropConfig }) => {
           onLoad={onImageLoad}
         />
       </ReactCrop>
-      <div>
-        {completedCrop && (
-          // <canvas
-          //   ref={previewCanvasRef}
-          //   style={{
-          //     border: '1px solid black',
-          //     objectFit: 'contain',
-          //     width: completedCrop.width,
-          //     height: completedCrop.height,
-          //   }}
-          // />
-          <p>crop completed</p>
-        )}
-      </div>
     </div>
   );
 };

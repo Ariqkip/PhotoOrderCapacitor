@@ -1,8 +1,9 @@
 //Core
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 //Components
 import Cropper from '../3d/Cropper';
+import View3d from '../3d/View3d';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -33,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
     top: theme.spacing(1),
     color: theme.palette.grey[500],
   },
-  fillWidth: {
+  fullWidth: {
     width: '100%',
   },
   p6: {
@@ -51,6 +52,15 @@ const useStyles = makeStyles((theme) => ({
   centerHorizontal: {
     display: 'flex',
     justifyContent: 'center',
+  },
+  visible: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hidden: {
+    display: 'none',
   },
   spaceBetweenContent: {
     display: 'flex',
@@ -123,8 +133,11 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const { t } = useTranslation();
 
   const [activeStep, setActiveStep] = React.useState(0);
+  const [finalImage, setFinalImage] = useState(null);
 
   const [order] = useOrder();
+
+  const drawingCanvasRef = useRef(null);
 
   function getOrderItem(items) {
     if (!items || items.length == 0) return null;
@@ -136,8 +149,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
 
     return result;
   }
-
-  const { orderItems } = order;
 
   function getProductConfig(i) {
     if (!product) return null;
@@ -169,7 +180,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   }
 
   const steps = getSteps();
-  console.log('%cLQS logger: ', 'color: #c931eb', { steps });
+  // console.log('%cLQS logger: ', 'color: #c931eb', { steps });
 
   useEffect(() => {
     let lastStep = steps.length - 1;
@@ -180,6 +191,115 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const handleStep = (step) => () => {
     setActiveStep(step);
   };
+
+  function saveTexture(model) {
+    console.log('%cLQS logger: saveTexture ', 'color: red', { model });
+  }
+
+  useEffect(() => {
+    function loadImage(src, callback) {
+      console.log('%cLQS logger: loadImage 01', 'color: #c931eb', {});
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      console.log('%cLQS logger: loadImage 02', 'color: #c931eb', {});
+      img.onload = function () {
+        callback(img);
+      };
+      console.log('%cLQS logger: loadImage 03', 'color: #c931eb', {});
+      img.src = src;
+      console.log('%cLQS logger: loadImage 04', 'color: #c931eb', {});
+    }
+
+    function generateTexture() {
+      if (!product) return null;
+      if (!product.layerImageUrl) return null;
+
+      const err_result = product.layerImageUrl;
+      if (!drawingCanvasRef) return err_result;
+      if (!drawingCanvasRef.current) return err_result;
+
+      const canvas = drawingCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+
+      loadImage(product.layerImageUrl, function (i) {
+        console.log('%cLQS logger: after loadImage', 'color: #c931eb', { i });
+        canvas.width = i.naturalWidth;
+        canvas.height = i.naturalHeight;
+        ctx.drawImage(i, 0, 0);
+        ctx.save();
+
+        steps.forEach((element) => {
+          if (element.type != 'crop') return;
+
+          console.log('%cLQS logger: ', 'color: #c931eb', { element });
+          loadImage(element.data.fileUrl, function (e) {
+            const sx = element?.data?.completedCropObj?.x ?? 0;
+            const sy = element?.data?.completedCropObj?.y ?? 0;
+            const sWidth = element?.data?.completedCropObj?.width ?? 0;
+            const sHeight = element?.data.completedCropObj?.height ?? 0;
+            const dx = element?.data?.productConfig?.positionX ?? 0;
+            const dy = element?.data.productConfig?.positionY ?? 0;
+            const dWidth = element?.data?.productConfig?.width ?? 0;
+            const dHeight = element?.data?.productConfig?.height ?? 0;
+
+            ctx.drawImage(e, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+            ctx.save();
+          });
+        });
+      });
+
+      //     const sx = steps[0]?.data?.completedCropObj?.x ?? 0;
+      //     const sy = steps[0]?.data?.completedCropObj?.y ?? 0;
+      //     const sWidth = steps[0]?.data?.completedCropObj?.width ?? 0;
+      //     const sHeight = steps[0]?.data.completedCropObj?.height ?? 0;
+      //     const dx = steps[0]?.data?.productConfig?.positionX ?? 0;
+      //     const dy = steps[0]?.data.productConfig?.positionY ?? 0;
+      //     const dWidth = steps[0]?.data?.productConfig?.width ?? 0;
+      //     const dHeight = steps[0]?.data?.productConfig?.height ?? 0;
+      //     ctx.save();
+      //     ctx.drawImage(img1, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+      //     ctx.save();
+      //     console.log('%cLQS texture 06-03-02 ', 'color: #c931eb', {});
+      //   };
+      //   const img1model = steps[0].data;
+      //   img1.src = img1model.fileUrl;
+      //   console.log('%cLQS texture 06-04 ', 'color: #c931eb', {});
+
+      //   //wklejam crop img2
+      //   var img2 = new Image();
+      //   img2.crossOrigin = 'anonymous';
+      //   console.log('%cLQS texture 06-05 ', 'color: #c931eb', {});
+      //   img2.onload = function () {
+      //     console.log('%cLQS texture 06-05-01 ', 'color: #c931eb', {});
+      //     const sx = steps[1]?.data?.completedCropObj?.x ?? 0;
+      //     const sy = steps[1]?.data?.completedCropObj?.y ?? 0;
+      //     const sWidth = steps[1]?.data?.completedCropObj?.width ?? 0;
+      //     const sHeight = steps[1]?.data?.completedCropObj?.height ?? 0;
+      //     const dx = steps[1]?.data.productConfig?.positionX ?? 0;
+      //     const dy = steps[1]?.data.productConfig?.positionY ?? 0;
+      //     const dWidth = steps[1]?.data.productConfig?.width ?? 0;
+      //     const dHeight = steps[1]?.data.productConfig?.height ?? 0;
+      //     ctx.save();
+      //     ctx.drawImage(img2, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+      //     ctx.save();
+      //     console.log('%cLQS texture 06-05-02 ', 'color: #c931eb', {});
+      //   };
+      //   const img2model = steps[1].data;
+      //   img2.src = img2model.fileUrl;
+      //   console.log('%cLQS texture 06-06 ', 'color: #c931eb', {});
+      // };
+      // templateImg.src = product.layerImageUrl;
+
+      const url = drawingCanvasRef.current.toDataURL();
+      console.log('%cLQS texture 07 ', 'color: #c931eb', { url });
+      if (url) return url;
+      console.log('%cLQS texture 08 ', 'color: #c931eb', {});
+      return product.layerImageUrl;
+    }
+    console.log('%cLQS >>>>>>>>>>>>> logger: ', 'color: red', {});
+
+    setFinalImage(generateTexture());
+  }, [product, steps]);
 
   return (
     <Dialog
@@ -246,7 +366,20 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                 />
               );
             } else {
-              return <p>3d cup</p>;
+              return (
+                <div
+                  className={
+                    index == activeStep ? classes.visible : classes.hidden
+                  }
+                >
+                  <View3d
+                    textureUrl={finalImage}
+                    modelUrl={product.objUrl}
+                    saveFn={saveTexture}
+                  />
+                  <canvas ref={drawingCanvasRef} className={classes.hidden} />
+                </div>
+              );
             }
           })}
         </div>
