@@ -1,5 +1,5 @@
 //Core
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 
 //Components
 import Cropper from '../3d/Cropper';
@@ -7,9 +7,12 @@ import View3d from '../3d/View3d';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
+import { createGuid } from '../../core/helpers/guidHelper';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -131,13 +134,22 @@ const OtherButton = withStyles((theme) => ({
 const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const classes = useStyles();
   const { t } = useTranslation();
+  const history = useHistory();
 
+  const [copied, setCopied] = useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
   const [finalImage, setFinalImage] = useState(null);
+  const [finalImageReady, setFinalImageReady] = useState(false);
+  const [refresh, setRefresh] = useState(0);
 
-  const [order] = useOrder();
+  const [order, orderDispatch] = useOrder();
 
   const drawingCanvasRef = useRef(null);
+
+  const handleNext = () => {
+    closeFn();
+    history.push(`/photographer/${product.photographerId}/checkout`);
+  };
 
   function getOrderItem(items) {
     if (!items || items.length == 0) return null;
@@ -180,7 +192,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   }
 
   const steps = getSteps();
-  // console.log('%cLQS logger: ', 'color: #c931eb', { steps });
 
   useEffect(() => {
     let lastStep = steps.length - 1;
@@ -193,26 +204,38 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   };
 
   function saveTexture(model) {
-    console.log('%cLQS logger: saveTexture ', 'color: red', { model });
+    const trackingGuid = createGuid();
+    const newOrderItem = {
+      maxSize: product.size,
+      guid: trackingGuid,
+      fileAsBase64: model,
+      fileUrl: '',
+      fileName: trackingGuid,
+      productId: product.id,
+      set: pack,
+      qty: 1,
+      status: 'idle',
+    };
+
+    orderDispatch({ type: 'ADD_ORDER_ITEM_TEXTURE_3D', payload: newOrderItem });
   }
 
   useEffect(() => {
     function loadImage(src, callback) {
-      console.log('%cLQS logger: loadImage 01', 'color: #c931eb', {});
       var img = new Image();
       img.crossOrigin = 'anonymous';
-      console.log('%cLQS logger: loadImage 02', 'color: #c931eb', {});
       img.onload = function () {
         callback(img);
       };
-      console.log('%cLQS logger: loadImage 03', 'color: #c931eb', {});
+
       img.src = src;
-      console.log('%cLQS logger: loadImage 04', 'color: #c931eb', {});
     }
 
     function generateTexture() {
       if (!product) return null;
       if (!product.layerImageUrl) return null;
+      if (!steps) return null;
+      if (steps.length < 2) return null;
 
       const err_result = product.layerImageUrl;
       if (!drawingCanvasRef) return err_result;
@@ -222,7 +245,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
       const ctx = canvas.getContext('2d');
 
       loadImage(product.layerImageUrl, function (i) {
-        console.log('%cLQS logger: after loadImage', 'color: #c931eb', { i });
         canvas.width = i.naturalWidth;
         canvas.height = i.naturalHeight;
         ctx.drawImage(i, 0, 0);
@@ -231,7 +253,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
         steps.forEach((element) => {
           if (element.type != 'crop') return;
 
-          console.log('%cLQS logger: ', 'color: #c931eb', { element });
           loadImage(element.data.fileUrl, function (e) {
             const sx = element?.data?.completedCropObj?.x ?? 0;
             const sy = element?.data?.completedCropObj?.y ?? 0;
@@ -248,58 +269,55 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
         });
       });
 
-      //     const sx = steps[0]?.data?.completedCropObj?.x ?? 0;
-      //     const sy = steps[0]?.data?.completedCropObj?.y ?? 0;
-      //     const sWidth = steps[0]?.data?.completedCropObj?.width ?? 0;
-      //     const sHeight = steps[0]?.data.completedCropObj?.height ?? 0;
-      //     const dx = steps[0]?.data?.productConfig?.positionX ?? 0;
-      //     const dy = steps[0]?.data.productConfig?.positionY ?? 0;
-      //     const dWidth = steps[0]?.data?.productConfig?.width ?? 0;
-      //     const dHeight = steps[0]?.data?.productConfig?.height ?? 0;
-      //     ctx.save();
-      //     ctx.drawImage(img1, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-      //     ctx.save();
-      //     console.log('%cLQS texture 06-03-02 ', 'color: #c931eb', {});
-      //   };
-      //   const img1model = steps[0].data;
-      //   img1.src = img1model.fileUrl;
-      //   console.log('%cLQS texture 06-04 ', 'color: #c931eb', {});
-
-      //   //wklejam crop img2
-      //   var img2 = new Image();
-      //   img2.crossOrigin = 'anonymous';
-      //   console.log('%cLQS texture 06-05 ', 'color: #c931eb', {});
-      //   img2.onload = function () {
-      //     console.log('%cLQS texture 06-05-01 ', 'color: #c931eb', {});
-      //     const sx = steps[1]?.data?.completedCropObj?.x ?? 0;
-      //     const sy = steps[1]?.data?.completedCropObj?.y ?? 0;
-      //     const sWidth = steps[1]?.data?.completedCropObj?.width ?? 0;
-      //     const sHeight = steps[1]?.data?.completedCropObj?.height ?? 0;
-      //     const dx = steps[1]?.data.productConfig?.positionX ?? 0;
-      //     const dy = steps[1]?.data.productConfig?.positionY ?? 0;
-      //     const dWidth = steps[1]?.data.productConfig?.width ?? 0;
-      //     const dHeight = steps[1]?.data.productConfig?.height ?? 0;
-      //     ctx.save();
-      //     ctx.drawImage(img2, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-      //     ctx.save();
-      //     console.log('%cLQS texture 06-05-02 ', 'color: #c931eb', {});
-      //   };
-      //   const img2model = steps[1].data;
-      //   img2.src = img2model.fileUrl;
-      //   console.log('%cLQS texture 06-06 ', 'color: #c931eb', {});
-      // };
-      // templateImg.src = product.layerImageUrl;
-
       const url = drawingCanvasRef.current.toDataURL();
-      console.log('%cLQS texture 07 ', 'color: #c931eb', { url });
-      if (url) return url;
-      console.log('%cLQS texture 08 ', 'color: #c931eb', {});
+      if (url) {
+        setFinalImageReady(true);
+        return url;
+      }
+
       return product.layerImageUrl;
     }
-    console.log('%cLQS >>>>>>>>>>>>> logger: ', 'color: red', {});
+    const newFinalImage = generateTexture();
 
-    setFinalImage(generateTexture());
+    setFinalImage(newFinalImage);
   }, [product, steps]);
+
+  function handleCopy() {
+    setCopied(true);
+  }
+
+  function isShareDisabled() {
+    if (!order) return true;
+
+    const { orderItems } = order;
+
+    const item = getOrderItem(orderItems);
+    if (!item) return true;
+
+    return false;
+  }
+
+  const showAcceptButton = isShareDisabled();
+
+  const shareUrl = () => {
+    const baseUrl = window.location.origin;
+    const { photographerId } = product;
+    const { id } = product;
+
+    const item = getOrderItem(order.orderItems);
+    const fullGuidUrl = item?.fileUrl ?? '';
+    const storageUrl = `${process.env.REACT_APP_STORAGE_PATH}/customerorderphoto`;
+    const shortGuid = fullGuidUrl.replace(`${storageUrl}/`, '');
+    const encodedGuid = encodeURIComponent(shortGuid);
+
+    return `${baseUrl}/share3d/${photographerId}/${id}/${encodedGuid}`;
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setRefresh((prev) => prev + 1);
+    }, 1000);
+  }, [finalImageReady]);
 
   return (
     <Dialog
@@ -375,8 +393,9 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                   <View3d
                     textureUrl={finalImage}
                     modelUrl={product.objUrl}
-                    saveFn={saveTexture}
+                    saveFn={() => {}}
                   />
+
                   <canvas ref={drawingCanvasRef} className={classes.hidden} />
                 </div>
               );
@@ -390,6 +409,34 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
           <OtherButton onClick={closeFn} color='primary' className={classes.m6}>
             {t('Back')}
           </OtherButton>
+          <CopyToClipboard text={shareUrl()}>
+            <OtherButton
+              onClick={handleCopy}
+              color='primary'
+              className={classes.m6}
+              disabled={isShareDisabled()}
+            >
+              {copied ? t('Copied') : t('Share')}
+            </OtherButton>
+          </CopyToClipboard>
+          {showAcceptButton && (
+            <NextButton
+              onClick={() => saveTexture(finalImage)}
+              color='primary'
+              className={classes.m6}
+            >
+              {t('Accept')}
+            </NextButton>
+          )}
+          {!showAcceptButton && (
+            <NextButton
+              onClick={handleNext}
+              color='primary'
+              className={classes.m6}
+            >
+              {t('Next step')}
+            </NextButton>
+          )}
         </div>
       </DialogActions>
     </Dialog>

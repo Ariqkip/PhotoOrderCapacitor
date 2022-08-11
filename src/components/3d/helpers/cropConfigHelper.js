@@ -1,4 +1,5 @@
 export function getPixelCrop(percentCrop, canvasWidth, canvasHeight) {
+  if (percentCrop.unit == 'px') return percentCrop;
   if (percentCrop.unit != '%') return null;
 
   const x = canvasWidth * (percentCrop.x / 100);

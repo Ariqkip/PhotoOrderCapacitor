@@ -3,6 +3,7 @@ import {
   addAttributesGroupConfig,
   updateAttributesGroupItemSelection,
 } from '../../core/helpers/attributesConfigHelper';
+import { getPixelCrop } from '../../components/3d/helpers/cropConfigHelper';
 
 export const INIT_STATE = {
   photographerId: 0,
@@ -117,6 +118,13 @@ export function OrderReducer(state = INIT_STATE, action) {
           if (item.guid !== action.payload.guid) return item;
 
           item.cropObj = action.payload.crop;
+
+          item.completedCropObj = getPixelCrop(
+            action.payload.crop,
+            item.width,
+            item.height
+          );
+
           return item;
         }),
       ];
@@ -148,8 +156,6 @@ export function OrderReducer(state = INIT_STATE, action) {
       return { ...state, orderItems: [...newOrderItemsWithConfigMulti] };
 
     case 'UPDATE_ORDER_ITEM_CROP_COMPLETE':
-      console.log('%cLQS logger 01: ', 'color: #c931eb', { action });
-
       const newOrderItemsWithCompletedCrop = [
         ...state.orderItems.map((item) => {
           if (item.guid !== action.payload.guid) return item;
@@ -158,9 +164,6 @@ export function OrderReducer(state = INIT_STATE, action) {
           return item;
         }),
       ];
-      console.log('%cLQS logger: 02', 'color: #c931eb', {
-        newOrderItemsWithCompletedCrop,
-      });
 
       return { ...state, orderItems: [...newOrderItemsWithCompletedCrop] };
 

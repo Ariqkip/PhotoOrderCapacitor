@@ -1,11 +1,5 @@
 //Core
-import React, {
-  useState,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useCallback,
-} from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import ReactCrop, {
   centerCrop,
   makeAspectCrop,
@@ -23,7 +17,6 @@ import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
 import { canvasPreview } from './helpers/canvasPreview';
-import { getPixelCrop } from '../3d/helpers/cropConfigHelper';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -59,11 +52,6 @@ function centerAspectCrop(mediaWidth, mediaHeight, aspect) {
 const Cropper = ({ uniqKey, display, orderItem, cropConfig }) => {
   const classes = useStyles();
   const { t } = useTranslation();
-  // console.log('%cLQS logger: ', 'color: #c931eb', {
-  //   cropConfig,
-  //   orderItem,
-  //   uniqKey,
-  // });
 
   const imgRef = useRef(null);
   const previewCanvasRef = useRef(null);
@@ -132,29 +120,7 @@ const Cropper = ({ uniqKey, display, orderItem, cropConfig }) => {
     effectWrapper();
   }, [aspect, orderItem]);
 
-  useLayoutEffect(() => {
-    function calculatePxCrop() {
-      if (!crop) return null;
-      if (!imgRef) return null;
-      if (!imgRef.current) return null;
-
-      if (crop.unit == 'px') return crop;
-
-      const editorW = imgRef?.current?.width ?? 0;
-      const editorH = imgRef?.current?.height ?? 0;
-      const pixelCrop = getPixelCrop(crop, editorW, editorH);
-
-      return pixelCrop;
-    }
-
-    const newEndedCrop = calculatePxCrop();
-
-    // handleSetCompletedCrop(newEndedCrop);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [crop]);
-
   useEffect(() => {
-    // console.log('%cLQS logger 001: ', 'color: #c931eb', { completedCrop });
     function executeCropUpdate() {
       if (!completedCrop) return;
       const cropSum =
@@ -206,27 +172,10 @@ const Cropper = ({ uniqKey, display, orderItem, cropConfig }) => {
     }
   }
 
-  // const setCompletedCropCallback = (e) => {
-  //   const model = { crop: e, guid: uniqKey };
-  //   orderDispatch({ type: 'UPDATE_ORDER_ITEM_CROP_COMPLETE', payload: model });
-  // };
-  // const handleSetCompletedCrop = useCallback(setCompletedCropCallback, [
-  //   orderDispatch,
-  //   uniqKey,
-  // ]);
-
   if (!imgSrc) return <></>;
 
   function handleSetCrop(percentCrop) {
     setCrop(percentCrop);
-  }
-
-  function handleSetCompletedCrop(e) {
-    const model = { crop: e, guid: uniqKey };
-    // console.log('%cLQS logger: ', 'color: red', { model });
-
-    //orderDispatch({ type: 'UPDATE_ORDER_ITEM_CROP_COMPLETE', payload: model });
-    setCompletedCrop(e);
   }
 
   return (
