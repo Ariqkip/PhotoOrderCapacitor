@@ -83,9 +83,20 @@ const OrderService = () => {
         Quantity: item.qty,
         Attributes: itemAttributes,
       };
-
+      let layerIndex = -1;
       if (item.isLayerItem === true) {
-        result.sizes = item.layerConfig;
+        layerIndex++;
+        const config = {
+          X: item.completedCropObj.x,
+          Y: item.completedCropObj.y,
+          Width: item.completedCropObj.width,
+          Height: item.completedCropObj.height,
+          ScaleFactoryUp: 1,
+          Guid: item.guid,
+          Index: layerIndex,
+        };
+
+        result.sizes = config;
       }
 
       return result;

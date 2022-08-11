@@ -3,6 +3,7 @@ import {
   addAttributesGroupConfig,
   updateAttributesGroupItemSelection,
 } from '../../core/helpers/attributesConfigHelper';
+import { getPixelCrop } from '../../components/3d/helpers/cropConfigHelper';
 
 export const INIT_STATE = {
   photographerId: 0,
@@ -111,6 +112,25 @@ export function OrderReducer(state = INIT_STATE, action) {
 
       return { ...state, orderItems: [...newOrderItems] };
 
+    case 'UPDATE_ORDER_ITEM_CROP':
+      const newOrderItemsWithCrop = [
+        ...state.orderItems.map((item) => {
+          if (item.guid !== action.payload.guid) return item;
+
+          item.cropObj = action.payload.crop;
+
+          item.completedCropObj = getPixelCrop(
+            action.payload.crop,
+            item.width,
+            item.height
+          );
+
+          return item;
+        }),
+      ];
+
+      return { ...state, orderItems: [...newOrderItemsWithCrop] };
+
     case 'UPDATE_ORDER_ITEM_TEXTURE_CONFIG':
       const newOrderItemsWithConfig = [
         ...state.orderItems.map((item) => {
@@ -134,6 +154,18 @@ export function OrderReducer(state = INIT_STATE, action) {
         }),
       ];
       return { ...state, orderItems: [...newOrderItemsWithConfigMulti] };
+
+    case 'UPDATE_ORDER_ITEM_CROP_COMPLETE':
+      const newOrderItemsWithCompletedCrop = [
+        ...state.orderItems.map((item) => {
+          if (item.guid !== action.payload.guid) return item;
+          item.completedCropObj = action.payload.crop;
+          item.cropObj = action.payload.crop;
+          return item;
+        }),
+      ];
+
+      return { ...state, orderItems: [...newOrderItemsWithCompletedCrop] };
 
     case 'INCREASE_ORDER_ITEM_QTY':
       return {

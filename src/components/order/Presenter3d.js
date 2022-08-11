@@ -5,6 +5,7 @@ import { Image, Layer, Stage } from 'react-konva';
 //Components
 import View3d from '../3d/View3d';
 import Rectangle from '../3d/Rectangle';
+import Cropper from '../3d/Cropper';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,10 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import Stepper from '@material-ui/core/Stepper';
+import Step from '@material-ui/core/Step';
+import StepButton from '@material-ui/core/StepButton';
+import Typography from '@material-ui/core/Typography';
 
 //Assets
 import defaultObj from '../../assets/cup.obj';
@@ -41,6 +46,28 @@ const useStyles = makeStyles((theme) => ({
   centerVertical: {
     display: 'flex',
     alignItems: 'center',
+  },
+  centerHorizontal: {
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  stepperContainer: {
+    display: 'flex',
+  },
+  thumbImage: {
+    width: '100%',
+    maxWidth: '100px',
+    height: '100%',
+    maxHeight: '60px',
+    marginTop: '4px',
+  },
+  thumbImageSelected: {
+    width: '100%',
+    maxWidth: '100px',
+    height: '100%',
+    maxHeight: '60px',
+    marginTop: '4px',
+    border: 'solid 2px blue',
   },
 }));
 
@@ -80,7 +107,36 @@ const Presenter3d = ({ product, pack }) => {
   const [selectedMode, setSelectedMode] = useState(true);
   const [rectangles, setRectangles] = useState([]);
 
+  const [activeStep, setActiveStep] = React.useState(0);
+
   const [image, status] = useImage(product.layerImageUrl, 'anonymous');
+
+  function getSteps() {
+    const images = order.orderItems.filter(
+      (i) => i.productId === product.id && i.isLayerItem === true
+    );
+
+    return [...images];
+  }
+
+  function getSelectedOrderItem() {
+    const steps = getSteps();
+    return steps[activeStep];
+  }
+
+  function getSelectedCropConfig() {
+    if (!product) return null;
+    const { sizes } = product;
+    if (!sizes) return null;
+
+    return product.sizes[activeStep];
+  }
+
+  const handleStep = (step) => () => {
+    setActiveStep(step);
+  };
+
+  const steps = getSteps();
 
   const scale = 0.4215686275;
   var container = document.querySelector('#js-stage-root');
@@ -288,6 +344,60 @@ const Presenter3d = ({ product, pack }) => {
           width: '100%',
         }}
       >
+        {showEditor && (
+          <>
+            <div>
+              <div className={classes.centerVertical}>
+                <Typography variant='h5' component='span'>
+                  {t('Select file to CROP')}
+                </Typography>
+              </div>
+              <Stepper alternativeLabel nonLinear activeStep={activeStep}>
+                {steps.map((step, index) => {
+                  const stepProps = {};
+                  const buttonProps = {};
+                  if (step.fileUrl) {
+                    buttonProps.optional = (
+                      <img
+                        src={step.fileUrl}
+                        alt={step.fileName}
+                        className={
+                          index == activeStep
+                            ? classes.thumbImageSelected
+                            : classes.thumbImage
+                        }
+                      />
+                    );
+                  }
+                  return (
+                    <Step key={step.guid} {...stepProps}>
+                      <StepButton
+                        onClick={handleStep(index)}
+                        // completed={isStepComplete(index)}
+                        {...buttonProps}
+                      >
+                        {/* {label} */}
+                      </StepButton>
+                    </Step>
+                  );
+                })}
+              </Stepper>
+            </div>
+            <div className={classes.centerHorizontal}>
+              {steps.map((step, index) => {
+                const key = step.guid;
+                return (
+                  <Cropper
+                    uniqKey={key}
+                    display={index == activeStep}
+                    orderItem={getSelectedOrderItem()}
+                    cropConfig={getSelectedCropConfig()}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
         <div id='js-stage-root' className={classes.w100}>
           <Stage
             width={widthValue}
@@ -301,7 +411,7 @@ const Presenter3d = ({ product, pack }) => {
               maxWidth: widthValue,
               height: '100%',
               maxHeight: heightValue,
-              display: showEditor ? 'block' : 'none',
+              // display: 'none',
             }}
           >
             <Layer ref={stageLayerRef}>
