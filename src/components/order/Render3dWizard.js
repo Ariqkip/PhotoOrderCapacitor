@@ -57,10 +57,8 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
   },
   visible: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: 'block',
+    width: '100%',
   },
   hidden: {
     display: 'none',
@@ -297,7 +295,16 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     return false;
   }
 
+  function isThisLastStep() {
+    if (steps.length == activeStep + 1) return true;
+
+    return false;
+  }
+
   const showAcceptButton = isShareDisabled();
+
+  const showShareButton = isThisLastStep();
+  const showNextButton = isThisLastStep();
 
   const shareUrl = () => {
     const baseUrl = window.location.origin;
@@ -316,7 +323,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   useEffect(() => {
     setTimeout(() => {
       setRefresh((prev) => prev + 1);
-    }, 1000);
+    }, 2000);
   }, [finalImageReady]);
 
   return (
@@ -371,20 +378,23 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
             );
           })}
         </Stepper>
-        <div className={classes.centerHorizontal}>
-          {steps.map((step, index) => {
-            if (step.type == 'crop') {
-              const key = step.data.guid;
-              return (
+
+        {steps.map((step, index) => {
+          if (step.type == 'crop') {
+            const key = step.data.guid;
+            return (
+              <div className={classes.centerHorizontal}>
                 <Cropper
                   uniqKey={key}
                   display={index == activeStep}
                   orderItem={step.data}
                   cropConfig={step.data.productConfig}
                 />
-              );
-            } else {
-              return (
+              </div>
+            );
+          } else {
+            return (
+              <div className={classes.centerContent}>
                 <div
                   className={
                     index == activeStep ? classes.visible : classes.hidden
@@ -398,10 +408,11 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
 
                   <canvas ref={drawingCanvasRef} className={classes.hidden} />
                 </div>
-              );
-            }
-          })}
-        </div>
+              </div>
+            );
+          }
+        })}
+
         <Divider />
       </DialogContent>
       <DialogActions>
@@ -409,17 +420,19 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
           <OtherButton onClick={closeFn} color='primary' className={classes.m6}>
             {t('Back')}
           </OtherButton>
-          <CopyToClipboard text={shareUrl()}>
-            <OtherButton
-              onClick={handleCopy}
-              color='primary'
-              className={classes.m6}
-              disabled={isShareDisabled()}
-            >
-              {copied ? t('Copied') : t('Share')}
-            </OtherButton>
-          </CopyToClipboard>
-          {showAcceptButton && (
+          {showShareButton && (
+            <CopyToClipboard text={shareUrl()}>
+              <OtherButton
+                onClick={handleCopy}
+                color='primary'
+                className={classes.m6}
+                disabled={isShareDisabled()}
+              >
+                {copied ? t('Copied') : t('Share')}
+              </OtherButton>
+            </CopyToClipboard>
+          )}
+          {showAcceptButton && showNextButton && (
             <NextButton
               onClick={() => saveTexture(finalImage)}
               color='primary'
@@ -428,7 +441,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               {t('Accept')}
             </NextButton>
           )}
-          {!showAcceptButton && (
+          {!showAcceptButton && showNextButton && (
             <NextButton
               onClick={handleNext}
               color='primary'
