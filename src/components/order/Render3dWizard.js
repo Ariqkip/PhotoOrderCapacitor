@@ -230,10 +230,10 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     }
 
     function generateTexture() {
-      if (!product) return null;
-      if (!product.layerImageUrl) return null;
-      if (!steps) return null;
-      if (steps.length < 2) return null;
+      if (!product) return finalImage;
+      if (!product.layerImageUrl) return finalImage;
+      if (!steps) return finalImage;
+      if (steps.length < 2) return finalImage;
 
       const err_result = product.layerImageUrl;
       if (!drawingCanvasRef) return err_result;
@@ -321,10 +321,13 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      setRefresh((prev) => prev + 1);
-    }, 2000);
-  }, [finalImageReady]);
+    const isLastStep = activeStep + 1 == steps.length;
+    if (isOpen && isLastStep) {
+      setTimeout(() => {
+        setRefresh((prev) => prev + 1);
+      }, 3000);
+    }
+  }, [activeStep, isOpen, steps.length, refresh]);
 
   return (
     <Dialog
