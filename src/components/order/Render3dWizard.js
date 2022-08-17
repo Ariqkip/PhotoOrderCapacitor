@@ -98,6 +98,9 @@ const useStyles = makeStyles((theme) => ({
     marginTop: '4px',
     border: 'solid 2px blue',
   },
+  minheight: {
+    minHeight: '150px',
+  },
 }));
 
 const NextButton = withStyles((theme) => ({
@@ -139,6 +142,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const [finalImage, setFinalImage] = useState(null);
   const [finalImageReady, setFinalImageReady] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const [imageUrls, setImageUrls] = useState(new Set());
 
   const [order, orderDispatch] = useOrder();
 
@@ -168,28 +172,32 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     return product.sizes[i];
   }
 
-  function getSteps() {
-    const images = order.orderItems.filter(
-      (i) => i.productId === product.id && i.isLayerItem === true
-    );
+  const steps = React.useMemo(() => {
+    function getSteps() {
+      const images = order.orderItems.filter(
+        (i) => i.productId === product.id && i.isLayerItem === true
+      );
 
-    const cropSteps = images.map((s, index) => {
-      const sizeConfig = getProductConfig(index);
-      if (sizeConfig) s.productConfig = sizeConfig;
-      return {
-        type: 'crop',
-        data: s,
+      const cropSteps = images.map((s, index) => {
+        const sizeConfig = getProductConfig(index);
+        if (sizeConfig) s.productConfig = sizeConfig;
+        return {
+          type: 'crop',
+          data: s,
+        };
+      });
+
+      const previewStep = {
+        type: 'preview',
+        data: {},
       };
-    });
+      return [...cropSteps, previewStep];
+    }
 
-    const previewStep = {
-      type: 'preview',
-      data: {},
-    };
-    return [...cropSteps, previewStep];
-  }
-
-  const steps = getSteps();
+    const newSteps = getSteps();
+    return newSteps;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order.orderItems]);
 
   useEffect(() => {
     let lastStep = steps.length - 1;
@@ -218,8 +226,8 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     orderDispatch({ type: 'ADD_ORDER_ITEM_TEXTURE_3D', payload: newOrderItem });
   }
 
-  useEffect(() => {
-    function loadImage(src, callback) {
+  const newFinalImage = React.useMemo(() => {
+    function test_loadImage(src, callback) {
       var img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = function () {
@@ -229,11 +237,16 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
       img.src = src;
     }
 
-    function generateTexture() {
+    function updateImgUrls(src) {
+      setImageUrls((prev) => new Set(prev).add(src));
+    }
+
+    function test_generateTexture() {
       if (!product) return finalImage;
       if (!product.layerImageUrl) return finalImage;
       if (!steps) return finalImage;
-      if (steps.length < 2) return finalImage;
+      // if (steps.length < 2) return finalImage;
+      //if (imageUrls.size != steps.length) return finalImage;
 
       const err_result = product.layerImageUrl;
       if (!drawingCanvasRef) return err_result;
@@ -242,16 +255,17 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
       const canvas = drawingCanvasRef.current;
       const ctx = canvas.getContext('2d');
 
-      loadImage(product.layerImageUrl, function (i) {
+      test_loadImage(product.layerImageUrl, function (i) {
         canvas.width = i.naturalWidth;
         canvas.height = i.naturalHeight;
         ctx.drawImage(i, 0, 0);
         ctx.save();
+        updateImgUrls(product.layerImageUrl);
 
         steps.forEach((element) => {
           if (element.type != 'crop') return;
 
-          loadImage(element.data.fileUrl, function (e) {
+          test_loadImage(element.data.fileUrl, function (e) {
             const sx = element?.data?.completedCropObj?.x ?? 0;
             const sy = element?.data?.completedCropObj?.y ?? 0;
             const sWidth = element?.data?.completedCropObj?.width ?? 0;
@@ -263,6 +277,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
 
             ctx.drawImage(e, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
             ctx.save();
+            updateImgUrls(element.data.fileUrl);
           });
         });
       });
@@ -275,10 +290,81 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
 
       return product.layerImageUrl;
     }
-    const newFinalImage = generateTexture();
 
-    setFinalImage(newFinalImage);
-  }, [product, steps]);
+    const generatedImage = test_generateTexture();
+    const test = generatedImage.length;
+
+    if (finalImage != generatedImage && generatedImage.length > 1000) {
+      setFinalImage(generatedImage);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.layerImageUrl, steps, imageUrls.size, refresh]);
+
+  // useEffect(() => {
+  //   function loadImage(src, callback) {
+  //     var img = new Image();
+  //     img.crossOrigin = 'anonymous';
+  //     img.onload = function () {
+  //       console.log('%cLQS logger: IMG LOADED', 'color: #c931eb', { src });
+
+  //       callback(img);
+  //     };
+
+  //     img.src = src;
+  //   }
+
+  //   function generateTexture() {
+  //     if (!product) return finalImage;
+  //     if (!product.layerImageUrl) return finalImage;
+  //     if (!steps) return finalImage;
+  //     if (steps.length < 2) return finalImage;
+
+  //     const err_result = product.layerImageUrl;
+  //     if (!drawingCanvasRef) return err_result;
+  //     if (!drawingCanvasRef.current) return err_result;
+
+  //     const canvas = drawingCanvasRef.current;
+  //     const ctx = canvas.getContext('2d');
+
+  //     loadImage(product.layerImageUrl, function (i) {
+  //       canvas.width = i.naturalWidth;
+  //       canvas.height = i.naturalHeight;
+  //       ctx.drawImage(i, 0, 0);
+  //       ctx.save();
+
+  //       steps.forEach((element) => {
+  //         if (element.type != 'crop') return;
+
+  //         loadImage(element.data.fileUrl, function (e) {
+  //           const sx = element?.data?.completedCropObj?.x ?? 0;
+  //           const sy = element?.data?.completedCropObj?.y ?? 0;
+  //           const sWidth = element?.data?.completedCropObj?.width ?? 0;
+  //           const sHeight = element?.data.completedCropObj?.height ?? 0;
+  //           const dx = element?.data?.productConfig?.positionX ?? 0;
+  //           const dy = element?.data.productConfig?.positionY ?? 0;
+  //           const dWidth = element?.data?.productConfig?.width ?? 0;
+  //           const dHeight = element?.data?.productConfig?.height ?? 0;
+
+  //           ctx.drawImage(e, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+  //           ctx.save();
+  //         });
+  //       });
+  //     });
+
+  //     const url = drawingCanvasRef.current.toDataURL();
+  //     if (url) {
+  //       setFinalImageReady(true);
+  //       return url;
+  //     }
+
+  //     return product.layerImageUrl;
+  //   }
+  //   const newFinalImage = generateTexture();
+  //   if (finalImage != newFinalImage) {
+  //     setFinalImage(newFinalImage);
+  //   }
+  // }, [product.layerImageUrl, steps]);
 
   function handleCopy() {
     setCopied(true);
@@ -325,9 +411,9 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     if (isOpen && isLastStep) {
       setTimeout(() => {
         setRefresh((prev) => prev + 1);
-      }, 3000);
+      }, 10000);
     }
-  }, [activeStep, isOpen, steps.length, refresh]);
+  }, [activeStep, isOpen, steps.length, refresh, finalImage]);
 
   return (
     <Dialog
@@ -403,12 +489,18 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                     index == activeStep ? classes.visible : classes.hidden
                   }
                 >
-                  <View3d
-                    textureUrl={finalImage}
-                    modelUrl={product.objUrl}
-                    saveFn={() => {}}
-                  />
-
+                  {imageUrls.size == steps.length && (
+                    <View3d
+                      textureUrl={finalImage}
+                      modelUrl={product.objUrl}
+                      saveFn={() => {}}
+                    />
+                  )}
+                  {imageUrls.size != steps.length && (
+                    <div className={classes.centerContent}>
+                      <CircularProgress />
+                    </div>
+                  )}
                   <canvas ref={drawingCanvasRef} className={classes.hidden} />
                 </div>
               </div>

@@ -48,7 +48,7 @@ const UploadManager = (props) => {
 
     orderDispatch({
       type: 'ORDER_ITEM_SET_STATE_PROCESSING',
-      payload: { guid: itemToUpload.fileGuid },
+      payload: { guid: itemToUpload.guid },
     });
 
     const service = OrderService();
