@@ -220,8 +220,12 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
 
   const isNextDisabled = () => {
     const files = order.orderItems.filter(
-      (item) => item.productId === product.id && item.isLayerItem === true
+      (item) =>
+        item.productId === product.id &&
+        item.isLayerItem === true &&
+        item.status === 'success'
     );
+    
     const limit = getMaxFileLimit();
 
     return files.length !== limit;

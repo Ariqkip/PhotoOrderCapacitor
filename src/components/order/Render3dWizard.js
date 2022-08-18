@@ -292,7 +292,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     }
 
     const generatedImage = test_generateTexture();
-    const test = generatedImage.length;
 
     if (finalImage != generatedImage && generatedImage.length > 1000) {
       setFinalImage(generatedImage);
@@ -300,71 +299,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.layerImageUrl, steps, imageUrls.size, refresh]);
-
-  // useEffect(() => {
-  //   function loadImage(src, callback) {
-  //     var img = new Image();
-  //     img.crossOrigin = 'anonymous';
-  //     img.onload = function () {
-  //       console.log('%cLQS logger: IMG LOADED', 'color: #c931eb', { src });
-
-  //       callback(img);
-  //     };
-
-  //     img.src = src;
-  //   }
-
-  //   function generateTexture() {
-  //     if (!product) return finalImage;
-  //     if (!product.layerImageUrl) return finalImage;
-  //     if (!steps) return finalImage;
-  //     if (steps.length < 2) return finalImage;
-
-  //     const err_result = product.layerImageUrl;
-  //     if (!drawingCanvasRef) return err_result;
-  //     if (!drawingCanvasRef.current) return err_result;
-
-  //     const canvas = drawingCanvasRef.current;
-  //     const ctx = canvas.getContext('2d');
-
-  //     loadImage(product.layerImageUrl, function (i) {
-  //       canvas.width = i.naturalWidth;
-  //       canvas.height = i.naturalHeight;
-  //       ctx.drawImage(i, 0, 0);
-  //       ctx.save();
-
-  //       steps.forEach((element) => {
-  //         if (element.type != 'crop') return;
-
-  //         loadImage(element.data.fileUrl, function (e) {
-  //           const sx = element?.data?.completedCropObj?.x ?? 0;
-  //           const sy = element?.data?.completedCropObj?.y ?? 0;
-  //           const sWidth = element?.data?.completedCropObj?.width ?? 0;
-  //           const sHeight = element?.data.completedCropObj?.height ?? 0;
-  //           const dx = element?.data?.productConfig?.positionX ?? 0;
-  //           const dy = element?.data.productConfig?.positionY ?? 0;
-  //           const dWidth = element?.data?.productConfig?.width ?? 0;
-  //           const dHeight = element?.data?.productConfig?.height ?? 0;
-
-  //           ctx.drawImage(e, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-  //           ctx.save();
-  //         });
-  //       });
-  //     });
-
-  //     const url = drawingCanvasRef.current.toDataURL();
-  //     if (url) {
-  //       setFinalImageReady(true);
-  //       return url;
-  //     }
-
-  //     return product.layerImageUrl;
-  //   }
-  //   const newFinalImage = generateTexture();
-  //   if (finalImage != newFinalImage) {
-  //     setFinalImage(newFinalImage);
-  //   }
-  // }, [product.layerImageUrl, steps]);
 
   function handleCopy() {
     setCopied(true);
@@ -380,6 +314,20 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
 
     return false;
   }
+
+  function isAcceptUploading() {
+    const { orderItems } = order;
+    const acceptedItem = orderItems.find(
+      (i) => i.productId == product.id && !i.isLayerItem
+    );
+
+    if (!acceptedItem) return false;
+
+    if (acceptedItem.status == 'processing') return true;
+
+    return false;
+  }
+  isAcceptUploading();
 
   function isThisLastStep() {
     if (steps.length == activeStep + 1) return true;
@@ -411,9 +359,9 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     if (isOpen && isLastStep) {
       setTimeout(() => {
         setRefresh((prev) => prev + 1);
-      }, 10000);
+      }, 5000);
     }
-  }, [activeStep, isOpen, steps.length, refresh, finalImage]);
+  }, [steps.length, refresh, activeStep, isOpen]);
 
   return (
     <Dialog
@@ -532,8 +480,9 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               onClick={() => saveTexture(finalImage)}
               color='primary'
               className={classes.m6}
+              disabled={isAcceptUploading()}
             >
-              {t('Accept')}
+              {isAcceptUploading() ? <CircularProgress /> : t('Accept')}
             </NextButton>
           )}
           {!showAcceptButton && showNextButton && (
