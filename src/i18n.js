@@ -210,7 +210,7 @@ i18n.init({
       },
     },
   },
-  lng: 'gr',
+  lng: 'en',
   fallbackLng: 'en',
   debug: false,
 

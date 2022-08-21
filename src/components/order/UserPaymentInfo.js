@@ -29,6 +29,8 @@ const useStyles = makeStyles((theme) => ({
     padding: '28px',
     height: '100%',
     cursor: 'pointer',
+    width: '100%',
+    maxWidth: '200px',
   },
   gridCard: {
     justifyContent: 'center',
@@ -49,8 +51,13 @@ const UserPaymentInfo = (props) => {
 
   return (
     <Container maxWidth='md' className={classes.container}>
-      <Grid container spacing={3}>
-        <Grid item xs={6} sm={4} md={3}>
+      <Grid
+        container
+        spacing={3}
+        justifyContent='space-evenly'
+        alignItems='stretch'
+      >
+        <Grid item sm={6} md={3}>
           <Paper square className={classes.paper}>
             <Grid
               container
@@ -72,7 +79,7 @@ const UserPaymentInfo = (props) => {
             </Grid>
           </Paper>
         </Grid>
-        <Grid item xs={6} sm={4} md={3}>
+        <Grid item sm={6} md={3}>
           <Paper square className={classes.paper}>
             <Grid
               container
@@ -95,7 +102,7 @@ const UserPaymentInfo = (props) => {
             </Grid>
           </Paper>
         </Grid>
-        <Grid item xs={6} sm={4} md={3}>
+        <Grid item sm={6} md={3}>
           <Paper square className={classes.paper}>
             <Grid
               container
