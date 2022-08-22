@@ -278,16 +278,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
               {t('REMOVE ALL FILES')}
             </RemoveButton>
           </Grid>
-          {/* <Grid
-            item
-            xs={12}
-            md={4}
-            className={[classes.centerContent, classes.p6]}
-          >
-            <OtherButton onClick={closeFn} color='primary'>
-              {t('Choose other products')}
-            </OtherButton>
-          </Grid> */}
           <Grid
             item
             xs={12}

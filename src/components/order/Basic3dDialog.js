@@ -1,5 +1,5 @@
 //Core
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 //Components
 import RoundButton from '../core/RoundButton';
@@ -127,6 +127,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
   const history = useHistory();
 
   let fileInput = null;
+  const scrollToRef = useRef(null);
 
   const [pack, setPack] = useState(1);
   const [open3d, setOpen3d] = useState(false);
@@ -153,6 +154,8 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
 
     return current >= limit;
   };
+
+  const executeScroll = () => scrollToRef.current.scrollIntoView();
 
   const fileInputHandler = (event) => {
     const limit = getMaxFileLimit();
@@ -187,6 +190,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
           };
 
           orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
+          executeScroll();
         };
       };
     }
@@ -225,7 +229,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
         item.isLayerItem === true &&
         item.status === 'success'
     );
-    
+
     const limit = getMaxFileLimit();
 
     return files.length !== limit;
@@ -307,12 +311,18 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
                 <AttributesList product={product} pack={pack} />
               </Grid>
             </Grid>
+            <div ref={scrollToRef} />
             {renderFiles()}
           </DialogContentText>
           <Divider />
         </DialogContent>
         <DialogActions>
-          <Grid container spacing={0} direction='row'>
+          <Grid
+            container
+            spacing={0}
+            direction='row'
+            justifyContent='space-between'
+          >
             <Grid
               item
               xs={12}
@@ -322,16 +332,6 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
               <RemoveButton onClick={handleRemoveAll} color='primary'>
                 {t('REMOVE ALL FILES')}
               </RemoveButton>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              md={4}
-              className={[classes.centerContent, classes.p6]}
-            >
-              <OtherButton onClick={closeFn} color='primary'>
-                {t('Choose other products')}
-              </OtherButton>
             </Grid>
             <Grid
               item

@@ -369,7 +369,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
       maxWidth={'lg'}
       open={isOpen ?? false}
       onClose={closeFn}
-      scroll='body'
+      scroll='paper'
     >
       <DialogContent>
         <Stepper alternativeLabel nonLinear activeStep={activeStep}>

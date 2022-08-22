@@ -66,6 +66,8 @@ const ActiveButton = withStyles((theme) => ({
   root: {
     width: '100%',
     maxWidth: '320px',
+    position: 'fixed',
+    bottom: '10px',
     color: 'white',
     borderRadius: '50px',
     padding: '12px 28px',
