@@ -81,12 +81,18 @@ const ThankYouCard = (props) => {
             />
           </Grid>
           <Grid item>
-            <Typography variant='h4' component='h1'>
-              {order.orderId} has been accepted
+            <Typography variant='h5' component='p' align='center'>
+              Order no:
+            </Typography>
+            <Typography variant='h4' component='h1' align='center'>
+              {order.orderId}
+            </Typography>
+            <Typography variant='h5' component='p' align='center'>
+              has been accepted
             </Typography>
           </Grid>
           <Grid item>
-            <Typography variant='h4' component='h1'>
+            <Typography variant='h4' component='p'>
               {photographer.companyName}
             </Typography>
           </Grid>

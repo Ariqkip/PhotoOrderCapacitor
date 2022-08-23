@@ -63,7 +63,7 @@ const OrderService = () => {
         );
         //read all selected items
         groupIds.map((id) => {
-          const selectedValue = config.configs.find((c) => c.groupId === id);
+          const selectedValue = config?.configs?.find((c) => c.groupId === id);
           if (selectedValue) itemAttributes.push(selectedValue.selected);
           else {
             const defaultSelection = defaultAttributes.find(
