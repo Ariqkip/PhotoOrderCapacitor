@@ -46,15 +46,13 @@ function priceCalculator(productId, quantity, photographer, order) {
   if (productPrices && productPrices.length > 0) {
     priceUnitBase = productPrices[0].price;
 
-    const matchingPriceRange = productPrices.find(
-      (r) =>
-        r.priceLevelFrom <= estimatedQuantity &&
-        r.priceLevelTo >= estimatedQuantity
-    );
+    productPrices.forEach((p) => {
+      if (p.priceLevelFrom > estimatedQuantity) return;
 
-    if (matchingPriceRange) {
-      priceUnitBase = matchingPriceRange.price;
-    }
+      if (p.priceLevelTo >= estimatedQuantity || p.priceLevelTo == 0) {
+        priceUnitBase = p.price;
+      }
+    });
   }
 
   //calculate by attributes
