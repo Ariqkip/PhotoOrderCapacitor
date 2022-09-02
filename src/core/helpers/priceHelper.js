@@ -2,8 +2,8 @@ import { getSelectedAttributes } from './attributesHelper';
 
 export function formatPrice(num) {
   if (typeof num !== 'number') return null;
-
-  return `${num.toFixed(2)}`;
+  const result = Math.round((num + Number.EPSILON) * 100) / 100;
+  return `${result.toFixed(2)}`;
 }
 
 function priceCalculator(productId, quantity, photographer, order) {

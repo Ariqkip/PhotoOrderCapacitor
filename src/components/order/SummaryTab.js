@@ -80,16 +80,24 @@ const SummaryTab = (props) => {
   };
 
   useEffect(() => {
-    const bill = order.orderItems.map((item) => {
-      if (item.isLayerItem === true) return 0;
 
-      return getPrice(item.productId, item.qty, photographer, order);
+    const productIdsList = [
+      ...new Set(order.orderItems.map((i) => i.productId)),
+    ];
+
+    const bill = productIdsList.map((id) => {
+      const items = order.orderItems.filter(
+        (x) => x.isLayerItem !== true && x.productId == id
+      );
+
+      return getPrice(id, items.length, photographer, order);
     });
 
     let newTotal = bill.reduce((sum, item) => sum + item, 0);
     if (order.shippingSelected) {
       newTotal += photographer.shippingPrice;
     }
+
     setTotal(newTotal);
   }, [order, photographer]);
 
