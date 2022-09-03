@@ -90,7 +90,9 @@ const SummaryTab = (props) => {
         (x) => x.isLayerItem !== true && x.productId == id
       );
 
-      return getPrice(id, items.length, photographer, order);
+      const sumQty = items.reduce((sum, item) => sum + item.qty, 0);
+
+      return getPrice(id, sumQty, photographer, order);
     });
 
     let newTotal = bill.reduce((sum, item) => sum + item, 0);
