@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 //Components
 import Cropper from '../3d/Cropper';
 import View3d from '../3d/View3d';
+import RoundButton from './../core/RoundButton';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -17,10 +18,13 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
+import CachedIcon from '@material-ui/icons/Cached';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import Divider from '@material-ui/core/Divider';
+import DoneAllIcon from '@material-ui/icons/DoneAll';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
@@ -101,6 +105,9 @@ const useStyles = makeStyles((theme) => ({
   minheight: {
     minHeight: '150px',
   },
+  shareBox: {
+    padding: '10px',
+  },
 }));
 
 const NextButton = withStyles((theme) => ({
@@ -136,6 +143,8 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const history = useHistory();
+
+  let fileInput = null;
 
   const [copied, setCopied] = useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
@@ -191,7 +200,12 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
         type: 'preview',
         data: {},
       };
-      return [...cropSteps, previewStep];
+
+      const shareStep = {
+        type: 'share',
+        data: {},
+      };
+      return [...cropSteps, previewStep, shareStep];
     }
 
     const newSteps = getSteps();
@@ -200,9 +214,9 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   }, [order.orderItems]);
 
   useEffect(() => {
-    let lastStep = steps.length - 1;
-    if (lastStep < 0) lastStep = 0;
-    setActiveStep(lastStep);
+    let oneBeforeLast = steps.length - 2;
+    if (oneBeforeLast < 0) oneBeforeLast = 0;
+    setActiveStep(oneBeforeLast);
   }, [steps.length]);
 
   const handleStep = (step) => () => {
@@ -328,14 +342,19 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     return false;
   }
   isAcceptUploading();
-
   function isThisLastStep() {
     if (steps.length == activeStep + 1) return true;
 
     return false;
   }
 
-  const showAcceptButton = isShareDisabled();
+  function showAcceptButton() {
+    const isShareDisabledResult = isShareDisabled();
+    const oneBeforeLast = activeStep + 2 == steps.length;
+    const result = activeStep == oneBeforeLast + isShareDisabledResult;
+
+    return result;
+  }
 
   const showShareButton = isThisLastStep();
   const showNextButton = isThisLastStep();
@@ -354,9 +373,50 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     return `${baseUrl}/share3d/${photographerId}/${id}/${encodedGuid}`;
   };
 
+  const handleUploadClick = () => {
+    fileInput.click();
+  };
+
+  const fileInputHandler = (e) => {
+    const { files } = e.target;
+    const newFile = files[0] ?? null;
+
+    if (!newFile) return;
+
+    const trackingGuid = createGuid();
+    const reader = new FileReader();
+    reader.readAsDataURL(newFile);
+
+    const currentItem = steps[activeStep].data ?? null;
+
+    reader.onloadend = () => {
+      var tempImg = new Image();
+      tempImg.src = reader.result;
+      tempImg.onload = function () {
+        const orderItem = {
+          oldGuid: currentItem.guid,
+          newGuid: trackingGuid,
+          maxSize: product.size,
+          fileAsBase64: reader.result,
+          fileUrl: URL.createObjectURL(newFile),
+          fileName: newFile.name,
+          productId: product.id,
+          set: pack,
+          qty: 1,
+          status: 'idle',
+          isLayerItem: true,
+          width: tempImg.width,
+          height: tempImg.height,
+        };
+
+        orderDispatch({ type: 'REPLACE_ORDER_ITEM', payload: orderItem });
+      };
+    };
+  };
+
   useEffect(() => {
-    const isLastStep = activeStep + 1 == steps.length;
-    if (isOpen && isLastStep) {
+    const oneBeforeLast = activeStep + 2 == steps.length;
+    if (isOpen && oneBeforeLast) {
       setTimeout(() => {
         setRefresh((prev) => prev + 1);
       }, 5000);
@@ -402,6 +462,19 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                 />
               );
             }
+            if (step.type == 'share') {
+              buttonProps.optional = (
+                <div
+                  className={`${
+                    index == activeStep
+                      ? classes.thumbImageSelected
+                      : classes.thumbImage
+                  } ${classes.shareBox}`}
+                >
+                  <DoneAllIcon />
+                </div>
+              );
+            }
             return (
               <Step key={step.data.guid} {...stepProps}>
                 <StepButton
@@ -420,16 +493,43 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
           if (step.type == 'crop') {
             const key = step.data.guid;
             return (
-              <div className={classes.centerHorizontal}>
-                <Cropper
-                  uniqKey={key}
-                  display={index == activeStep}
-                  orderItem={step.data}
-                  cropConfig={step.data.productConfig}
-                />
-              </div>
+              <>
+                <div className={classes.centerHorizontal}>
+                  <Cropper
+                    uniqKey={key}
+                    display={index == activeStep}
+                    orderItem={step.data}
+                    cropConfig={step.data.productConfig}
+                  />
+                </div>
+                <div>
+                  <input
+                    key={key}
+                    type='file'
+                    style={{ display: 'none' }}
+                    inputprops={{ accept: 'image/*' }}
+                    onChange={fileInputHandler}
+                    ref={(input) => {
+                      fileInput = input;
+                    }}
+                  />
+                  <RoundButton
+                    key={key}
+                    onClick={() => handleUploadClick()}
+                    className={
+                      index == activeStep ? classes.visible : classes.hidden
+                    }
+                  >
+                    <Box className={classes.centerContent}>
+                      <CachedIcon />
+                      <span>{t('Replace file')}</span>
+                    </Box>
+                  </RoundButton>
+                </div>
+              </>
             );
-          } else {
+          }
+          if (step.type == 'preview') {
             return (
               <div className={classes.centerContent}>
                 <div
@@ -437,19 +537,32 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                     index == activeStep ? classes.visible : classes.hidden
                   }
                 >
-                  {imageUrls.size == steps.length && (
+                  {imageUrls.size >= steps.length - 1 && (
                     <View3d
                       textureUrl={finalImage}
                       modelUrl={product.objUrl}
                       saveFn={() => {}}
                     />
                   )}
-                  {imageUrls.size != steps.length && (
+                  {imageUrls.size < steps.length - 1 && (
                     <div className={classes.centerContent}>
                       <CircularProgress />
                     </div>
                   )}
                   <canvas ref={drawingCanvasRef} className={classes.hidden} />
+                </div>
+              </div>
+            );
+          }
+          if (step.type == 'share') {
+            return (
+              <div className={classes.centerContent}>
+                <div
+                  className={
+                    index == activeStep ? classes.visible : classes.hidden
+                  }
+                >
+                  <p>share page step</p>
                 </div>
               </div>
             );
@@ -475,7 +588,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               </OtherButton>
             </CopyToClipboard>
           )}
-          {showAcceptButton && showNextButton && (
+          {showAcceptButton() && (
             <NextButton
               onClick={() => saveTexture(finalImage)}
               color='primary'
@@ -485,7 +598,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               {isAcceptUploading() ? <CircularProgress /> : t('Accept')}
             </NextButton>
           )}
-          {!showAcceptButton && showNextButton && (
+          {showNextButton && (
             <NextButton
               onClick={handleNext}
               color='primary'

@@ -46,7 +46,7 @@ const RoundButton = ({ children, onClick, ...props }) => {
 
   return (
     <Button
-      className={[classes.rootBtn, classes.borderBtn, classes.paddingsBtn]}
+      className={`${classes.rootBtn} ${classes.borderBtn} ${classes.paddingsBtn}`}
       onClick={onClick}
       {...props}
     >

@@ -87,6 +87,19 @@ export function OrderReducer(state = INIT_STATE, action) {
     case 'ADD_ORDER_ITEM':
       return { ...state, orderItems: [action.payload, ...state.orderItems] };
 
+    case 'REPLACE_ORDER_ITEM':
+      const replacedOrderItems = [
+        ...state.orderItems.map((item) => {
+          if (item.guid !== action.payload.oldGuid) return item;
+
+          let newItem = { ...action.payload, guid: action.payload.newGuid };
+
+          return newItem;
+        }),
+      ];
+
+      return { ...state, orderItems: [...replacedOrderItems] };
+
     case 'ADD_ORDER_ITEM_TEXTURE_3D':
       const newOrderItems = [
         ...state.orderItems.map((item) => {
