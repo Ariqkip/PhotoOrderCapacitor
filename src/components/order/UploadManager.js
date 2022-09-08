@@ -64,9 +64,14 @@ const UploadManager = (props) => {
       })
       .then(
         (res) => {
+
           orderDispatch({
             type: 'ORDER_ITEM_SET_STATE_SUCCESS',
-            payload: { guid: res.data.TrackingGuid, url: res.data.ImageUri },
+            payload: {
+              guid: res.data.TrackingGuid,
+              url: res.data.ImageUri,
+              fileGuid: res.data.ImageGuid,
+            },
           });
         },
         (err) => {
