@@ -19,6 +19,8 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import CachedIcon from '@material-ui/icons/Cached';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -29,6 +31,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
+
+//Assets
+import shareImg from '../../assets/share2.jpg';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -108,6 +113,10 @@ const useStyles = makeStyles((theme) => ({
   shareBox: {
     padding: '10px',
   },
+  newLines: {
+    whiteSpace: 'pre-line',
+    textAlign: 'center',
+  },
 }));
 
 const NextButton = withStyles((theme) => ({
@@ -152,6 +161,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const [finalImageReady, setFinalImageReady] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [imageUrls, setImageUrls] = useState(new Set());
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const [order, orderDispatch] = useOrder();
 
@@ -160,6 +170,11 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const handleNext = () => {
     closeFn();
     history.push(`/photographer/${product.photographerId}/checkout`);
+  };
+
+  const handleClose = () => {
+    setIsShareOpen(false);
+    closeFn();
   };
 
   function getOrderItem(items) {
@@ -201,11 +216,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
         data: {},
       };
 
-      const shareStep = {
-        type: 'share',
-        data: {},
-      };
-      return [...cropSteps, previewStep, shareStep];
+      return [...cropSteps, previewStep];
     }
 
     const newSteps = getSteps();
@@ -214,9 +225,9 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   }, [order.orderItems]);
 
   useEffect(() => {
-    let oneBeforeLast = steps.length - 2;
-    if (oneBeforeLast < 0) oneBeforeLast = 0;
-    setActiveStep(oneBeforeLast);
+    let last = steps.length - 1;
+    if (last < 0) last = 0;
+    setActiveStep(last);
   }, [steps.length]);
 
   const handleStep = (step) => () => {
@@ -238,6 +249,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     };
 
     orderDispatch({ type: 'ADD_ORDER_ITEM_TEXTURE_3D', payload: newOrderItem });
+    setIsShareOpen(true);
   }
 
   const newFinalImage = React.useMemo(() => {
@@ -350,8 +362,8 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
 
   function showAcceptButton() {
     const isShareDisabledResult = isShareDisabled();
-    const oneBeforeLast = activeStep + 2 == steps.length;
-    const result = activeStep == oneBeforeLast + isShareDisabledResult;
+    const last = activeStep + 1 == steps.length;
+    const result = activeStep == last + isShareDisabledResult;
 
     return result;
   }
@@ -415,8 +427,8 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   };
 
   useEffect(() => {
-    const oneBeforeLast = activeStep + 2 == steps.length;
-    if (isOpen && oneBeforeLast) {
+    const last = activeStep + 1 == steps.length;
+    if (isOpen && last) {
       setTimeout(() => {
         setRefresh((prev) => prev + 1);
       }, 5000);
@@ -424,192 +436,221 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   }, [steps.length, refresh, activeStep, isOpen]);
 
   return (
-    <Dialog
-      fullWidth={true}
-      maxWidth={'lg'}
-      open={isOpen ?? false}
-      onClose={closeFn}
-      scroll='paper'
-    >
-      <DialogContent>
-        <Stepper alternativeLabel nonLinear activeStep={activeStep}>
-          {steps.map((step, index) => {
-            const stepProps = {};
-            const buttonProps = {};
-            if (step.type == 'crop' && step.data.fileUrl) {
-              buttonProps.optional = (
-                <img
-                  src={step.data.fileUrl}
-                  alt={step.data.fileName}
-                  className={
-                    index == activeStep
-                      ? classes.thumbImageSelected
-                      : classes.thumbImage
-                  }
-                />
+    <>
+      <Dialog
+        fullWidth={true}
+        maxWidth={'lg'}
+        open={isOpen ?? false}
+        onClose={handleClose}
+        scroll='paper'
+      >
+        <DialogContent>
+          <Stepper alternativeLabel nonLinear activeStep={activeStep}>
+            {steps.map((step, index) => {
+              const stepProps = {};
+              const buttonProps = {};
+              if (step.type == 'crop' && step.data.fileUrl) {
+                buttonProps.optional = (
+                  <img
+                    src={step.data.fileUrl}
+                    alt={step.data.fileName}
+                    className={
+                      index == activeStep
+                        ? classes.thumbImageSelected
+                        : classes.thumbImage
+                    }
+                  />
+                );
+              }
+              if (step.type == 'preview' && product.imageUrl) {
+                buttonProps.optional = (
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className={
+                      index == activeStep
+                        ? classes.thumbImageSelected
+                        : classes.thumbImage
+                    }
+                  />
+                );
+              }
+              if (step.type == 'share') {
+                buttonProps.optional = (
+                  <div
+                    className={`${
+                      index == activeStep
+                        ? classes.thumbImageSelected
+                        : classes.thumbImage
+                    } ${classes.shareBox}`}
+                  >
+                    <DoneAllIcon />
+                  </div>
+                );
+              }
+              return (
+                <Step key={step.data.guid} {...stepProps}>
+                  <StepButton
+                    onClick={handleStep(index)}
+                    // completed={isStepComplete(index)}
+                    {...buttonProps}
+                  >
+                    {/* {label} */}
+                  </StepButton>
+                </Step>
               );
-            }
-            if (step.type == 'preview' && product.imageUrl) {
-              buttonProps.optional = (
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className={
-                    index == activeStep
-                      ? classes.thumbImageSelected
-                      : classes.thumbImage
-                  }
-                />
-              );
-            }
-            if (step.type == 'share') {
-              buttonProps.optional = (
-                <div
-                  className={`${
-                    index == activeStep
-                      ? classes.thumbImageSelected
-                      : classes.thumbImage
-                  } ${classes.shareBox}`}
-                >
-                  <DoneAllIcon />
-                </div>
-              );
-            }
-            return (
-              <Step key={step.data.guid} {...stepProps}>
-                <StepButton
-                  onClick={handleStep(index)}
-                  // completed={isStepComplete(index)}
-                  {...buttonProps}
-                >
-                  {/* {label} */}
-                </StepButton>
-              </Step>
-            );
-          })}
-        </Stepper>
+            })}
+          </Stepper>
 
-        {steps.map((step, index) => {
-          if (step.type == 'crop') {
-            const key = step.data.guid;
-            return (
-              <>
-                <div className={classes.centerHorizontal}>
-                  <Cropper
-                    uniqKey={key}
-                    display={index == activeStep}
-                    orderItem={step.data}
-                    cropConfig={step.data.productConfig}
-                  />
-                </div>
-                <div>
-                  <input
-                    key={key}
-                    type='file'
-                    style={{ display: 'none' }}
-                    inputprops={{ accept: 'image/*' }}
-                    onChange={fileInputHandler}
-                    ref={(input) => {
-                      fileInput = input;
-                    }}
-                  />
-                  <RoundButton
-                    key={key}
-                    onClick={() => handleUploadClick()}
+          {steps.map((step, index) => {
+            if (step.type == 'crop') {
+              const key = step.data.guid;
+              return (
+                <>
+                  <div className={classes.centerHorizontal}>
+                    <Cropper
+                      uniqKey={key}
+                      display={index == activeStep}
+                      orderItem={step.data}
+                      cropConfig={step.data.productConfig}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      key={key}
+                      type='file'
+                      style={{ display: 'none' }}
+                      inputprops={{ accept: 'image/*' }}
+                      onChange={fileInputHandler}
+                      ref={(input) => {
+                        fileInput = input;
+                      }}
+                    />
+                    <RoundButton
+                      key={key}
+                      onClick={() => handleUploadClick()}
+                      className={
+                        index == activeStep ? classes.visible : classes.hidden
+                      }
+                    >
+                      <Box className={classes.centerContent}>
+                        <CachedIcon />
+                        <span>{t('Replace file')}</span>
+                      </Box>
+                    </RoundButton>
+                  </div>
+                </>
+              );
+            }
+            if (step.type == 'preview') {
+              return (
+                <div className={classes.centerContent}>
+                  <div
                     className={
                       index == activeStep ? classes.visible : classes.hidden
                     }
                   >
-                    <Box className={classes.centerContent}>
-                      <CachedIcon />
-                      <span>{t('Replace file')}</span>
-                    </Box>
-                  </RoundButton>
+                    {imageUrls.size >= steps.length && (
+                      <View3d
+                        textureUrl={finalImage}
+                        modelUrl={product.objUrl}
+                        saveFn={() => {}}
+                      />
+                    )}
+                    {imageUrls.size < steps.length && (
+                      <div className={classes.centerContent}>
+                        <CircularProgress />
+                      </div>
+                    )}
+                    <canvas ref={drawingCanvasRef} className={classes.hidden} />
+                  </div>
                 </div>
-              </>
-            );
-          }
-          if (step.type == 'preview') {
-            return (
-              <div className={classes.centerContent}>
-                <div
-                  className={
-                    index == activeStep ? classes.visible : classes.hidden
-                  }
-                >
-                  {imageUrls.size >= steps.length - 1 && (
-                    <View3d
-                      textureUrl={finalImage}
-                      modelUrl={product.objUrl}
-                      saveFn={() => {}}
-                    />
-                  )}
-                  {imageUrls.size < steps.length - 1 && (
-                    <div className={classes.centerContent}>
-                      <CircularProgress />
-                    </div>
-                  )}
-                  <canvas ref={drawingCanvasRef} className={classes.hidden} />
+              );
+            }
+            if (step.type == 'share') {
+              return (
+                <div className={classes.centerContent}>
+                  <div
+                    className={
+                      index == activeStep ? classes.visible : classes.hidden
+                    }
+                  >
+                    <p>share page step</p>
+                  </div>
                 </div>
-              </div>
-            );
-          }
-          if (step.type == 'share') {
-            return (
-              <div className={classes.centerContent}>
-                <div
-                  className={
-                    index == activeStep ? classes.visible : classes.hidden
-                  }
-                >
-                  <p>share page step</p>
-                </div>
-              </div>
-            );
-          }
-        })}
+              );
+            }
+          })}
 
-        <Divider />
-      </DialogContent>
-      <DialogActions>
-        <div className={classes.btnContainer}>
-          <OtherButton onClick={closeFn} color='primary' className={classes.m6}>
-            {t('Back')}
-          </OtherButton>
-          {showShareButton && (
-            <CopyToClipboard text={shareUrl()}>
-              <OtherButton
-                onClick={handleCopy}
+          <Divider />
+        </DialogContent>
+        <DialogActions>
+          <div className={classes.btnContainer}>
+            <OtherButton
+              onClick={closeFn}
+              color='primary'
+              className={classes.m6}
+            >
+              {t('Back')}
+            </OtherButton>
+            {showAcceptButton() && (
+              <NextButton
+                onClick={() => saveTexture(finalImage)}
                 color='primary'
                 className={classes.m6}
-                disabled={isShareDisabled()}
+                disabled={isAcceptUploading()}
               >
-                {copied ? t('Copied') : t('Share')}
-              </OtherButton>
-            </CopyToClipboard>
-          )}
-          {showAcceptButton() && (
-            <NextButton
-              onClick={() => saveTexture(finalImage)}
-              color='primary'
-              className={classes.m6}
-              disabled={isAcceptUploading()}
-            >
-              {isAcceptUploading() ? <CircularProgress /> : t('Accept')}
-            </NextButton>
-          )}
-          {showNextButton && (
-            <NextButton
-              onClick={handleNext}
-              color='primary'
-              className={classes.m6}
-            >
-              {t('Next step')}
-            </NextButton>
-          )}
-        </div>
-      </DialogActions>
-    </Dialog>
+                {isAcceptUploading() ? <CircularProgress /> : t('Accept')}
+              </NextButton>
+            )}
+          </div>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        fullWidth={true}
+        maxWidth={'md'}
+        open={isShareOpen ?? false}
+        onClose={handleClose}
+      >
+        <DialogContent>
+          <div
+            className={`${classes.centerHorizontal}, ${classes.centerContent}`}
+          >
+            <img
+              src={shareImg}
+              alt='Share img'
+              style={{ width: '300px', height: '300px' }}
+            />
+            <div className={classes.newLines}>{t('ShareCTA')}</div>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <div className={classes.btnContainer}>
+            {showShareButton && (
+              <CopyToClipboard text={shareUrl()}>
+                <OtherButton
+                  onClick={handleCopy}
+                  color='primary'
+                  className={classes.m6}
+                  disabled={isShareDisabled()}
+                >
+                  {copied ? t('Copied') : t('Share')}
+                </OtherButton>
+              </CopyToClipboard>
+            )}
+            {showNextButton && (
+              <NextButton
+                onClick={handleNext}
+                color='primary'
+                className={classes.m6}
+              >
+                {t('Next step')}
+              </NextButton>
+            )}
+          </div>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

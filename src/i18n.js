@@ -62,6 +62,9 @@ i18n.init({
         'Missing product': 'We have not found the product you are looking for',
         'Fill basic information to continue':
           'Fill in the basic informations and add products to continue.',
+        ShareCTA: `Click the "share" button and paste this link into your message
+          Let your friends create their own wonderful mugs !!!
+          Don\'t forget to press the "next step" button to complete your order.`,
 
         // Mobile Welcome Modal
         'You want to upload photos faster.':
