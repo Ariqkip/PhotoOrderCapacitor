@@ -140,13 +140,7 @@ const OrderIndex = ({ match }) => {
       </Backdrop>
       <Suspense fallback={<SuspenseContainer />}>
         <Switch>
-          {redirectCategoriesFlag(photographerQuery) && (
-            <Redirect exact from={`${url}/`} to={`${url}/categories`} />
-          )}
-          {/* HACK: temporary redirect in case of old urls */}
-          {!redirectCategoriesFlag(photographerQuery) && (
-            <Redirect exact from={`${url}/`} to={`${url}/products`} />
-          )}
+          <Redirect exact from={`${url}/`} to={`${url}/categories`} />
           <Route
             exact
             path={`${url}/categories`}

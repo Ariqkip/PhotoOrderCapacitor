@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import CategoryCard from '../../components/order/CategoryCard';
 import CategoryCardSkeleton from '../../components/order/CategoryCardSkeleton';
 import BanerSlider from '../../components/order/BanerSlider';
+import UncategorizedCard from '../../components/order/UncategorizedCard';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -69,6 +70,9 @@ const CategoriesView = (props) => {
             <CategoryCard key={category.Id} category={category} />
           </Grid>
         ))}
+        <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key='uncategorized'>
+          <UncategorizedCard />
+        </Grid>
       </Grid>
     );
   };
@@ -85,8 +89,10 @@ const CategoriesView = (props) => {
 
   return (
     <div className={classes.root}>
-      <BanerSlider photographerId={photographer.photographId} />
       {isLoading() && RenderSkeletonList()}
+      {isLoading() && (
+        <BanerSlider photographerId={photographer.photographId} />
+      )}
       {!isLoading() && renderCategories()}
     </div>
   );
