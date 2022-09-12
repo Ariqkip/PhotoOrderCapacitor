@@ -69,6 +69,11 @@ const Router = (props) => {
             path='/photographer/:id'
             render={(props) => <ViewPhotographer {...props} />}
           />
+          {/* HACK: temporary redirect in case of old urls */}
+          <Route
+            path='/:id'
+            render={(props) => <ViewPhotographer {...props} />}
+          />
           <Route
             path='/share3d/:photographerId/:productId/:guid'
             render={(props) => <View3dPresenter {...props} />}

@@ -240,6 +240,7 @@ export function OrderReducer(state = INIT_STATE, action) {
               item.status = 'success';
               item.fileAsBase64 = null; //release memory
               item.fileUrl = action.payload.url;
+              item.imageGuid = action.payload.fileGuid;
             }
             return item;
           }),

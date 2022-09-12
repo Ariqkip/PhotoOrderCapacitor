@@ -77,7 +77,7 @@ const OrderService = () => {
 
       let result = {
         FileName: item.fileName,
-        FileGuid: item.guid,
+        FileGuid: item.imageGuid,
         FileUrl: item.fileUrl,
         ProductId: item.productId,
         Quantity: item.qty,
@@ -92,13 +92,13 @@ const OrderService = () => {
           Width: item.completedCropObj.width,
           Height: item.completedCropObj.height,
           ScaleFactoryUp: 1,
-          Guid: item.guid,
+          Guid: item.imageGuid,
           Index: layerIndex,
         };
 
         result.sizes = config;
       }
-
+      
       return result;
     });
 
