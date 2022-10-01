@@ -182,6 +182,13 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     });
   };
 
+  const isNextDisabled = () => {
+    const files = order.orderItems.filter(
+      (item) => item.productId === product.id
+    );
+    return files.length == 0;
+  };
+
   const handleNext = () => {
     closeFn();
     history.push(`/photographer/${product.photographerId}/checkout`);
@@ -284,7 +291,11 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             md={4}
             className={[classes.centerContent, classes.p6]}
           >
-            <NextButton onClick={handleNext} color='primary'>
+            <NextButton
+              onClick={handleNext}
+              color='primary'
+              disabled={isNextDisabled()}
+            >
               {t('Next step')} <ShoppingCartIcon fontSize='small' />
             </NextButton>
           </Grid>
