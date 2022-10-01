@@ -284,9 +284,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
       test_loadImage(product.layerImageUrl, function (i) {
         canvas.width = i.naturalWidth;
         canvas.height = i.naturalHeight;
-        ctx.drawImage(i, 0, 0);
-        ctx.save();
-        updateImgUrls(product.layerImageUrl);
 
         steps.forEach((element) => {
           if (element.type != 'crop') return;
@@ -302,11 +299,17 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
             const dHeight = element?.data?.productConfig?.height ?? 0;
 
             ctx.drawImage(e, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+            ctx.drawImage(i, 0, 0);
             ctx.save();
             updateImgUrls(element.data.fileUrl);
           });
         });
+
+        ctx.drawImage(i, 0, 0);
+        ctx.save();
+        updateImgUrls(product.layerImageUrl);
       });
+
 
       const url = drawingCanvasRef.current.toDataURL();
       if (url) {
