@@ -241,7 +241,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
       guid: trackingGuid,
       fileAsBase64: model,
       fileUrl: '',
-      fileName: trackingGuid,
+      fileName: `${trackingGuid}.jpg`,
       productId: product.id,
       set: pack,
       qty: 1,
