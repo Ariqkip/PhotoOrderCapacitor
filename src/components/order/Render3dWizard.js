@@ -365,8 +365,8 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
 
   function showAcceptButton() {
     const isShareDisabledResult = isShareDisabled();
-    const last = activeStep + 1 == steps.length;
-    const result = activeStep == last + isShareDisabledResult;
+    const last = activeStep + 1 >= steps.length;
+    const result = last && isShareDisabledResult;
 
     return result;
   }
