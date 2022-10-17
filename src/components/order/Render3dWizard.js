@@ -510,14 +510,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               const key = step.data.guid;
               return (
                 <>
-                  <div className={classes.centerHorizontal}>
-                    <Cropper
-                      uniqKey={key}
-                      display={index == activeStep}
-                      orderItem={step.data}
-                      cropConfig={step.data.productConfig}
-                    />
-                  </div>
                   <div>
                     <input
                       key={key}
@@ -530,6 +522,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                       }}
                     />
                     <RoundButton
+                      size='small'
                       key={key}
                       onClick={() => handleUploadClick()}
                       className={
@@ -541,6 +534,14 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                         <span>{t('Replace file')}</span>
                       </Box>
                     </RoundButton>
+                  </div>
+                  <div className={classes.centerHorizontal}>
+                    <Cropper
+                      uniqKey={key}
+                      display={index == activeStep}
+                      orderItem={step.data}
+                      cropConfig={step.data.productConfig}
+                    />
                   </div>
                 </>
               );
