@@ -22,6 +22,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import Container from '@material-ui/core/Container';
+import Hidden from '@material-ui/core/Hidden';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -93,7 +94,7 @@ const NextButton = withStyles((theme) => ({
   },
 }))(Button);
 
-const OtherButton = withStyles((theme) => ({
+const OptionsButton = withStyles((theme) => ({
   root: {
     width: '100%',
     maxWidth: '400px',
@@ -131,12 +132,24 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   let fileInput = null;
 
   const scrollToRef = useRef(null);
+  const scrollOptionsRef = useRef(null);
 
   const [pack, setPack] = useState(1);
   const [order, orderDispatch] = useOrder();
   const [photographer] = usePhotographer();
 
-  const executeScroll = () => scrollToRef.current.scrollIntoView();
+  const executeScroll = () =>
+    scrollToRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+      inline: 'nearest',
+    });
+  const executeOptionsScroll = () =>
+    scrollOptionsRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+      inline: 'nearest',
+    });
 
   const fileInputHandler = (event) => {
     const { files } = event.target;
@@ -201,6 +214,13 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     return getLabelPrice(product.id, quantity, photographer, order);
   };
 
+  const attributesAvailable = () => {
+    if (!product) return false;
+    if (!product.attributes) return false;
+
+    return product.attributes.length > 0;
+  };
+
   return (
     <Dialog
       key={product.id}
@@ -260,6 +280,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                 photographer={photographer}
                 order={order}
               />
+              <div ref={scrollOptionsRef} />
               <AttributesList product={product} pack={pack} />
             </Grid>
           </Grid>
@@ -285,6 +306,19 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
               {t('REMOVE ALL FILES')}
             </RemoveButton>
           </Grid>
+          <Hidden mdUp>
+            {attributesAvailable() && (
+              <Grid
+                item
+                xs={12}
+                className={[classes.centerContent, classes.p6]}
+              >
+                <OptionsButton onClick={executeOptionsScroll} color='primary'>
+                  {t('OPTIONS')}
+                </OptionsButton>
+              </Grid>
+            )}
+          </Hidden>
           <Grid
             item
             xs={12}
