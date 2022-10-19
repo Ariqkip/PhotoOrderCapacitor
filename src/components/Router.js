@@ -66,6 +66,11 @@ const Router = (props) => {
       <BrowserRouter>
         <Switch>
           <Route
+            exact
+            path='/share3d/:photographerId/:productId/:guid'
+            render={(props) => <View3dPresenter {...props} />}
+          />
+          <Route
             path='/photographer/:id'
             render={(props) => <ViewPhotographer {...props} />}
           />
@@ -73,10 +78,6 @@ const Router = (props) => {
           <Route
             path='/:id'
             render={(props) => <ViewPhotographer {...props} />}
-          />
-          <Route
-            path='/share3d/:photographerId/:productId/:guid'
-            render={(props) => <View3dPresenter {...props} />}
           />
           <Route render={(props) => <View404 {...props} />} />
         </Switch>
