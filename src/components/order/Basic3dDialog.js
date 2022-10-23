@@ -24,6 +24,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import Container from '@material-ui/core/Container';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -261,6 +262,18 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
     return product.attributes.length > 0;
   };
 
+  function isUploadingFiles() {
+    const { orderItems } = order;
+
+    const items = orderItems.filter(
+      (i) => i.productId == product.id && i.status != 'success'
+    );
+
+    if (!items || items.length == 0) return false;
+
+    return true;
+  }
+
   return (
     <>
       <Dialog
@@ -377,7 +390,11 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
                 color='primary'
                 disabled={isNextDisabled()}
               >
-                {t('Next step')}
+                {isUploadingFiles() ? (
+                  <CircularProgress size={18} />
+                ) : (
+                  t('Next step')
+                )}
               </NextButton>
             </Grid>
           </Grid>

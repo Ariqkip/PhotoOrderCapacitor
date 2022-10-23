@@ -169,6 +169,9 @@ i18n.init({
         'Missing product': 'We have not found the product you are looking for',
         'Fill basic information to continue':
           'Fill in the basic informations and add products to continue.',
+        ShareCTA: `Κάντε κλικ στο κουμπί "SHARE" και στείλτε αυτόν τον σύνδεσμο στους φίλους σας
+          Δώστε την ευκαιρία στους φίλους σας να δημιουργήσουν τις δικές τους υπέροχες κούπες!!!
+          Μόνο μην ξεχάσετε να πατήσετε το κουμπί "Επόμενο βήμα" για να ολοκληρώσετε την παραγγελία σας.`,
 
         // Mobile Welcome Modal
         'You want to upload photos faster.':
@@ -206,14 +209,15 @@ i18n.init({
 
         //3d CUP - welcome modal
         'Best gift': 'Best gift',
-        'See what I designed': 'See what I designed',
-        'gift CTA': 'You too can design and order such a great gift!',
+        'See what I designed': 'Δείτε τι έχω σχεδιάσει, αυτό είναι φοβερό!',
+        'gift CTA':
+          'Μπορείτε και εσείς να δημιουργήσετε ένα τόσο υπέροχο δώρο!',
         'how to order':
-          'Click CREATE OWN, add your own photos and order a personalized mug!',
+          'Κάντε κλικ στο CREATE OWN, προσθέστε τις δικές σας φωτογραφίες και παραγγείλετε μια εξατομικευμένη κούπα!',
       },
     },
   },
-  lng: 'en',
+  lng: 'gr',
   fallbackLng: 'en',
   debug: false,
 
