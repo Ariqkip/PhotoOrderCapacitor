@@ -77,11 +77,34 @@ const OrderIndex = ({ match }) => {
   const bannersQuery = useGetBanners(match?.params?.id ?? 0);
 
   function redirectCategoriesFlag(query) {
-    if (!query.isSuccess) return false;
-    if (!query.data?.Categories) return false;
-    if (query.data?.Categories?.length < 1) return false;
+    if (!query) {
+      return false;
+    }
+    if (!query.isSuccess) {
+      return false;
+    }
+    if (!query.data?.Categories) {
+      return false;
+    }
+    if (query.data?.Categories?.length < 1) {
+      return false;
+    }
 
     return true;
+  }
+
+  function redirectProductsFlag(query) {
+    if (!query) {
+      return false;
+    }
+    if (!query.isSuccess) {
+      return false;
+    }
+    if (!query.data?.Categories || query.data?.Categories?.length < 1) {
+      return true;
+    }
+
+    return false;
   }
 
   function isLoading(query) {
@@ -140,7 +163,12 @@ const OrderIndex = ({ match }) => {
       </Backdrop>
       <Suspense fallback={<SuspenseContainer />}>
         <Switch>
-          <Redirect exact from={`${url}/`} to={`${url}/categories`} />
+          {redirectCategoriesFlag(photographerQuery) && (
+            <Redirect exact from={`${url}/`} to={`${url}/categories`} />
+          )}
+          {redirectProductsFlag(photographerQuery) && (
+            <Redirect exact from={`${url}/`} to={`${url}/products`} />
+          )}
           <Route
             exact
             path={`${url}/categories`}
