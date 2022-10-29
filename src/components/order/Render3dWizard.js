@@ -14,6 +14,10 @@ import { useOrder } from '../../contexts/OrderContext';
 //Utils
 import { createGuid } from '../../core/helpers/guidHelper';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import {
+  getScaleUpFactor,
+  getRectTransformation,
+} from '../../core/helpers/imageTransformationHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -289,10 +293,29 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
           if (element.type != 'crop') return;
 
           test_loadImage(element.data.fileUrl, function (e) {
-            const sx = element?.data?.completedCropObj?.x ?? 0;
-            const sy = element?.data?.completedCropObj?.y ?? 0;
-            const sWidth = element?.data?.completedCropObj?.width ?? 0;
-            const sHeight = element?.data.completedCropObj?.height ?? 0;
+            const upFactor = getScaleUpFactor(
+              e.naturalWidth,
+              element?.data?.completedCropObj?.editorWidth ??
+                element?.data?.width
+            );
+
+            const crop_sx = element?.data?.completedCropObj?.x ?? 0;
+            const crop_sy = element?.data?.completedCropObj?.y ?? 0;
+            const crop_sWidth = element?.data?.completedCropObj?.width ?? 0;
+            const crop_sHeight = element?.data.completedCropObj?.height ?? 0;
+            const scaledCropp = getRectTransformation(
+              crop_sx,
+              crop_sy,
+              crop_sWidth,
+              crop_sHeight,
+              upFactor
+            );
+
+            const sx = scaledCropp?.x ?? 0;
+            const sy = scaledCropp?.y ?? 0;
+            const sWidth = scaledCropp?.w ?? 0;
+            const sHeight = scaledCropp?.h ?? 0;
+
             const dx = element?.data?.productConfig?.positionX ?? 0;
             const dy = element?.data.productConfig?.positionY ?? 0;
             const dWidth = element?.data?.productConfig?.width ?? 0;
@@ -512,7 +535,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                 <>
                   <div>
                     <input
-                      key={key}
+                      key={`input_${key}`}
                       type='file'
                       style={{ display: 'none' }}
                       inputprops={{ accept: 'image/*' }}
@@ -523,7 +546,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                     />
                     <RoundButton
                       size='small'
-                      key={key}
+                      key={`roundBtn_${key}`}
                       onClick={() => handleUploadClick()}
                       className={
                         index == activeStep ? classes.visible : classes.hidden
@@ -537,7 +560,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                   </div>
                   <div className={classes.centerHorizontal}>
                     <Cropper
-                      uniqKey={key}
+                      uniqKey={`cropper_${key}`}
                       display={index == activeStep}
                       orderItem={step.data}
                       cropConfig={step.data.productConfig}
