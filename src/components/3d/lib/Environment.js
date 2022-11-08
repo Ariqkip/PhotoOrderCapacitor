@@ -6,7 +6,7 @@ export default class Environment {
     const container = place;
     this.scene = new THREE.Scene();
 
-    console.log(container);
+    // console.log(container);
     this.parameters = parameters;
     this.canvas = canvas;
     this.width = container.clientWidth;
@@ -68,7 +68,7 @@ export default class Environment {
   }
 
   windowResize() {
-    console.log('windowResize', this);
+    // console.log('windowResize', this);
 
     this.width = this.container.clientWidth;
     this.height = this.container.clientHeight;

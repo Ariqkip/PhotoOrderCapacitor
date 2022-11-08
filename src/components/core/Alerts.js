@@ -58,7 +58,7 @@ const Alert = ({ alert }) => {
   }
 
   function renderAction(action, id, actionprops) {
-    console.log('renderAction: ', action, id, actionprops);
+    // console.log('renderAction: ', action, id, actionprops);
     return () => {
       action(actionprops);
       alertDispatch({ type: REMOVE, payload: { id: id } });

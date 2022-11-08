@@ -35,7 +35,7 @@ export default class ModelMaping {
   }
   setModel(url) {
     const { scene } = this;
-    console.log(scene);
+    // console.log(scene);
     if (this.primeryModel) {
       scene.remove(this.primeryModel);
     }
@@ -58,7 +58,7 @@ export default class ModelMaping {
           resolve(object);
         },
         (xhr) => {
-          console.log((xhr.loaded / xhr.total) * 100 + '%');
+          // console.log((xhr.loaded / xhr.total) * 100 + '%');
           if (xhr.loaded / xhr.total == 1) this.setLoading(true);
         },
         (error) => {
