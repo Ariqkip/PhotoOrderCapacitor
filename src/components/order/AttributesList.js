@@ -70,6 +70,7 @@ const AttributesList = ({ product, pack }) => {
   const calculateAttributes = (group) => {
     return product.attributes
       .filter((a) => a.attributesGroupId === group.Id)
+      .filter((a) => a.isActive === true)
       .sort((a, b) => a.position < b.position);
   };
 
