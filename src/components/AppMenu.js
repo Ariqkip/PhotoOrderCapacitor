@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 
 //Components
 import MenuDrawer from './MenuDrawer';
+import Zoom from './core/Zoom';
 
 //Hooks
 import { useHistory } from 'react-router-dom';
@@ -293,6 +294,7 @@ const AppMenu = ({ photographerId }) => {
             </IconButton>
           </div>
           <div className={classes.sectionDesktop}>
+            <Zoom />
             {renderProductsOrCategories()}
             <NavLink
               to={`/photographer/${photographerId}/checkout`}
