@@ -111,6 +111,7 @@ const OrderService = () => {
       IsShippingChoosen: order.shippingSelected,
       OrderGuid: order.orderGuid,
       OrderItems: orderedItems,
+      PaymentMethod: order.paymentMethod,
     };
 
     return legacy.put(endpoint, body);

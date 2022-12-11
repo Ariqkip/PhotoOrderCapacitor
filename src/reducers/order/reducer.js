@@ -18,6 +18,7 @@ export const INIT_STATE = {
   shippingName: '',
   shippingAddress: '',
   shippingEmail: '',
+  paymentMethod: 0,
   //orderInitialized: false,
   //orderRequestSend: false,
   //orderSending: false,
@@ -258,6 +259,12 @@ export function OrderReducer(state = INIT_STATE, action) {
             return item;
           }),
         ],
+      };
+
+    case 'ORDER_SET_PAYMENT_METHOD':
+      return {
+        ...state,
+        paymentMethod: action.payload.paymentMethod,
       };
 
     case 'ORDER_SET_FIRST_NAME':
