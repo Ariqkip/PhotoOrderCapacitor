@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
+import { usePhotographer } from '../../contexts/PhotographerContext';
 import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
@@ -48,6 +49,9 @@ const useStyles = makeStyles((theme) => ({
   red: {
     color: '#f44336',
   },
+  grey: {
+    color: '#8f8f8f',
+  },
   cardState: {
     fontSize: '26px',
     textAlign: 'center',
@@ -59,9 +63,11 @@ const UserPaymentInfo = (props) => {
   const { t } = useTranslation();
 
   const [order, orderDispatch] = useOrder();
-  console.log('%cLQS logger: ', 'color: #c931eb', { order });
+  const [photographer] = usePhotographer();
 
   function ChangePaymentMethod(type) {
+    if (type == 1 && !IsBankTransferPossible()) return;
+    if (type == 2 && !IsVivaWalletTransferPossible()) return;
     orderDispatch({
       type: 'ORDER_SET_PAYMENT_METHOD',
       payload: {
@@ -75,6 +81,21 @@ const UserPaymentInfo = (props) => {
     return type === orderType;
   }
 
+  function IsBankTransferPossible() {
+    var iban = photographer.iban;
+
+    if (iban == undefined) return false;
+
+    return true;
+  }
+
+  function IsVivaWalletTransferPossible() {
+    var vivaWallet = photographer.vivawallet;
+    if (!vivaWallet) return false;
+
+    return true;
+  }
+
   return (
     <Container maxWidth='md' className={classes.container}>
       {IsSelected(1) && (
@@ -85,7 +106,14 @@ const UserPaymentInfo = (props) => {
           </Typography>
 
           <Typography className={[]}>
-            {t('Please paste this text in Viva Wallet dialog window')}:
+            {t('Please make a payment to this account')}:{' '}
+            <b>{photographer.iban}</b>
+            <br />
+            {t("and don't forget to add this text in the comment")}:
+            <br />
+            <b>
+              {t('Order no')}: {order.orderId}
+            </b>
           </Typography>
         </Paper>
       )}
@@ -97,7 +125,11 @@ const UserPaymentInfo = (props) => {
           </Typography>
 
           <Typography className={[]}>
-            {t('Please make a payment to this account')}:
+            {t('Please paste this text in Viva Wallet dialog window')}:
+            <br />
+            <b>
+              {t('Order no')}: {order.orderId}
+            </b>
           </Typography>
         </Paper>
       )}
@@ -162,6 +194,11 @@ const UserPaymentInfo = (props) => {
                     {t('SELECTED')}
                   </Typography>
                 )}
+                {!IsBankTransferPossible() && (
+                  <Typography className={[classes.cardState, classes.grey]}>
+                    {t('DISABLED')}
+                  </Typography>
+                )}
               </Grid>
             </Grid>
           </Paper>
@@ -186,6 +223,11 @@ const UserPaymentInfo = (props) => {
                 {IsSelected(2) && (
                   <Typography className={[classes.cardState, classes.green]}>
                     {t('SELECTED')}
+                  </Typography>
+                )}
+                {!IsVivaWalletTransferPossible() && (
+                  <Typography className={[classes.cardState, classes.grey]}>
+                    {t('DISABLED')}
                   </Typography>
                 )}
               </Grid>

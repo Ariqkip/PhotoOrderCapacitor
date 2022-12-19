@@ -18,6 +18,8 @@ const INIT_STATE = {
   products: [],
   productCategories: [],
   productAttributes: [],
+  iban: null,
+  vivawallet: null,
 };
 
 export function PhotographerReducer(state = INIT_STATE, action) {
@@ -47,6 +49,8 @@ export function PhotographerReducer(state = INIT_STATE, action) {
         appDroidStore: data.BrandingAppLinkPlay,
         appAppleStore: data.BrandingAppLinkApple,
         appHideToken: data.BrandingAppHideTokenText,
+        iban: data.IBAN,
+        vivawallet: data.VivaWalletId,
       };
     case 'ADD_PRODUCTS':
       var products = action.data;
