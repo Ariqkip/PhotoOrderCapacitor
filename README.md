@@ -1,70 +1,35 @@
-# Getting Started with Create React App
+# photo-order-react v2.0
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+## Zasady pracy z repozytorium
 
-In the project directory, you can run:
+Głównym branchem jest `main` - trigeruje github actions i aktualna wersja aplikacji trafia na środowisko `staging`.
 
-### `npm start`
+Zadania wykonujemy na branchu oddzielonym od `main` i na koniec mergujemy do `main` za pomocą pull requesta.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Release do wersji produkcyjnej następuje przez zmergowanie `main` do brancha `release`. Tylko w tym kierunku, nic nie trafia bezpośrednio na `release`. Osobny github actions publikuje produkcję.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Uruchomienie środowiska staging
 
-### `npm test`
+Startujemy aplikację z parametrami `.env.staging`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Musimy zaakceptować brak certyfikatów dla środowiska staging (legacy apka).
+Otwieramy `https://staging.oistigmes.com/` - po zaakceptowaniu można zamknąć.
 
-### `npm run build`
+W uruchomionej aplikacji przechodzimy na adres `localhost:3000/photographer/2320`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Links
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+photo-order PRD `https://oistigmes-react-ordering.azurewebsites.net`
 
-### `npm run eject`
+photo-order STG `https://oistigmes-staging-web-ordering.azurewebsites.net`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+oistigmes PRD `https://oistigmes.com/`
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+oistigmes STG `https://staging.oistigmes.com`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
+## Other
 To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
