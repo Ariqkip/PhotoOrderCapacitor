@@ -320,7 +320,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
             }
             if (step.type == 'preview') {
               if(index === activeStep && !finalImage){
-                console.log(editorRef)
                 const uri = editorRef.current.toDataURL({
                   pixelRatio: 2
                 });
@@ -333,7 +332,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                       index === activeStep ? classes.visible : classes.hidden
                     }
                   >
-                  dupa2
                     {finalImage && (
                       <View3d
                         textureUrl={finalImage}
