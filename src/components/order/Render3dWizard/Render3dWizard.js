@@ -83,6 +83,10 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
       const images = order.orderItems.filter(
         (i) => i.productId === product.id && i.isLayerItem === true
       );
+      images.forEach((s, index) => {
+        const sizeConfig = getProductConfig(index);
+        if (sizeConfig) s.productConfig = sizeConfig;
+      });
 
       const editStep = {
         type: 'edit',
@@ -314,7 +318,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               const stepImages = step.data.map(d=>(<img src={d.fileUrl} naturalWidth={d.width} naturalHeight={d.height}/>));
               return (
                 <div className={ index == activeStep ? classes.visible : classes.hidden }>
-                  <PhotoFrame backgroundColor='#fff' layoutName="example1_broke" photos={stepImages} setEditorRef={setEditorRef}/>
+                  <PhotoFrame data={step.data} frame={product.layerImageUrl} photos={stepImages} setEditorRef={setEditorRef}/>
                 </div>
               )
             }

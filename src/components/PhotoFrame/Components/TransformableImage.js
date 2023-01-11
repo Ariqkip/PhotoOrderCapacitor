@@ -3,9 +3,8 @@ import { Image, Transformer } from 'react-konva';
 import useImage from 'use-image';
 
 const TransformableImage = ({ shapeProps, imgRef, onSelect, onChange }) => {
-  // const [image] = useImage('https://konvajs.org/assets/lion.png', 'Anonymous');
-    const [image] = useImage(shapeProps.img.props.src, 'Anonymous');
-    // console.log(image)
+  const [image] = useImage(shapeProps.img.props.src, 'Anonymous');
+  
   return (
     <>
       <Image

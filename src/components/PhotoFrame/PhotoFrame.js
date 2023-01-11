@@ -2,16 +2,15 @@ import React, {useEffect, useState} from 'react';
 import './PhotoFrame.css';
 
 import { Stage, Layer } from 'react-konva';
-import {getLayout} from './PhotoFrameLayoutConfig';
 
 import Frame from './Components/Frame';
 import TransformableImage from './Components/TransformableImage';
 import ScaleAndRotationTransformer from './Components/ScaleAndRotationTransformer';
 
 
-const PhotoFrame = ({ backgroundColor, layoutName, photos, pack, setEditorRef, ...props }) => {
-    const width = 900;
-    const height = 300;
+const PhotoFrame = ({ data, frame, photos, setEditorRef }) => {
+    const width = 748;
+    const height = 315;
 
     const crateLayers = (initialLayers, photos) =>{
       const photoss = [];
@@ -45,9 +44,16 @@ const PhotoFrame = ({ backgroundColor, layoutName, photos, pack, setEditorRef, .
       return photoss;
     }
 
-    const layout = getLayout(layoutName);
-    const initialLayers = layout.layers;
-    const frame = layout.frame;
+    const initialLayers = data.map(d=>{return{
+      x:d.productConfig.positionX/3,
+      y:d.productConfig.positionY/3,
+      width:d.productConfig.width/3,
+      height:d.productConfig.height/3,
+      clipX: 0,
+      clipY: 0,
+      clipWidth: d.productConfig.width/3,
+      clipHeight: d.productConfig.height/3
+     }});
 
     const [layers, setLayers] = useState(crateLayers(initialLayers, photos));
     const [selectedId, selectShape] = useState(null);
@@ -112,7 +118,7 @@ const PhotoFrame = ({ backgroundColor, layoutName, photos, pack, setEditorRef, .
             />
           </Layer>
         )}
-      {frame && <Frame frame={frame} width={width} height={height}/>}
+        {frame && <Frame frameUrl={frame} width={width} height={height}/>}
     </Stage>
     <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]}/>
     </>
