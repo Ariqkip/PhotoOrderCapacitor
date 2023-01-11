@@ -7,7 +7,7 @@ import FileListItem from './FileListItem';
 import PriceRangeList from './PriceRangeList';
 import AttributesList from './AttributesList';
 import Render3dDialog from './Render3dDialog';
-import Render3dWizard from './Render3dWizard';
+import Render3dWizard from './Render3dWizard/Render3dWizard';
 
 //Hooks
 import { useTranslation } from 'react-i18next';

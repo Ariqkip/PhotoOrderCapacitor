@@ -41,6 +41,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:staging": "env-cmd -f .env.staging react-scripts start",
     "build": "react-scripts build",
     "build:staging": "env-cmd -f .env.staging npm run-script build",
     "build:production": "env-cmd -f .env.production npm run-script build",
