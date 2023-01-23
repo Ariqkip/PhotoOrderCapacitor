@@ -1,16 +1,25 @@
 import React, {useEffect, useState} from 'react';
-import './PhotoFrame.css';
-
+import { useImageSize } from 'react-image-size';
 import { Stage, Layer } from 'react-konva';
+
+//UI
+import { makeStyles } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import Frame from './Components/Frame';
 import TransformableImage from './Components/TransformableImage';
 import ScaleAndRotationTransformer from './Components/ScaleAndRotationTransformer';
 
+const useStyles = makeStyles((theme) => ({
+  centerContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: "300px",
+}}));
 
-const PhotoFrame = ({ data, frame, photos, setEditorRef }) => {
-    const width = 748;
-    const height = 315;
+const PhotoFrame = ({ stepData, frameUrl, photos, ratio, setEditorRef }) => {
 
     const crateLayers = (initialLayers, photos) =>{
       const photoss = [];
@@ -44,23 +53,35 @@ const PhotoFrame = ({ data, frame, photos, setEditorRef }) => {
       return photoss;
     }
 
-    const initialLayers = data.map(d=>{return{
-      x:d.productConfig.positionX/3,
-      y:d.productConfig.positionY/3,
-      width:d.productConfig.width/3,
-      height:d.productConfig.height/3,
+    const initialLayers = stepData.map(d=>{return{
+      x:d.productConfig.positionX/ratio,
+      y:d.productConfig.positionY/ratio,
+      width:d.productConfig.width/ratio,
+      height:d.productConfig.height/ratio,
       clipX: 0,
       clipY: 0,
-      clipWidth: d.productConfig.width/3,
-      clipHeight: d.productConfig.height/3
+      clipWidth: d.productConfig.width/ratio,
+      clipHeight: d.productConfig.height/ratio
      }});
+
 
     const [layers, setLayers] = useState(crateLayers(initialLayers, photos));
     const [selectedId, selectShape] = useState(null);
     const [transformerPosition, setTransformerPosition] = useState(null);
+    const [frameWidth, setFrameWidth] = useState();
+    const [frameHeight, setFrameHeight] = useState();
+    const classes = useStyles();
     const imgRef = React.useRef([]);
     const trRef = React.useRef();
     const stageRef = React.useRef(null);
+    const [data, { loading, error }] = useImageSize(frameUrl);
+
+    useEffect(()=>{
+      if(data && !loading && !error){
+        setFrameWidth(data.width/ratio);
+        setFrameHeight(data.height/ratio);
+      }
+    },[data, loading, error]);
 
     useEffect(() => {
       setEditorRef(stageRef);
@@ -94,34 +115,43 @@ const PhotoFrame = ({ data, frame, photos, setEditorRef }) => {
       }
     };
 
+    let composerView = (<CircularProgress />);
+    if(data && !loading && !error){
+      composerView = (
+        <>
+          <Stage
+            width={frameWidth}
+            height={frameHeight}
+            ref={stageRef}
+            onMouseDown={checkDeselect}
+            onTouchStart={checkDeselect}>
+              {layers.map((rect, i) =>
+                <Layer key={i} {...initialLayers[i]}>
+                  <TransformableImage
+                    shapeProps={rect}
+                    imgRef={imgRef}
+                    onSelect={() => {
+                      selectShape(rect.id);
+                    }}
+                    onChange={(newAttrs) => {
+                      const rects = layers.slice();
+                      rects[i] = newAttrs;
+                      setLayers(rects);
+                    }}
+                  />
+                </Layer>
+              )}
+              {frameUrl && <Frame frameUrl={frameUrl} width={frameWidth} height={frameHeight}/>}
+          </Stage>
+          <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]}/>
+        </>
+      );
+    }
+
   return (
-    <>
-    <Stage
-      width={width}
-      height={height}
-      ref={stageRef}
-      onMouseDown={checkDeselect}
-      onTouchStart={checkDeselect}>
-        {layers.map((rect, i) =>
-          <Layer key={i} {...initialLayers[i]}>
-            <TransformableImage
-              shapeProps={rect}
-              imgRef={imgRef}
-              onSelect={() => {
-                selectShape(rect.id);
-              }}
-              onChange={(newAttrs) => {
-                const rects = layers.slice();
-                rects[i] = newAttrs;
-                setLayers(rects);
-              }}
-            />
-          </Layer>
-        )}
-        {frame && <Frame frameUrl={frame} width={width} height={height}/>}
-    </Stage>
-    <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]}/>
-    </>
+    <div className={classes.centerContent}>
+      {composerView}
+    </div>
   );
 };
 

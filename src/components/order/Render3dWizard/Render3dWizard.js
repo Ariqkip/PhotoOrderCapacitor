@@ -318,7 +318,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               const stepImages = step.data.map(d=>(<img src={d.fileUrl} naturalWidth={d.width} naturalHeight={d.height}/>));
               return (
                 <div className={ index == activeStep ? classes.visible : classes.hidden }>
-                  <PhotoFrame data={step.data} frame={product.layerImageUrl} photos={stepImages} setEditorRef={setEditorRef}/>
+                  <PhotoFrame stepData={step.data} frameUrl={product.layerImageUrl} photos={stepImages} ratio={4} setEditorRef={setEditorRef}/>
                 </div>
               )
             }
