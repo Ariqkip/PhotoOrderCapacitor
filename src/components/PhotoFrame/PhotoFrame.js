@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     minHeight: "300px",
 }}));
 
-const PhotoFrame = ({ stepData, frameUrl, photos, ratio, setEditorRef }) => {
+const PhotoFrame = ({ stepData, frameUrl, photos, setEditorRef, setEditorRatio }) => {
 
     const crateLayers = (initialLayers, photos) =>{
       const photoss = [];
@@ -53,35 +53,47 @@ const PhotoFrame = ({ stepData, frameUrl, photos, ratio, setEditorRef }) => {
       return photoss;
     }
 
-    const initialLayers = stepData.map(d=>{return{
-      x:d.productConfig.positionX/ratio,
-      y:d.productConfig.positionY/ratio,
-      width:d.productConfig.width/ratio,
-      height:d.productConfig.height/ratio,
-      clipX: 0,
-      clipY: 0,
-      clipWidth: d.productConfig.width/ratio,
-      clipHeight: d.productConfig.height/ratio
-     }});
-
-
-    const [layers, setLayers] = useState(crateLayers(initialLayers, photos));
     const [selectedId, selectShape] = useState(null);
     const [transformerPosition, setTransformerPosition] = useState(null);
+    const [parentWidth, setParentWidth] = useState(0);
     const [frameWidth, setFrameWidth] = useState();
     const [frameHeight, setFrameHeight] = useState();
+    const [ratio, setRatio] = useState(0);
+    const [initialLayers, setInitialLayers] = useState();
+    const [layers, setLayers] = useState([]);
     const classes = useStyles();
     const imgRef = React.useRef([]);
     const trRef = React.useRef();
     const stageRef = React.useRef(null);
+    const parentRef = React.useRef(null);
     const [data, { loading, error }] = useImageSize(frameUrl);
 
     useEffect(()=>{
+      setParentWidth(parentRef.current.offsetWidth);
+    },[parentRef]);
+
+    useEffect(()=>{
       if(data && !loading && !error){
+        const ratio = data.width/parentWidth;
+        const initialLayers = stepData.map(d=>{return{
+          x:d.productConfig.positionX/ratio,
+          y:d.productConfig.positionY/ratio,
+          width:d.productConfig.width/ratio,
+          height:d.productConfig.height/ratio,
+          clipX: 0,
+          clipY: 0,
+          clipWidth: d.productConfig.width/ratio,
+          clipHeight: d.productConfig.height/ratio
+        }});
+
         setFrameWidth(data.width/ratio);
         setFrameHeight(data.height/ratio);
+        setRatio(ratio);
+        setEditorRatio(ratio);
+        setInitialLayers(initialLayers);
+        setLayers(crateLayers(initialLayers, photos));
       }
-    },[data, loading, error]);
+    },[data, loading, error, photos, parentWidth]);
 
     useEffect(() => {
       setEditorRef(stageRef);
@@ -104,10 +116,6 @@ const PhotoFrame = ({ stepData, frameUrl, photos, ratio, setEditorRef }) => {
       }
     }, [selectedId]);
 
-    useEffect(()=>{
-      setLayers(crateLayers(initialLayers, photos));
-    }, [photos])
-
     const checkDeselect = (e) => {
       const clickedOnEmpty = e.target === e.target.getStage();
       if (clickedOnEmpty) {
@@ -116,7 +124,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, ratio, setEditorRef }) => {
     };
 
     let composerView = (<CircularProgress />);
-    if(data && !loading && !error){
+    if(data && !loading && !error && initialLayers){
       composerView = (
         <>
           <Stage
@@ -149,7 +157,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, ratio, setEditorRef }) => {
     }
 
   return (
-    <div className={classes.centerContent}>
+    <div className={classes.centerContent} ref={parentRef}>
       {composerView}
     </div>
   );

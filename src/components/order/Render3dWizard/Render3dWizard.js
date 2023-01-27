@@ -44,6 +44,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const [refresh, setRefresh] = useState(0);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [editorRef, setEditorRef] = useState();
+  const [editorRatio, setEditorRatio] = useState(0);
 
   const [order, orderDispatch] = useOrder();
 
@@ -318,14 +319,19 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               const stepImages = step.data.map(d=>(<img src={d.fileUrl} naturalWidth={d.width} naturalHeight={d.height}/>));
               return (
                 <div className={ index == activeStep ? classes.visible : classes.hidden }>
-                  <PhotoFrame stepData={step.data} frameUrl={product.layerImageUrl} photos={stepImages} ratio={4} setEditorRef={setEditorRef}/>
+                  <PhotoFrame
+                    stepData={step.data}
+                    frameUrl={product.layerImageUrl}
+                    photos={stepImages}
+                    setEditorRef={setEditorRef}
+                    setEditorRatio={setEditorRatio}/>
                 </div>
               )
             }
             if (step.type == 'preview') {
               if(index === activeStep && !finalImage){
                 const uri = editorRef.current.toDataURL({
-                  pixelRatio: 2
+                  pixelRatio: editorRatio
                 });
                 setFinalImage(uri)
               }
