@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     minHeight: "300px",
 }}));
 
-const PhotoFrame = ({ stepData, frameUrl, photos, setEditorRef, setEditorRatio }) => {
+const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setEditorRef, setEditorRatio }) => {
 
     const crateLayers = (initialLayers, photos) =>{
       const photoss = [];
@@ -150,7 +150,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, setEditorRef, setEditorRatio }
                   />
                 </Layer>
               )}
-              {frameUrl && <Frame frameUrl={frameUrl} width={frameWidth} height={frameHeight} initialLayers={initialLayers} selectedId={selectedId}/>}
+              {frameUrl && <Frame frameUrl={frameUrl} width={frameWidth} height={frameHeight} initialLayers={initialLayers} selectedId={selectedId} hideSelectors={hideSelectors}/>}
           </Stage>
           <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} selectedId={selectedId}/>
         </>

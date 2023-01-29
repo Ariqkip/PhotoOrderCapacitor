@@ -47,6 +47,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [editorRef, setEditorRef] = useState();
   const [editorRatio, setEditorRatio] = useState(0);
+  const [hideSelectors, setHideSelectors] = useState(false);
 
   const [order, orderDispatch] = useOrder();
 
@@ -262,31 +263,31 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               const buttonProps = {};
               if (step.type == 'edit' && step.data[0]?.fileUrl) {
                 buttonProps.icon=(<EditIcon/>);
-                buttonProps.optional = (
-                  <img
-                    src={step.data[0].fileUrl}
-                    alt={step.data[0].fileName}
-                    className={
-                      index == activeStep
-                        ? classes.thumbImageSelected
-                        : classes.thumbImage
-                    }
-                  />
-                );
+                // buttonProps.optional = (
+                //   <img
+                //     src={step.data[0].fileUrl}
+                //     alt={step.data[0].fileName}
+                //     className={
+                //       index == activeStep
+                //         ? classes.thumbImageSelected
+                //         : classes.thumbImage
+                //     }
+                //   />
+                // );
               }
               if (step.type == 'preview' && product.imageUrl) {
                 buttonProps.icon=<VisibilityIcon/>;
-                buttonProps.optional = (
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className={
-                      index == activeStep
-                        ? classes.thumbImageSelected
-                        : classes.thumbImage
-                    }
-                  />
-                );
+                // buttonProps.optional = (
+                //   <img
+                //     src={product.imageUrl}
+                //     alt={product.name}
+                //     className={
+                //       index == activeStep
+                //         ? classes.thumbImageSelected
+                //         : classes.thumbImage
+                //     }
+                //   />
+                // );
               }
               if (step.type == 'share') {
                 buttonProps.optional = (
@@ -318,7 +319,8 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
           {steps.map((step, index) => {
             if (step.type == 'edit') {
               if(index === activeStep && finalImage){
-                setFinalImage(null)
+                setHideSelectors(false);
+                setFinalImage(null);
               }
               const stepImages = step.data.map(d=>(<img src={d.fileUrl} naturalWidth={d.width} naturalHeight={d.height}/>));
               return (
@@ -327,6 +329,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                     stepData={step.data}
                     frameUrl={product.layerImageUrl}
                     photos={stepImages}
+                    hideSelectors={hideSelectors}
                     setEditorRef={setEditorRef}
                     setEditorRatio={setEditorRatio}/>
                 </div>
@@ -334,10 +337,17 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
             }
             if (step.type == 'preview') {
               if(index === activeStep && !finalImage){
-                const uri = editorRef.current.toDataURL({
-                  pixelRatio: editorRatio
-                });
-                setFinalImage(uri)
+                if(!hideSelectors){
+                  setHideSelectors(true);
+                }else{
+
+                  setTimeout(()=>{
+                    const uri = editorRef.current.toDataURL({
+                      pixelRatio: editorRatio
+                    });
+                    setFinalImage(uri);
+                  }, 500);
+                }
               }
               return (
                 <div className={classes.centerContent}>
