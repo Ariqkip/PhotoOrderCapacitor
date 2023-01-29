@@ -38,6 +38,12 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId}) =>{
     }
   },[scale])
 
+  useEffect(()=>{
+    if(imgRef){
+      setScale((imgRef.attrs.scaleX-1)*10 || 0);
+    }
+  },[imgRef])
+
   return(
     <>
       {selectedId ?
