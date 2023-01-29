@@ -75,7 +75,8 @@ const PhotoFrame = ({ stepData, frameUrl, photos, setEditorRef, setEditorRatio }
     useEffect(()=>{
       if(data && !loading && !error){
         const ratio = data.width/parentWidth;
-        const initialLayers = stepData.map(d=>{return{
+        const initialLayers = stepData.map((d,i)=>{return{
+          id: "photo"+i,
           x:d.productConfig.positionX/ratio,
           y:d.productConfig.positionY/ratio,
           width:d.productConfig.width/ratio,
@@ -149,9 +150,9 @@ const PhotoFrame = ({ stepData, frameUrl, photos, setEditorRef, setEditorRatio }
                   />
                 </Layer>
               )}
-              {frameUrl && <Frame frameUrl={frameUrl} width={frameWidth} height={frameHeight}/>}
+              {frameUrl && <Frame frameUrl={frameUrl} width={frameWidth} height={frameHeight} initialLayers={initialLayers} selectedId={selectedId}/>}
           </Stage>
-          <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]}/>
+          <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} selectedId={selectedId}/>
         </>
       );
     }
