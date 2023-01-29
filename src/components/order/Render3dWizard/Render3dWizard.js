@@ -23,6 +23,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
+import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 import PhotoFrame from '../../PhotoFrame/PhotoFrame';
 
@@ -259,6 +261,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               const stepProps = {};
               const buttonProps = {};
               if (step.type == 'edit' && step.data[0]?.fileUrl) {
+                buttonProps.icon=(<EditIcon/>);
                 buttonProps.optional = (
                   <img
                     src={step.data[0].fileUrl}
@@ -272,6 +275,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                 );
               }
               if (step.type == 'preview' && product.imageUrl) {
+                buttonProps.icon=<VisibilityIcon/>;
                 buttonProps.optional = (
                   <img
                     src={product.imageUrl}
@@ -385,7 +389,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
             >
               {t('Back')}
             </OtherButton>
-            {showAcceptButton() && (
+            {showAcceptButton() ? (
               <NextButton
                 onClick={() => saveTexture(finalImage)}
                 color='primary'
@@ -393,6 +397,15 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                 disabled={isAcceptUploading()}
               >
                 {isAcceptUploading() ? <CircularProgress /> : t('Accept')}
+              </NextButton>
+            ):(
+              <NextButton
+                onClick={() => setActiveStep(1)}
+                color='primary'
+                className={classes.m6}
+                disabled={isAcceptUploading()}
+              >
+                {isAcceptUploading() ? <CircularProgress /> : t('Next')}
               </NextButton>
             )}
           </div>
