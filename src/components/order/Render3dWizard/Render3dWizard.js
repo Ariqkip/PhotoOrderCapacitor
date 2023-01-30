@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 //Components
 import View3d from '../../3d/View3d';
+import RoundButton from './../../core/RoundButton';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -14,6 +15,8 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { createGuid } from '../../../core/helpers/guidHelper';
 
 //UI
+import Box from '@material-ui/core/Box';
+import CachedIcon from '@material-ui/icons/Cached';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -48,6 +51,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const [editorRef, setEditorRef] = useState();
   const [editorRatio, setEditorRatio] = useState(0);
   const [hideSelectors, setHideSelectors] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState(-1);
 
   const [order, orderDispatch] = useOrder();
 
@@ -204,14 +208,12 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const fileInputHandler = (e) => {
     const { files } = e.target;
     const newFile = files[0] ?? null;
-
     if (!newFile) return;
 
     const trackingGuid = createGuid();
     const reader = new FileReader();
     reader.readAsDataURL(newFile);
-
-    const currentItem = steps[activeStep].data ?? null;
+    const currentItem = steps[activeStep].data[selectedPhoto] ?? null;
 
     reader.onloadend = () => {
       var tempImg = new Image();
@@ -232,7 +234,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
           width: tempImg.width,
           height: tempImg.height,
         };
-
         orderDispatch({ type: 'REPLACE_ORDER_ITEM', payload: orderItem });
       };
     };
@@ -246,7 +247,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
       }, 5000);
     }
   }, [steps.length, refresh, activeStep, isOpen]);
-
   return (
     <>
       <Dialog
@@ -263,31 +263,9 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               const buttonProps = {};
               if (step.type == 'edit' && step.data[0]?.fileUrl) {
                 buttonProps.icon=(<EditIcon/>);
-                // buttonProps.optional = (
-                //   <img
-                //     src={step.data[0].fileUrl}
-                //     alt={step.data[0].fileName}
-                //     className={
-                //       index == activeStep
-                //         ? classes.thumbImageSelected
-                //         : classes.thumbImage
-                //     }
-                //   />
-                // );
               }
               if (step.type == 'preview' && product.imageUrl) {
                 buttonProps.icon=<VisibilityIcon/>;
-                // buttonProps.optional = (
-                //   <img
-                //     src={product.imageUrl}
-                //     alt={product.name}
-                //     className={
-                //       index == activeStep
-                //         ? classes.thumbImageSelected
-                //         : classes.thumbImage
-                //     }
-                //   />
-                // );
               }
               if (step.type == 'share') {
                 buttonProps.optional = (
@@ -325,11 +303,36 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
               const stepImages = step.data.map(d=>(<img src={d.fileUrl} naturalWidth={d.width} naturalHeight={d.height}/>));
               return (
                 <div className={ index == activeStep ? classes.visible : classes.hidden }>
+                  <div>
+                    <input
+                      type='file'
+                      style={{ display: 'none' }}
+                      inputprops={{ accept: 'image/*' }}
+                      onChange={fileInputHandler}
+                      ref={(input) => {
+                        fileInput = input;
+                      }}
+                    />
+                    <RoundButton
+                      size='small'
+                      onClick={() => handleUploadClick()}
+                      disabled={selectedPhoto<0}
+                      className={
+                        index == activeStep ? classes.visible : classes.hidden
+                      }
+                    >
+                      <Box className={classes.centerContent}>
+                        <CachedIcon />
+                        <span>{t('Replace file')}</span>
+                      </Box>
+                    </RoundButton>
+                  </div>
                   <PhotoFrame
                     stepData={step.data}
                     frameUrl={product.layerImageUrl}
                     photos={stepImages}
                     hideSelectors={hideSelectors}
+                    setSelectedPhoto={setSelectedPhoto}
                     setEditorRef={setEditorRef}
                     setEditorRatio={setEditorRatio}/>
                 </div>

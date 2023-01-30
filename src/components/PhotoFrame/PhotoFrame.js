@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     minHeight: "300px",
 }}));
 
-const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setEditorRef, setEditorRatio }) => {
+const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhoto, setEditorRef, setEditorRatio }) => {
 
     const crateLayers = (initialLayers, photos) =>{
       const photoss = [];
@@ -112,8 +112,10 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setEditorRef, s
       const layerIndex = layers.indexOf(layers.find((img,i)=>img.id === selectedId));
       if(layerIndex>=0){
         setTransformerPosition(initialLayers[layerIndex]);
+        setSelectedPhoto(layerIndex);
       }else{
         setTransformerPosition(null);
+        setSelectedPhoto(-1);
       }
     }, [selectedId]);
 
