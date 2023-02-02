@@ -21,39 +21,61 @@ const useStyles = makeStyles((theme) => ({
 
 const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhoto, setEditorRef, setEditorRatio }) => {
 
-    const crateLayers = (initialLayers, photos) =>{
-      const photoss = [];
+    const initialize = () =>{
+      const ratio = data.width/parentWidth;
+      const initialLayers = stepData.map((d,i)=>{return{
+        id: "photo"+i,
+        x:d.productConfig.positionX/ratio,
+        y:d.productConfig.positionY/ratio,
+        width:d.productConfig.width/ratio,
+        height:d.productConfig.height/ratio,
+        clipX: 0,
+        clipY: 0,
+        clipWidth: d.productConfig.width/ratio,
+        clipHeight: d.productConfig.height/ratio
+      }});
+      const newLayers = [];
       initialLayers.forEach((iL,i)=>{
         if(photos[i]){
-          const photo = {};
-          const layerRatio = iL.width / iL.height;
-          const photoRatio = photos[i].props.naturalWidth / photos[i].props.naturalHeight;
-
-          let width = 0;
-          let height = 0;
-
-          if(layerRatio > photoRatio){
-            width = iL.width;
-            height = photos[i].props.naturalHeight * (iL.width / photos[i].props.naturalWidth );
+          let newLayer = {};
+          if(layers[i] && layers[i].img.props.src === photos[i].props.src){
+            newLayer = layers[i];
           }else{
-            width = photos[i].props.naturalWidth * (iL.height / photos[i].props.naturalHeight );
-            height = iL.height;
+            const layerRatio = iL.width / iL.height;
+            const photoRatio = photos[i].props.naturalWidth / photos[i].props.naturalHeight;
+
+            let width = 0;
+            let height = 0;
+
+            if(layerRatio > photoRatio){
+              width = iL.width;
+              height = photos[i].props.naturalHeight * (iL.width / photos[i].props.naturalWidth );
+            }else{
+              width = photos[i].props.naturalWidth * (iL.height / photos[i].props.naturalHeight );
+              height = iL.height;
+            }
+            newLayer.x = iL.width/2;
+            newLayer.y = iL.height/2;
+            newLayer.offsetX = width/2;
+            newLayer.offsetY = height/2;
+            newLayer.width = width;
+            newLayer.height = height;
+            newLayer.id = "photo"+i;
+            newLayer.img = photos[i];
           }
-          photo.x = iL.width/2;
-          photo.y = iL.height/2;
-          photo.offsetX = width/2;
-          photo.offsetY = height/2;
-          photo.width = width;
-          photo.height = height;
-          photo.id = "photo"+i;
-          photo.img = photos[i];
-          photoss.push(photo);
+          newLayers.push(newLayer);
         }
       })
-      return photoss;
+
+      setFrameWidth(data.width/ratio);
+      setFrameHeight(data.height/ratio);
+      setRatio(ratio);
+      setEditorRatio(ratio);
+      setInitialLayers(initialLayers);
+      setLayers(newLayers);
     }
 
-    const [selectedId, selectShape] = useState(null);
+    const [selectedId, setSelectId] = useState(null);
     const [transformerPosition, setTransformerPosition] = useState(null);
     const [parentWidth, setParentWidth] = useState(0);
     const [frameWidth, setFrameWidth] = useState();
@@ -74,27 +96,9 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
 
     useEffect(()=>{
       if(data && !loading && !error){
-        const ratio = data.width/parentWidth;
-        const initialLayers = stepData.map((d,i)=>{return{
-          id: "photo"+i,
-          x:d.productConfig.positionX/ratio,
-          y:d.productConfig.positionY/ratio,
-          width:d.productConfig.width/ratio,
-          height:d.productConfig.height/ratio,
-          clipX: 0,
-          clipY: 0,
-          clipWidth: d.productConfig.width/ratio,
-          clipHeight: d.productConfig.height/ratio
-        }});
-
-        setFrameWidth(data.width/ratio);
-        setFrameHeight(data.height/ratio);
-        setRatio(ratio);
-        setEditorRatio(ratio);
-        setInitialLayers(initialLayers);
-        setLayers(crateLayers(initialLayers, photos));
+        initialize();
       }
-    },[data, loading, error, photos, parentWidth]);
+    },[data, loading, error, parentWidth, photos]);
 
     useEffect(() => {
       setEditorRef(stageRef);
@@ -122,7 +126,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
     const checkDeselect = (e) => {
       const clickedOnEmpty = e.target === e.target.getStage();
       if (clickedOnEmpty) {
-        selectShape(null);
+        setSelectId(null);
       }
     };
 
@@ -142,7 +146,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
                     shapeProps={rect}
                     imgRef={imgRef}
                     onSelect={() => {
-                      selectShape(rect.id);
+                      setSelectId(rect.id);
                     }}
                     onChange={(newAttrs) => {
                       const rects = layers.slice();
