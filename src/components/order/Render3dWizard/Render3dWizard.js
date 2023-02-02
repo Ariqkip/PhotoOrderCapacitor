@@ -301,32 +301,35 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                 setFinalImage(null);
               }
               const stepImages = step.data.map(d=>(<img src={d.fileUrl} naturalWidth={d.width} naturalHeight={d.height}/>));
+              const replaceFileBtn = (
+                <div>
+                  <input
+                    type='file'
+                    style={{ display: 'none' }}
+                    inputprops={{ accept: 'image/*' }}
+                    onChange={fileInputHandler}
+                    ref={(input) => {
+                      fileInput = input;
+                    }}
+                  />
+                  <RoundButton
+                    size='small'
+                    onClick={() => handleUploadClick()}
+                    disabled={selectedPhoto<0}
+                    className={
+                      index == activeStep ? classes.visible : classes.hidden
+                    }
+                  >
+                    <Box className={classes.centerContent}>
+                      <CachedIcon />
+                      <span>{t('Replace file')}</span>
+                    </Box>
+                  </RoundButton>
+                </div>
+              );
               return (
                 <div className={ index == activeStep ? classes.visible : classes.hidden }>
-                  <div>
-                    <input
-                      type='file'
-                      style={{ display: 'none' }}
-                      inputprops={{ accept: 'image/*' }}
-                      onChange={fileInputHandler}
-                      ref={(input) => {
-                        fileInput = input;
-                      }}
-                    />
-                    <RoundButton
-                      size='small'
-                      onClick={() => handleUploadClick()}
-                      disabled={selectedPhoto<0}
-                      className={
-                        index == activeStep ? classes.visible : classes.hidden
-                      }
-                    >
-                      <Box className={classes.centerContent}>
-                        <CachedIcon />
-                        <span>{t('Replace file')}</span>
-                      </Box>
-                    </RoundButton>
-                  </div>
+
                   <PhotoFrame
                     stepData={step.data}
                     frameUrl={product.layerImageUrl}
@@ -334,7 +337,8 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                     hideSelectors={hideSelectors}
                     setSelectedPhoto={setSelectedPhoto}
                     setEditorRef={setEditorRef}
-                    setEditorRatio={setEditorRatio}/>
+                    setEditorRatio={setEditorRatio}
+                    replaceFileBtn={replaceFileBtn}/>
                 </div>
               )
             }
@@ -395,31 +399,42 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
         </DialogContent>
         <DialogActions>
           <div className={classes.btnContainer}>
-            <OtherButton
-              onClick={closeFn}
-              color='primary'
-              className={classes.m6}
-            >
-              {t('Back')}
-            </OtherButton>
             {showAcceptButton() ? (
-              <NextButton
-                onClick={() => saveTexture(finalImage)}
-                color='primary'
-                className={classes.m6}
-                disabled={isAcceptUploading()}
-              >
-                {isAcceptUploading() ? <CircularProgress /> : t('Accept')}
-              </NextButton>
+              <>
+                <OtherButton
+                  onClick={() => setActiveStep(0)}
+                  color='primary'
+                  className={classes.m6}
+                >
+                  {t('Back')}
+                </OtherButton>
+                <NextButton
+                  onClick={() => saveTexture(finalImage)}
+                  color='primary'
+                  className={classes.m6}
+                  disabled={isAcceptUploading()}
+                >
+                  {isAcceptUploading() ? <CircularProgress /> : t('Accept')}
+                </NextButton>
+              </>
             ):(
-              <NextButton
-                onClick={() => setActiveStep(1)}
-                color='primary'
-                className={classes.m6}
-                disabled={isAcceptUploading()}
-              >
-                {isAcceptUploading() ? <CircularProgress /> : t('Next')}
-              </NextButton>
+              <>
+                <OtherButton
+                  onClick={closeFn}
+                  color='primary'
+                  className={classes.m6}
+                >
+                  {t('Back')}
+                </OtherButton>
+                <NextButton
+                  onClick={() => setActiveStep(1)}
+                  color='primary'
+                  className={classes.m6}
+                  disabled={isAcceptUploading()}
+                >
+                  {isAcceptUploading() ? <CircularProgress /> : t('Next')}
+                </NextButton>
+              </>
             )}
           </div>
         </DialogActions>
