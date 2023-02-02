@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import { useTranslation } from 'react-i18next';
-import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
 
 const useStyles = makeStyles((theme) => ({
   scaleAndRotationPlaceholder: {
+    marginTop:"10px",
     width: "100%",
     height: "55px",
     display: "flex",
@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
 const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId, replaceFileBtn}) =>{
   const { t } = useTranslation();
   const classes = useStyles();
+  const [rotation, setRotation] = useState(0);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState(null);
 
@@ -47,7 +48,9 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId, replaceFileBt
     }
     if(imgRef){
       const s = imgRef.attrs.scaleX || 1;
+      const r = imgRef.attrs.rotation || 0;
       setScale((s-1)*10);
+      setRotation(r);
     }
   },[position])
 
@@ -56,13 +59,15 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId, replaceFileBt
       imgRef.setAttrs({
         scaleX: 1 + scale/10,
         scaleY: 1 + scale/10,
+        rotation: rotation
       })
     }
-  },[scale])
+  },[scale,rotation])
 
   useEffect(()=>{
     if(imgRef){
       setScale((imgRef.attrs.scaleX-1)*10 || 0);
+      setRotation(imgRef.attrs.rotation);
     }
   },[imgRef])
 
@@ -70,6 +75,18 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId, replaceFileBt
     <div className={classes.scaleAndRotationPlaceholder}>
         {selectedId &&
           <div>
+            <div className={classes.resizeBtn}>
+              <input
+                type="range" min="-90" max="90"
+                value={rotation}
+                onChange={(e)=>{
+                  const s = parseInt(e.target.value);
+                  setRotation(s)
+              }} />
+              <Typography className={classes.resizeLabel} gutterBottom>
+                {t('Rotation')}
+              </Typography>
+            </div>
             <div className={classes.resizeBtn}>
               <input
                 type="range" min="1" max="10"
