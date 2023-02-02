@@ -8,7 +8,10 @@ import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles((theme) => ({
   scaleAndRotationPlaceholder: {
     width: "100%",
-    height: "94px"
+    height: "55px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
   },
   resizeLabel:{
     margin: "auto",
@@ -64,28 +67,27 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId, replaceFileBt
   },[imgRef])
 
   return(
-    <>
-      {selectedId ?
-        <Box component="span" sx={{ p: 2, border: '1px dashed grey', backgroundColor: 'lightgrey' }}>
-          <div className={classes.resizeBtn}>
-            <input
-              type="range" min="1" max="10"
-              value={scale}
-              onChange={(e)=>{
-                const s = parseInt(e.target.value);
-                setScale(s)
-            }} />
-            <Typography className={classes.resizeLabel} gutterBottom>
-              {t('Resize file')}
-            </Typography>
+    <div className={classes.scaleAndRotationPlaceholder}>
+        {selectedId &&
+          <div>
+            <div className={classes.resizeBtn}>
+              <input
+                type="range" min="1" max="10"
+                value={scale}
+                onChange={(e)=>{
+                  const s = parseInt(e.target.value);
+                  setScale(s)
+              }} />
+              <Typography className={classes.resizeLabel} gutterBottom>
+                {t('Resize file')}
+              </Typography>
+            </div>
+            <div className={classes.changeFileBtn}>
+              {replaceFileBtn}
+            </div>
           </div>
-          <div className={classes.changeFileBtn}>
-            {replaceFileBtn}
-          </div>
-        </Box> :
-        <div className={classes.scaleAndRotationPlaceholder}/>
-      }
-    </>
+        }
+    </div>
   )
 }
 
