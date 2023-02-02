@@ -399,31 +399,42 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
         </DialogContent>
         <DialogActions>
           <div className={classes.btnContainer}>
-            <OtherButton
-              onClick={closeFn}
-              color='primary'
-              className={classes.m6}
-            >
-              {t('Back')}
-            </OtherButton>
             {showAcceptButton() ? (
-              <NextButton
-                onClick={() => saveTexture(finalImage)}
-                color='primary'
-                className={classes.m6}
-                disabled={isAcceptUploading()}
-              >
-                {isAcceptUploading() ? <CircularProgress /> : t('Accept')}
-              </NextButton>
+              <>
+                <OtherButton
+                  onClick={() => setActiveStep(0)}
+                  color='primary'
+                  className={classes.m6}
+                >
+                  {t('Back')}
+                </OtherButton>
+                <NextButton
+                  onClick={() => saveTexture(finalImage)}
+                  color='primary'
+                  className={classes.m6}
+                  disabled={isAcceptUploading()}
+                >
+                  {isAcceptUploading() ? <CircularProgress /> : t('Accept')}
+                </NextButton>
+              </>
             ):(
-              <NextButton
-                onClick={() => setActiveStep(1)}
-                color='primary'
-                className={classes.m6}
-                disabled={isAcceptUploading()}
-              >
-                {isAcceptUploading() ? <CircularProgress /> : t('Next')}
-              </NextButton>
+              <>
+                <OtherButton
+                  onClick={closeFn}
+                  color='primary'
+                  className={classes.m6}
+                >
+                  {t('Back')}
+                </OtherButton>
+                <NextButton
+                  onClick={() => setActiveStep(1)}
+                  color='primary'
+                  className={classes.m6}
+                  disabled={isAcceptUploading()}
+                >
+                  {isAcceptUploading() ? <CircularProgress /> : t('Next')}
+                </NextButton>
+              </>
             )}
           </div>
         </DialogActions>
