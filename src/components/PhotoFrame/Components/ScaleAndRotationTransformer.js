@@ -1,15 +1,34 @@
 import React, {useEffect, useState} from 'react';
+import { useTranslation } from 'react-i18next';
 import Box from '@material-ui/core/Box';
+import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
 
 const useStyles = makeStyles((theme) => ({
-  scaleAndRotationContainer: {
+  scaleAndRotationPlaceholder: {
     width: "100%",
-    height: "58px"
-}}));
+    height: "94px"
+  },
+  resizeLabel:{
+    margin: "auto",
+    textTransform: "uppercase",
+    fontSize: "0.8125rem",
+    color: "rgba(0, 0, 0, 0.87)",
+    fontFamily: "Nunito,sans-serif",
+    fontWeight: "500",
+    lineHeight: "1.75"
+  },
+  resizeBtn: {
+    display: "inline-grid"
+  },
+  changeFileBtn: {
+    display: "inline-grid"
+  }
+}));
 
-const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId}) =>{
+const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId, replaceFileBtn}) =>{
+  const { t } = useTranslation();
   const classes = useStyles();
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState(null);
@@ -48,7 +67,7 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId}) =>{
     <>
       {selectedId ?
         <Box component="span" sx={{ p: 2, border: '1px dashed grey', backgroundColor: 'lightgrey' }}>
-          <div className='ScaleAndRotationTransformer'>
+          <div className={classes.resizeBtn}>
             <input
               type="range" min="1" max="10"
               value={scale}
@@ -56,9 +75,15 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId}) =>{
                 const s = parseInt(e.target.value);
                 setScale(s)
             }} />
+            <Typography className={classes.resizeLabel} gutterBottom>
+              {t('Resize file')}
+            </Typography>
+          </div>
+          <div className={classes.changeFileBtn}>
+            {replaceFileBtn}
           </div>
         </Box> :
-        <div className={classes.scaleAndRotationContainer}/>
+        <div className={classes.scaleAndRotationPlaceholder}/>
       }
     </>
   )

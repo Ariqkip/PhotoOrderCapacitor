@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     minHeight: "300px",
 }}));
 
-const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhoto, setEditorRef, setEditorRatio }) => {
+const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhoto, setEditorRef, setEditorRatio, replaceFileBtn }) => {
 
     const initialize = () =>{
       const ratio = data.width/parentWidth;
@@ -158,7 +158,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
               )}
               {frameUrl && <Frame frameUrl={frameUrl} width={frameWidth} height={frameHeight} initialLayers={initialLayers} selectedId={selectedId} hideSelectors={hideSelectors}/>}
           </Stage>
-          <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} selectedId={selectedId}/>
+          <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} selectedId={selectedId} replaceFileBtn={replaceFileBtn}/>
         </>
       );
     }
