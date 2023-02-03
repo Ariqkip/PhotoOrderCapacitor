@@ -77,7 +77,7 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId, replaceFileBt
           <div>
             <div className={classes.resizeBtn}>
               <input
-                type="range" min="-90" max="90"
+                type="range" min="-180" max="180"
                 value={rotation}
                 onChange={(e)=>{
                   const s = parseInt(e.target.value);
