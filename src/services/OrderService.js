@@ -87,10 +87,10 @@ const OrderService = () => {
       if (item.isLayerItem === true) {
         layerIndex++;
         const config = {
-          X: item.completedCropObj.x,
-          Y: item.completedCropObj.y,
-          Width: item.completedCropObj.width,
-          Height: item.completedCropObj.height,
+          X: 0,
+          Y: 0,
+          Width: 0,
+          Height: 0,
           ScaleFactoryUp: 1,
           Guid: item.imageGuid,
           Index: layerIndex,
@@ -98,7 +98,7 @@ const OrderService = () => {
 
         result.sizes = config;
       }
-      
+
       return result;
     });
 

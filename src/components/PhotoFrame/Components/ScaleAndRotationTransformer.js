@@ -67,7 +67,7 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId, replaceFileBt
   useEffect(()=>{
     if(imgRef){
       setScale((imgRef.attrs.scaleX-1)*10 || 0);
-      setRotation(imgRef.attrs.rotation);
+      setRotation(imgRef.attrs.rotation || 0);
     }
   },[imgRef])
 
