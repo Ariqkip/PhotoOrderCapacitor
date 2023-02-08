@@ -11,7 +11,13 @@ const useStyles = makeStyles((theme) => ({
     height: "55px",
     display: "flex",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    [theme.breakpoints.down(500)]: {
+      height: "110px"
+    },
+    [theme.breakpoints.down(350)]: {
+      height: "130px"
+    }
   },
   resizeLabel:{
     margin: "auto",
