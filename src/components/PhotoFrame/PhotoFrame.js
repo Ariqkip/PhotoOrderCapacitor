@@ -7,8 +7,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import Frame from './Components/Frame';
+import TextLayer from './Components/TextLayer';
 import TransformableImage from './Components/TransformableImage';
+import TextTransformer from './Components/TextTransformer';
 import ScaleAndRotationTransformer from './Components/ScaleAndRotationTransformer';
+import Menu from './Components/Menu';
 
 const useStyles = makeStyles((theme) => ({
   centerContent: {
@@ -76,6 +79,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
     }
 
     const [selectedId, setSelectId] = useState(null);
+    const [textSelectedId, setTextSelectedId] = useState(null);
     const [transformerPosition, setTransformerPosition] = useState(null);
     const [parentWidth, setParentWidth] = useState(0);
     const [frameWidth, setFrameWidth] = useState();
@@ -83,6 +87,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
     const [ratio, setRatio] = useState(0);
     const [initialLayers, setInitialLayers] = useState();
     const [layers, setLayers] = useState([]);
+    const [textLayers, setTextLayers] = useState([]);
     const classes = useStyles();
     const imgRef = React.useRef([]);
     const trRef = React.useRef();
@@ -127,8 +132,21 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
       const clickedOnEmpty = e.target === e.target.getStage();
       if (clickedOnEmpty) {
         setSelectId(null);
+        setTextSelectedId(null);
       }
     };
+
+    const addText = () =>{
+      const newTextLayer = {
+        x:100,
+        y:100,
+        rotation:0,
+        text: "test",
+        fontSize: 100
+      }
+      setTextLayers([...textLayers, newTextLayer]);
+      setTextSelectedId(textLayers.length);
+    }
 
     let composerView = (<CircularProgress />);
     if(data && !loading && !error && initialLayers){
@@ -147,6 +165,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
                     imgRef={imgRef}
                     onSelect={() => {
                       setSelectId(rect.id);
+                      setTextSelectedId(null);
                     }}
                     onChange={(newAttrs) => {
                       const rects = layers.slice();
@@ -157,8 +176,20 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
                 </Layer>
               )}
               {frameUrl && <Frame frameUrl={frameUrl} width={frameWidth} height={frameHeight} initialLayers={initialLayers} selectedId={selectedId} hideSelectors={hideSelectors}/>}
+              {textLayers.map((textLayer, i) =>
+                <TextLayer
+                  key={i}
+                  config={textLayer}
+                  onSelect={() => {
+                    setSelectId(null);
+                    setTextSelectedId(i);
+                  }}
+                />
+              )}
           </Stage>
-          <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} selectedId={selectedId} replaceFileBtn={replaceFileBtn}/>
+          {selectedId && textSelectedId===null && <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} replaceFileBtn={replaceFileBtn}/>}
+          {!selectedId && textSelectedId!==null && <TextTransformer textSelectedId={textSelectedId} textLayers={textLayers} setTextLayers={setTextLayers}/>}
+          {!selectedId && textSelectedId===null && <Menu addText={addText}/>}
         </>
       );
     }
