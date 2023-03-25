@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId, replaceFileBtn}) =>{
+const ScaleAndRotationTransformer = ({initPos, imgRef, replaceFileBtn}) =>{
   const { t } = useTranslation();
   const classes = useStyles();
   const [rotation, setRotation] = useState(0);
@@ -79,37 +79,35 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, selectedId, replaceFileBt
 
   return(
     <div className={classes.scaleAndRotationPlaceholder}>
-        {selectedId &&
-          <div>
-            <div className={classes.resizeBtn}>
-              <input
-                type="range" min="-180" max="180"
-                value={rotation}
-                onChange={(e)=>{
-                  const s = parseInt(e.target.value);
-                  setRotation(s)
-              }} />
-              <Typography className={classes.resizeLabel} gutterBottom>
-                {t('Rotation')}
-              </Typography>
-            </div>
-            <div className={classes.resizeBtn}>
-              <input
-                type="range" min="1" max="10"
-                value={scale}
-                onChange={(e)=>{
-                  const s = parseInt(e.target.value);
-                  setScale(s)
-              }} />
-              <Typography className={classes.resizeLabel} gutterBottom>
-                {t('Resize file')}
-              </Typography>
-            </div>
-            <div className={classes.changeFileBtn}>
-              {replaceFileBtn}
-            </div>
+        <div>
+          <div className={classes.resizeBtn}>
+            <input
+              type="range" min="-180" max="180"
+              value={rotation}
+              onChange={(e)=>{
+                const s = parseInt(e.target.value);
+                setRotation(s)
+            }} />
+            <Typography className={classes.resizeLabel} gutterBottom>
+              {t('Rotation')}
+            </Typography>
           </div>
-        }
+          <div className={classes.resizeBtn}>
+            <input
+              type="range" min="1" max="10"
+              value={scale}
+              onChange={(e)=>{
+                const s = parseInt(e.target.value);
+                setScale(s)
+            }} />
+            <Typography className={classes.resizeLabel} gutterBottom>
+              {t('Resize file')}
+            </Typography>
+          </div>
+          <div className={classes.changeFileBtn}>
+            {replaceFileBtn}
+          </div>
+        </div>
     </div>
   )
 }
