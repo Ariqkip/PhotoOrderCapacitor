@@ -142,7 +142,9 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
         y:100,
         rotation:0,
         text: "test",
-        fontSize: 100
+        fontSize: 100,
+        fillColor: "#000000",
+        strokeColor: "#ff0000"
       }
       setTextLayers([...textLayers, newTextLayer]);
       setTextSelectedId(textLayers.length);

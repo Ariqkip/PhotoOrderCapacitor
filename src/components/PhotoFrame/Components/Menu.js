@@ -33,10 +33,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "500",
     lineHeight: "1.75"
   },
-  resizeBtn: {
-    display: "inline-grid"
-  },
-  changeFileBtn: {
+  menuBtn: {
     display: "inline-grid"
   },
   centerContent: {
@@ -54,7 +51,7 @@ const Menu = ({addText}) =>{
   return(
     <div className={classes.scaleAndRotationPlaceholder}>
         <div>
-          <div className={classes.changeFileBtn}>
+          <div className={classes.menuBtn}>
             <RoundButton
               size='small'
               onClick={addText}
@@ -69,7 +66,7 @@ const Menu = ({addText}) =>{
               </Box>
             </RoundButton>
           </div>
-          <div className={classes.changeFileBtn}>
+          <div className={classes.menuBtn}>
             <RoundButton
               size='small'
               onClick={() => {}}
