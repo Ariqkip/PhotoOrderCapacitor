@@ -206,7 +206,7 @@ const TextTransformer = ({textSelectedId, textLayers, setTextLayers}) =>{
             setTextLayers(newTextLayers);
         }} />
         <Typography className={classes.resizeLabel} gutterBottom>
-          {t('Stroke Color')}{selectedText.strokeColor}
+          {t('Stroke Color')}
         </Typography>
       </div>
       {backBtn}
