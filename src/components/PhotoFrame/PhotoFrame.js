@@ -142,6 +142,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
         y:100,
         rotation:0,
         text: "test",
+        fontFamily: "Arial",
         fontSize: 100,
         fillColor: "#000000",
         strokeColor: "#ff0000"
@@ -182,6 +183,12 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
                 <TextLayer
                   key={i}
                   config={textLayer}
+                  setConfig={(editedTextLayer)=>{
+                    console.log(editedTextLayer)
+                      const newTextLayers = [...textLayers];
+                      newTextLayers[i] = editedTextLayer;
+                      setTextLayers(newTextLayers);
+                  }}
                   onSelect={() => {
                     setSelectId(null);
                     setTextSelectedId(i);

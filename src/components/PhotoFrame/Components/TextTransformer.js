@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import RoundButton from './../../core/RoundButton';
 import Box from '@material-ui/core/Box';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 import ColorPicker from 'material-ui-color-picker'
 import Typography from '@material-ui/core/Typography';
 import FormatShapesIcon from '@material-ui/icons/FormatShapes';
@@ -72,6 +74,29 @@ const TextTransformer = ({textSelectedId, textLayers, setTextLayers}) =>{
         />
         <Typography className={classes.resizeLabel} gutterBottom>
           {t('Text')}
+        </Typography>
+      </div>
+      <div className={classes.menuBtn}>
+        <Select
+          style={{height: "20px"}}
+          labelId="demo-simple-select-standard-label"
+          id="demo-simple-select-standard"
+          value={selectedText.fontFamily}
+          onChange={(e)=>{
+            const newTextLayers = [...textLayers];
+            const editedTextLayer = {...selectedText}
+            editedTextLayer.fontFamily = e.target.value;
+            newTextLayers[textSelectedId] = editedTextLayer;
+            setTextLayers(newTextLayers);
+          }}
+          label="Age"
+        >
+          {["Arial", "Courier New", "Times New Roman"].map((font,i)=>
+            <MenuItem key={i} value={font}>{font}</MenuItem>
+          )}
+        </Select>
+        <Typography className={classes.resizeLabel} gutterBottom>
+          {t('Font Family')}
         </Typography>
       </div>
       <div className={classes.menuBtn}>
