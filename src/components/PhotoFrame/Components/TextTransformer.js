@@ -8,10 +8,11 @@ import ColorPicker from 'material-ui-color-picker'
 import Typography from '@material-ui/core/Typography';
 import FormatShapesIcon from '@material-ui/icons/FormatShapes';
 import ColorLensIcon from '@material-ui/icons/ColorLens';
-import UndoIcon from '@material-ui/icons/Undo';
 import { makeStyles } from '@material-ui/core/styles';
 import '../PhotoFrame.css'
+import BackBtn from '../Atoms/BackBtn';
 
+  // {["Arial", "Courier New", "Times New Roman"].map((font,i)=>
 
 const useStyles = makeStyles((theme) => ({
   scaleAndRotationPlaceholder: {
@@ -38,7 +39,8 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: "1.75"
   },
   menuBtn: {
-    display: "inline-grid"
+    display: "inline-grid",
+    margin: "0px 5px"
   },
   centerContent: {
     display: 'flex',
@@ -48,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const TextTransformer = ({textSelectedId, textLayers, setTextLayers}) =>{
+const TextTransformer = ({textSelectedId, setTextSelectedId, textLayers, setTextLayers}) =>{
   const { t } = useTranslation();
   const classes = useStyles();
   const [menuState, setMenuState] = useState(null)
@@ -91,8 +93,8 @@ const TextTransformer = ({textSelectedId, textLayers, setTextLayers}) =>{
           }}
           label="Age"
         >
-          {["Arial", "Courier New", "Times New Roman"].map((font,i)=>
-            <MenuItem key={i} value={font}>{font}</MenuItem>
+          {["Arial", "Verdana", "Tahoma", "Trebuchet MS", "Times New Roman", "Georgia", "Garamond", "Courier New", "Brush Script MT"].map((font,i)=>
+            <MenuItem key={i} value={font}><span style={{fontFamily:font}}>{font}</span></MenuItem>
           )}
         </Select>
         <Typography className={classes.resizeLabel} gutterBottom>
@@ -129,26 +131,11 @@ const TextTransformer = ({textSelectedId, textLayers, setTextLayers}) =>{
           </Box>
         </RoundButton>
       </div>
+      <BackBtn fun={()=>setTextSelectedId(null)} />
     </>
   );
 
-  const backBtn=(
-    <div className={classes.menuBtn}>
-      <RoundButton
-        size='small'
-        onClick={()=>setMenuState(null)}
-        disabled={false}
-        className={
-          true ? classes.visible : classes.hidden
-        }
-      >
-        <Box className={classes.centerContent}>
-          <UndoIcon />
-          <span>{t('Back')}</span>
-        </Box>
-      </RoundButton>
-    </div>
-  )
+
 
   const shapeMenu = (
     <>
@@ -197,7 +184,7 @@ const TextTransformer = ({textSelectedId, textLayers, setTextLayers}) =>{
           {t('Stroke Width')}
         </Typography>
       </div>
-      {backBtn}
+      <BackBtn fun={()=>setMenuState(null)} />
     </>
   );
 
@@ -234,7 +221,7 @@ const TextTransformer = ({textSelectedId, textLayers, setTextLayers}) =>{
           {t('Stroke Color')}
         </Typography>
       </div>
-      {backBtn}
+      <BackBtn fun={()=>setMenuState(null)} />
     </>
   )
 
