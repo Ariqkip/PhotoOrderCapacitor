@@ -196,9 +196,9 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
                 />
               )}
           </Stage>
-          {selectedId && textSelectedId===null && <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} replaceFileBtn={replaceFileBtn}/>}
-          {!selectedId && textSelectedId!==null && <TextTransformer textSelectedId={textSelectedId} textLayers={textLayers} setTextLayers={setTextLayers}/>}
-          {!selectedId && textSelectedId===null && <Menu addText={addText}/>}
+          {selectedId && textSelectedId===null && <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} replaceFileBtn={replaceFileBtn} setSelectId={setSelectId}/>}
+          {!selectedId && textSelectedId!==null && <TextTransformer textSelectedId={textSelectedId} setTextSelectedId={setTextSelectedId} textLayers={textLayers} setTextLayers={setTextLayers}/>}
+          {!selectedId && textSelectedId===null && <Menu setSelectId={setSelectId} addText={addText}/>}
         </>
       );
     }

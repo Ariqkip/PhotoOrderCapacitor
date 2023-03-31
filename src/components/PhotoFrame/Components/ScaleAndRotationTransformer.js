@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import BackBtn from '../Atoms/BackBtn';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -36,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ScaleAndRotationTransformer = ({initPos, imgRef, replaceFileBtn}) =>{
+const ScaleAndRotationTransformer = ({initPos, imgRef, replaceFileBtn, setSelectId}) =>{
   const { t } = useTranslation();
   const classes = useStyles();
   const [rotation, setRotation] = useState(0);
@@ -77,36 +78,52 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, replaceFileBtn}) =>{
     }
   },[imgRef])
 
+  const buttons=(
+    <>
+      <div className={classes.resizeBtn}>
+        <input
+          type="range" min="-180" max="180"
+          value={rotation}
+          onChange={(e)=>{
+            const s = parseInt(e.target.value);
+            setRotation(s)
+        }} />
+        <Typography className={classes.resizeLabel} gutterBottom>
+          {t('Rotation')}
+        </Typography>
+      </div>
+      <div className={classes.resizeBtn}>
+        <input
+          type="range" min="1" max="10"
+          value={scale}
+          onChange={(e)=>{
+            const s = parseInt(e.target.value);
+            setScale(s)
+        }} />
+        <Typography className={classes.resizeLabel} gutterBottom>
+          {t('Resize file')}
+        </Typography>
+      </div>
+      <div className={classes.changeFileBtn}>
+        {replaceFileBtn}
+      </div>
+    </>
+  )
+
+  const noPhotoSelected=(
+    <div className={classes.resizeBtn}>
+      <Typography className={classes.resizeLabel} gutterBottom>
+        {t('Select image by clicking it')}
+      </Typography>
+    </div>
+  )
+
   return(
     <div className={classes.scaleAndRotationPlaceholder}>
         <div>
-          <div className={classes.resizeBtn}>
-            <input
-              type="range" min="-180" max="180"
-              value={rotation}
-              onChange={(e)=>{
-                const s = parseInt(e.target.value);
-                setRotation(s)
-            }} />
-            <Typography className={classes.resizeLabel} gutterBottom>
-              {t('Rotation')}
-            </Typography>
-          </div>
-          <div className={classes.resizeBtn}>
-            <input
-              type="range" min="1" max="10"
-              value={scale}
-              onChange={(e)=>{
-                const s = parseInt(e.target.value);
-                setScale(s)
-            }} />
-            <Typography className={classes.resizeLabel} gutterBottom>
-              {t('Resize file')}
-            </Typography>
-          </div>
-          <div className={classes.changeFileBtn}>
-            {replaceFileBtn}
-          </div>
+          {imgRef && buttons}
+          {!imgRef && noPhotoSelected}
+          <BackBtn fun={()=>setSelectId(null)} />
         </div>
     </div>
   )
