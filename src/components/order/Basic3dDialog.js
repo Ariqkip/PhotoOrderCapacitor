@@ -1,5 +1,5 @@
 //Core
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 //Components
 import RoundButton from '../core/RoundButton';
@@ -358,30 +358,17 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
           >
             <Grid
               item
-              xs={12}
+              xs={6}
               md={4}
               className={[classes.centerContent, classes.p6]}
             >
               <RemoveButton onClick={handleRemoveAll} color='primary'>
-                {t('REMOVE ALL FILES')}
+                {t('REMOVE ALL')}
               </RemoveButton>
             </Grid>
-            <Hidden mdUp>
-              {attributesAvailable() && (
-                <Grid
-                  item
-                  xs={12}
-                  className={[classes.centerContent, classes.p6]}
-                >
-                  <OptionsButton onClick={executeOptionsScroll} color='primary'>
-                    {t('OPTIONS')}
-                  </OptionsButton>
-                </Grid>
-              )}
-            </Hidden>
             <Grid
               item
-              xs={12}
+              xs={6}
               md={4}
               className={[classes.centerContent, classes.p6]}
             >
@@ -397,6 +384,19 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
                 )}
               </NextButton>
             </Grid>
+            <Hidden mdUp>
+              {attributesAvailable() && (
+                <Grid
+                  item
+                  xs={6}
+                  className={[classes.centerContent, classes.p6]}
+                >
+                  <OptionsButton onClick={executeOptionsScroll} color='primary'>
+                    {t('OPTIONS')}
+                  </OptionsButton>
+                </Grid>
+              )}
+            </Hidden>
           </Grid>
         </DialogActions>
       </Dialog>
