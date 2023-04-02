@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 //UI
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,8 +33,9 @@ const NotFound = (props) => {
     <div className={classes.root}>
       <ProjectLogo />
       <Typography variant='h1' component='h2' gutterBottom>
-        404
+        404 test
       </Typography>
+      <Link to="/photographer/2320">GO</Link>
     </div>
   );
 };
