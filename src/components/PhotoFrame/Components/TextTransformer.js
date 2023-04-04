@@ -15,7 +15,25 @@ import BackBtn from '../Atoms/BackBtn';
   // {["Arial", "Courier New", "Times New Roman"].map((font,i)=>
 
 const useStyles = makeStyles((theme) => ({
-  scaleAndRotationPlaceholder: {
+  oneLineTextPlaceholderSmall: {
+    marginTop:"10px",
+    width: "100%",
+    height: "55px",
+    justifyContent: "center",
+    alignItems: "center",
+    display: "none",
+    [theme.breakpoints.down(500)]: {
+      display: "flex"
+    },
+  },
+  oneLineTextPlaceholderBig: {
+    display: "inline-grid",
+    margin: "0px 5px",
+    [theme.breakpoints.down(500)]: {
+      display: "none"
+    },
+  },
+  manuPlaceholder: {
     marginTop:"10px",
     width: "100%",
     height: "55px",
@@ -24,6 +42,21 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     [theme.breakpoints.down(500)]: {
       height: "110px"
+    },
+    [theme.breakpoints.down(350)]: {
+      height: "130px"
+    }
+  },
+  shapeManuPlaceholder:{
+    marginTop:"10px",
+    width: "100%",
+    height: "55px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    [theme.breakpoints.down(500)]: {
+      display:"grid",
+      height: "200px"
     },
     [theme.breakpoints.down(350)]: {
       height: "130px"
@@ -62,83 +95,103 @@ const TextTransformer = ({textSelectedId, setTextSelectedId, textLayers, setText
 
   const mainMenu = (
     <>
-      <div className={classes.menuBtn}>
-        <input
-          type="text"
-          value={selectedText.text}
-          onChange={(e)=>{
-            const newTextLayers = [...textLayers];
-            const editedTextLayer = {...selectedText}
-            editedTextLayer.text = e.target.value;
-            newTextLayers[textSelectedId] = editedTextLayer;
-            setTextLayers(newTextLayers);
-          }}
-        />
-        <Typography className={classes.resizeLabel} gutterBottom>
-          {t('Text')}
-        </Typography>
+      <div className={classes.oneLineTextPlaceholderSmall}>
+        <div className={classes.menuBtn}>
+          <input
+            type="text"
+            value={selectedText.text}
+            onChange={(e)=>{
+              const newTextLayers = [...textLayers];
+              const editedTextLayer = {...selectedText}
+              editedTextLayer.text = e.target.value;
+              newTextLayers[textSelectedId] = editedTextLayer;
+              setTextLayers(newTextLayers);
+            }}
+          />
+          <Typography className={classes.resizeLabel} gutterBottom>
+            {t('Text')}
+          </Typography>
+        </div>
       </div>
-      <div className={classes.menuBtn}>
-        <Select
-          style={{height: "20px"}}
-          labelId="demo-simple-select-standard-label"
-          id="demo-simple-select-standard"
-          value={selectedText.fontFamily}
-          onChange={(e)=>{
-            const newTextLayers = [...textLayers];
-            const editedTextLayer = {...selectedText}
-            editedTextLayer.fontFamily = e.target.value;
-            newTextLayers[textSelectedId] = editedTextLayer;
-            setTextLayers(newTextLayers);
-          }}
-          label="Age"
-        >
-          {["Arial", "Verdana", "Tahoma", "Trebuchet MS", "Times New Roman", "Georgia", "Garamond", "Courier New", "Brush Script MT"].map((font,i)=>
-            <MenuItem key={i} value={font}><span style={{fontFamily:font}}>{font}</span></MenuItem>
-          )}
-        </Select>
-        <Typography className={classes.resizeLabel} gutterBottom>
-          {t('Font Family')}
-        </Typography>
+      <div className={classes.manuPlaceholder}>
+        <div className={classes.oneLineTextPlaceholderBig}>
+          <input
+            type="text"
+            value={selectedText.text}
+            onChange={(e)=>{
+              const newTextLayers = [...textLayers];
+              const editedTextLayer = {...selectedText}
+              editedTextLayer.text = e.target.value;
+              newTextLayers[textSelectedId] = editedTextLayer;
+              setTextLayers(newTextLayers);
+            }}
+          />
+          <Typography className={classes.resizeLabel} gutterBottom>
+            {t('Text')}
+          </Typography>
+        </div>
+        <div className={classes.menuBtn}>
+          <Select
+            style={{height: "20px"}}
+            labelId="demo-simple-select-standard-label"
+            id="demo-simple-select-standard"
+            value={selectedText.fontFamily}
+            onChange={(e)=>{
+              const newTextLayers = [...textLayers];
+              const editedTextLayer = {...selectedText}
+              editedTextLayer.fontFamily = e.target.value;
+              newTextLayers[textSelectedId] = editedTextLayer;
+              setTextLayers(newTextLayers);
+            }}
+            label="Age"
+          >
+            {["Arial", "Verdana", "Tahoma", "Trebuchet MS", "Times New Roman", "Georgia", "Garamond", "Courier New", "Brush Script MT"].map((font,i)=>
+              <MenuItem key={i} value={font}><span style={{fontFamily:font}}>{font}</span></MenuItem>
+            )}
+          </Select>
+          <Typography className={classes.resizeLabel} gutterBottom>
+            {t('Font Family')}
+          </Typography>
+        </div>
+        <div className={classes.menuBtn}>
+          <RoundButton
+            size='small'
+            onClick={()=>setMenuState('shape')}
+            disabled={false}
+            className={
+              true ? classes.visible : classes.hidden
+            }
+          >
+            <Box className={classes.centerContent}>
+              <FormatShapesIcon />
+              <span>{t('Shape')}</span>
+            </Box>
+          </RoundButton>
+        </div>
+        <div className={classes.menuBtn}>
+          <RoundButton
+            size='small'
+            onClick={()=>setMenuState('colors')}
+            disabled={false}
+            className={
+              true ? classes.visible : classes.hidden
+            }
+          >
+            <Box className={classes.centerContent}>
+              <ColorLensIcon />
+              <span>{t('Colors')}</span>
+            </Box>
+          </RoundButton>
+        </div>
+        <BackBtn fun={()=>setTextSelectedId(null)} />
       </div>
-      <div className={classes.menuBtn}>
-        <RoundButton
-          size='small'
-          onClick={()=>setMenuState('shape')}
-          disabled={false}
-          className={
-            true ? classes.visible : classes.hidden
-          }
-        >
-          <Box className={classes.centerContent}>
-            <FormatShapesIcon />
-            <span>{t('Shape')}</span>
-          </Box>
-        </RoundButton>
-      </div>
-      <div className={classes.menuBtn}>
-        <RoundButton
-          size='small'
-          onClick={()=>setMenuState('colors')}
-          disabled={false}
-          className={
-            true ? classes.visible : classes.hidden
-          }
-        >
-          <Box className={classes.centerContent}>
-            <ColorLensIcon />
-            <span>{t('Colors')}</span>
-          </Box>
-        </RoundButton>
-      </div>
-      <BackBtn fun={()=>setTextSelectedId(null)} />
     </>
   );
 
 
 
   const shapeMenu = (
-    <>
+    <div className={classes.shapeManuPlaceholder}>
       <div className={classes.menuBtn}>
         <input
           type="range" min="-180" max="180"
@@ -185,11 +238,11 @@ const TextTransformer = ({textSelectedId, setTextSelectedId, textLayers, setText
         </Typography>
       </div>
       <BackBtn fun={()=>setMenuState(null)} />
-    </>
+    </div>
   );
 
   const colorsMenu = (
-    <>
+    <div className={classes.manuPlaceholder}>
       <div className={classes.menuBtn}>
         <ColorPicker
           defaultValue={selectedText.fillColor}
@@ -222,15 +275,15 @@ const TextTransformer = ({textSelectedId, setTextSelectedId, textLayers, setText
         </Typography>
       </div>
       <BackBtn fun={()=>setMenuState(null)} />
-    </>
+    </div>
   )
 
   return(
-    <div className={classes.scaleAndRotationPlaceholder}>
+    <>
         {!menuState && mainMenu}
         {menuState === 'shape' && shapeMenu}
         {menuState === 'colors' && colorsMenu}
-    </div>
+    </>
   )
 }
 

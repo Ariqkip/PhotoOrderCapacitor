@@ -30,6 +30,7 @@ const TextLayer = ({config, setConfig, onSelect}) =>{
           strokeWidth={config.strokeWidth}
           draggable
           onClick={onSelect}
+          onTap={onSelect}
           onDragEnd={(e) => {
             setConfig({...config, ...e.target._lastPos});
           }}

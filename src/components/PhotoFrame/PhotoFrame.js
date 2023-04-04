@@ -184,12 +184,12 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
                   key={i}
                   config={textLayer}
                   setConfig={(editedTextLayer)=>{
-                    console.log(editedTextLayer)
                       const newTextLayers = [...textLayers];
                       newTextLayers[i] = editedTextLayer;
                       setTextLayers(newTextLayers);
                   }}
                   onSelect={() => {
+                    console.log("dupa")
                     setSelectId(null);
                     setTextSelectedId(i);
                   }}
