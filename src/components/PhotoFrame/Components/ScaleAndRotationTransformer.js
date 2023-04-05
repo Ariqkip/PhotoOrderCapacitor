@@ -16,8 +16,8 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down(500)]: {
       height: "110px"
     },
-    [theme.breakpoints.down(350)]: {
-      height: "130px"
+    [theme.breakpoints.down(400)]: {
+      height: "150px"
     }
   },
   resizeLabel:{
