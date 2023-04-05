@@ -150,7 +150,7 @@ const TextTransformer = ({textSelectedId, setTextSelectedId, textLayers, setText
             )}
           </Select>
           <Typography className={classes.resizeLabel} gutterBottom>
-            {t('Font Family')}
+            {t('Font')}
           </Typography>
         </div>
         <div className={classes.menuBtn}>
@@ -256,7 +256,7 @@ const TextTransformer = ({textSelectedId, setTextSelectedId, textLayers, setText
             console.log(color)
         }} />
         <Typography className={classes.resizeLabel} gutterBottom>
-          {t('Fill Color')}
+          {t('Fill')}
         </Typography>
       </div>
       <div className={classes.menuBtn}>
@@ -271,7 +271,7 @@ const TextTransformer = ({textSelectedId, setTextSelectedId, textLayers, setText
             setTextLayers(newTextLayers);
         }} />
         <Typography className={classes.resizeLabel} gutterBottom>
-          {t('Stroke Color')}
+          {t('Stroke')}
         </Typography>
       </div>
       <BackBtn fun={()=>setMenuState(null)} />
