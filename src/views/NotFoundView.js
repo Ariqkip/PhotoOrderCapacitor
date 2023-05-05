@@ -35,7 +35,6 @@ const NotFound = (props) => {
       <Typography variant='h1' component='h2' gutterBottom>
         404
       </Typography>
-      <Link to="/photographer/2320">GO</Link>
     </div>
   );
 };
