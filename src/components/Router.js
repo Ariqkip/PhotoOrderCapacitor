@@ -29,6 +29,12 @@ const View404 = React.lazy(() =>
   import(/* webpackChunkName: "views-404" */ '../views/NotFoundView')
 );
 
+const CookiePage = React.lazy(() =>
+  import(/* webpackChunkName: "views-404" */ '../views/cookie')
+);
+
+
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -65,6 +71,11 @@ const Router = (props) => {
     <Suspense fallback={<SuspenseContainer />}>
       <BrowserRouter>
         <Switch>
+          <Route
+            exact
+            path='/cookie'
+            render={(props) => <CookiePage {...props} />}
+          />
           <Route
             exact
             path='/share3d/:photographerId/:productId/:guid'
