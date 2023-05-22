@@ -115,8 +115,7 @@ const OrderService = () => {
     };
 
     if (order.paymentMethod == 2) {
-      var vivawalletUrl =
-        'https://pay.vivawallet.com/' + photographer.vivawallet;
+      var vivawalletUrl = photographer.vivawallet;
 
       window.open(vivawalletUrl);
     }
