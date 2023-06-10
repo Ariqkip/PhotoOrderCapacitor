@@ -196,10 +196,14 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   };
 
   const isNextDisabled = () => {
-    const files = order.orderItems.filter(
-      (item) => item.productId === product.id
-    );
-    return files.length == 0;
+    if(product.productType === 4){
+      return false;
+    }else{
+      const files = order.orderItems.filter(
+        (item) => item.productId === product.id
+      );
+      return files.length == 0;
+    }
   };
 
   const handleNext = () => {
@@ -251,12 +255,12 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                     fileInput = input;
                   }}
                 />
-                <RoundButton onClick={() => handleUploadClick()}>
+                {product.productType !== 4 && <RoundButton onClick={() => handleUploadClick()}>
                   <Box className={classes.centerContent}>
                     <AddPhotoAlternateIcon />
                     <span>{t('Pick files')}</span>
                   </Box>
-                </RoundButton>
+                </RoundButton>}
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
