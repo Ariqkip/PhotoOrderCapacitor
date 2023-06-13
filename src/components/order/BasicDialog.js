@@ -139,7 +139,8 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const [photographer] = usePhotographer();
 
   useEffect(async()=>{
-    if(product.productType === 4){
+    const allreadyOrdered = order.orderItems.filter((item) => item.productId === product.id).length === 0
+    if(product.productType === 4 && allreadyOrdered){
       const data = await fetch(product.imageUrl);
       const blob = await data.blob();
       const reader = new FileReader();
