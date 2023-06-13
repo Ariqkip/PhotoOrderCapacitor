@@ -1,5 +1,5 @@
 //Core
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 //Components
 import RoundButton from './../core/RoundButton';
@@ -137,6 +137,30 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const [pack, setPack] = useState(1);
   const [order, orderDispatch] = useOrder();
   const [photographer] = usePhotographer();
+
+  useEffect(async()=>{
+    if(product.productType === 4){
+      const data = await fetch(product.imageUrl);
+      const blob = await data.blob();
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onload = () => {
+        const orderItem = {
+          maxSize: product.size,
+          guid: createGuid(),
+          fileAsBase64: reader.result,
+          fileUrl: product.imageUrl,
+          fileName: product.fileName,
+          productId: product.id,
+          set: pack,
+          qty: 1,
+          status: 'idle',
+        };
+        orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
+      }
+
+    }
+  }, [product])
 
   const executeScroll = () =>
     scrollToRef.current.scrollIntoView({
