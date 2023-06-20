@@ -4,6 +4,7 @@ import { useParams, useHistory, useLocation } from 'react-router-dom';
 
 //Components
 import BasicDialog from './BasicDialog';
+import BasicDialogNaturalProduct from './NaturalProduct/BasicDialogNaturalProduct';
 import CardBadge from './CardBadge';
 
 //Hooks
@@ -160,12 +161,18 @@ const ProductBasicCard = ({ product }) => {
           </CardContent>
         </CardActionArea>
       </Card>
-      <BasicDialog
+      {product.productType !== 4 && <BasicDialog
         product={product}
         key={`basic_dialog_${product.id}`}
         isOpen={isDialogOpen}
         closeFn={() => handleClose(product.id)}
-      />
+      />}
+      {product.productType === 4 && <BasicDialogNaturalProduct
+        product={product}
+        key={`basic_dialog_${product.id}`}
+        isOpen={isDialogOpen}
+        closeFn={() => handleClose(product.id)}
+      />}
     </>
   );
 };

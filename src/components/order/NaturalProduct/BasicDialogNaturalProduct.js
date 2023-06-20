@@ -2,20 +2,18 @@
 import React, { useState, useRef } from 'react';
 
 //Components
-import RoundButton from './../core/RoundButton';
-import FileListItem from './FileListItem';
-import PriceRangeList from './PriceRangeList';
-import AttributesList from './AttributesList';
+import AttributeListItem from './AttributeListItem';
+import PriceRangeList from '../PriceRangeList';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { useOrder } from '../../contexts/OrderContext';
-import { usePhotographer } from '../../contexts/PhotographerContext';
+import { useOrder } from '../../../contexts/OrderContext';
+import { usePhotographer } from '../../../contexts/PhotographerContext';
 
 //Utils
-import { createGuid } from '../../core/helpers/guidHelper';
-import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
+import { createGuid } from '../../../core/helpers/guidHelper';
+import { formatPrice, getLabelPrice } from '../../../core/helpers/priceHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -27,9 +25,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import Grid from '@material-ui/core/Grid';
-import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
 import Typography from '@material-ui/core/Typography';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Divider from '@material-ui/core/Divider';
@@ -124,7 +120,7 @@ const RemoveButton = withStyles((theme) => ({
   },
 }))(Button);
 
-const BasicDialog = ({ product, isOpen, closeFn }) => {
+const BasicDialogNaturalProduct = ({ product, isOpen, closeFn }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const history = useHistory();
@@ -182,10 +178,11 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     fileInput.click();
   };
 
-  const renderFiles = () => {
-    return order.orderItems
-      .filter((item) => item.productId === product.id)
-      ?.map((item) => <FileListItem key={item.guid} file={item} />);
+  const renderAtributes = () => {
+
+    return product.attributes.map((a,i)=>
+      <AttributeListItem key={i} attribute={a} order={order} product={product} pack={pack}/>
+    )
   };
 
   const handleRemoveAll = () => {
@@ -251,12 +248,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                     fileInput = input;
                   }}
                 />
-                <RoundButton onClick={() => handleUploadClick()}>
-                  <Box className={classes.centerContent}>
-                    <AddPhotoAlternateIcon />
-                    <span>{t('Pick files')}</span>
-                  </Box>
-                </RoundButton>
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -281,11 +272,10 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                 order={order}
               />
               <div ref={scrollOptionsRef} />
-              <AttributesList product={product} pack={pack} />
             </Grid>
           </Grid>
           <div ref={scrollToRef} />
-          {renderFiles()}
+          {renderAtributes()}
         </DialogContentText>
         <Divider />
       </DialogContent>
@@ -339,4 +329,4 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   );
 };
 
-export default BasicDialog;
+export default BasicDialogNaturalProduct;
