@@ -2,18 +2,20 @@
 import React, { useState, useRef } from 'react';
 
 //Components
-import AttributeListItem from './AttributeListItem';
-import PriceRangeList from '../PriceRangeList';
+import RoundButton from '../core/RoundButton';
+import FileListItem from './FileListItem';
+import PriceRangeList from './PriceRangeList';
+import AttributesList from './AttributesList';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { useOrder } from '../../../contexts/OrderContext';
-import { usePhotographer } from '../../../contexts/PhotographerContext';
+import { useOrder } from '../../contexts/OrderContext';
+import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Utils
-import { createGuid } from '../../../core/helpers/guidHelper';
-import { formatPrice, getLabelPrice } from '../../../core/helpers/priceHelper';
+import { createGuid } from '../../core/helpers/guidHelper';
+import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -26,6 +28,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import Grid from '@material-ui/core/Grid';
+import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
 import Typography from '@material-ui/core/Typography';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Divider from '@material-ui/core/Divider';
@@ -147,42 +150,54 @@ const BasicDialogNaturalProduct = ({ product, isOpen, closeFn }) => {
       inline: 'nearest',
     });
 
-  const fileInputHandler = (event) => {
-    const { files } = event.target;
+  const handleAddProduct = async() => {
+    const attributes = [...new Set(product.attributes.map(a=>a.attributesGroupId))].map(a=> {return{groupId: a, selected: null}});
+    const config = order?.orderItemsConfig.find(
+      (c) => c.productId === product.id && c.pack === pack
+    );
+    attributes.forEach(a=> {
+      a.selected = config.configs.find(c=>c.groupId === a.groupId)?.selected ||
+        product.attributes.find(pa=>pa.attributesGroupId === a.groupId && pa.position === 1)?.id;
+    })
+    const fileName = [product.name, ...attributes.map(a=>product.attributes.find(pa=>pa.attributesGroupId === a.groupId && pa.id === a.selected).name)].join(" ");
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const trackingGuid = createGuid();
+    const allreadyOrdered = order.orderItems.find((item) => item.fileName === fileName);
+    if(!allreadyOrdered){
+      const data = await fetch(product.imageUrl);
+      const blob = await data.blob();
       const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
+      reader.readAsDataURL(blob);
+      reader.onload = () => {
         const orderItem = {
           maxSize: product.size,
-          guid: trackingGuid,
+          guid: createGuid(),
           fileAsBase64: reader.result,
-          fileUrl: URL.createObjectURL(file),
-          fileName: file.name,
+          fileUrl: product.imageUrl,
+          fileName: fileName,
           productId: product.id,
           set: pack,
           qty: 1,
           status: 'idle',
         };
-
         orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
-        executeScroll();
-      };
+      }
+    }else{
+      orderDispatch({
+        type: 'INCREASE_ORDER_ITEM_QTY',
+        payload: { guid: allreadyOrdered.guid },
+      });
     }
-  };
-
-  const handleUploadClick = () => {
-    fileInput.click();
   };
 
   const renderAtributes = () => {
 
-    return product.attributes.map((a,i)=>
-      <AttributeListItem key={i} attribute={a} order={order} product={product} pack={pack}/>
-    )
+      return order.orderItems
+        .filter((item) => item.productId === product.id)
+        ?.map((item) => <FileListItem key={item.guid} file={item} />);
+
+    // return product.attributes.map((a,i)=>
+    //   <AttributeListItem key={i} attribute={a} order={order} product={product} pack={pack}/>
+    // )
   };
 
   const handleRemoveAll = () => {
@@ -238,16 +253,12 @@ const BasicDialogNaturalProduct = ({ product, isOpen, closeFn }) => {
                 />
               </Container>
               <Box className={classes.centerContent}>
-                <input
-                  type='file'
-                  style={{ display: 'none' }}
-                  inputprops={{ accept: 'image/*' }}
-                  multiple
-                  onChange={fileInputHandler}
-                  ref={(input) => {
-                    fileInput = input;
-                  }}
-                />
+                <RoundButton onClick={() => handleAddProduct()}>
+                  <Box className={classes.centerContent}>
+                    <AddPhotoAlternateIcon />
+                    <span>{t('Add product')}</span>
+                  </Box>
+                </RoundButton>
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -272,6 +283,7 @@ const BasicDialogNaturalProduct = ({ product, isOpen, closeFn }) => {
                 order={order}
               />
               <div ref={scrollOptionsRef} />
+              <AttributesList product={product} pack={pack} />
             </Grid>
           </Grid>
           <div ref={scrollToRef} />
