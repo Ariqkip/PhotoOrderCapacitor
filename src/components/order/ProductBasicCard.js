@@ -4,7 +4,7 @@ import { useParams, useHistory, useLocation } from 'react-router-dom';
 
 //Components
 import BasicDialog from './BasicDialog';
-import BasicDialogNaturalProduct from './NaturalProduct/BasicDialogNaturalProduct';
+import BasicDialogNaturalProduct from './BasicDialogNaturalProduct';
 import CardBadge from './CardBadge';
 
 //Hooks
