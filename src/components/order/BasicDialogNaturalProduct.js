@@ -156,7 +156,7 @@ const BasicDialogNaturalProduct = ({ product, isOpen, closeFn }) => {
       (c) => c.productId === product.id && c.pack === pack
     );
     attributes.forEach(a=> {
-      a.selected = config.configs.find(c=>c.groupId === a.groupId)?.selected ||
+      a.selected = config?.configs.find(c=>c.groupId === a.groupId)?.selected ||
         product.attributes.find(pa=>pa.attributesGroupId === a.groupId && pa.position === 1)?.id;
     })
     const fileName = [product.name, ...attributes.map(a=>product.attributes.find(pa=>pa.attributesGroupId === a.groupId && pa.id === a.selected).name)].join(" ");
@@ -190,14 +190,9 @@ const BasicDialogNaturalProduct = ({ product, isOpen, closeFn }) => {
   };
 
   const renderAtributes = () => {
-
-      return order.orderItems
-        .filter((item) => item.productId === product.id)
-        ?.map((item) => <FileListItem key={item.guid} file={item} />);
-
-    // return product.attributes.map((a,i)=>
-    //   <AttributeListItem key={i} attribute={a} order={order} product={product} pack={pack}/>
-    // )
+    return order.orderItems
+      .filter((item) => item.productId === product.id)
+      ?.map((item) => <FileListItem key={item.guid} file={item} />);
   };
 
   const handleRemoveAll = () => {
