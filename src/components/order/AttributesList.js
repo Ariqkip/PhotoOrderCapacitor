@@ -10,6 +10,7 @@ import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
 import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -70,7 +71,7 @@ const AttributesList = ({ product, pack }) => {
     return product.attributes
       .filter((a) => a.attributesGroupId === group.Id)
       .filter((a) => a.isActive === true)
-      .sort((a, b) => a.position < b.position);
+      .sort((a, b) => a.position - b.position );
   };
 
   const isAttributeChangeValid = (productId, groupId, attributeId) => {
