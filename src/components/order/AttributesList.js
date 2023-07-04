@@ -168,21 +168,21 @@ const AttributesList = ({ product, pack }) => {
     return 'outlined';
   };
 
-  const renderAttributes = (group) => {
+  const renderAttributes = (group, gIdx) => {
     const att = calculateAttributes(group);
 
     return (
-      <>
+      <div key={gIdx}>
         <Typography
           gutterBottom
           component='p'
-          className={[classes.groupName, classes.mb16]}
+          className={`${classes.groupName} ${classes.mb16}`}
         >
           {group.Name}:
         </Typography>
         <Grid container spacing={3} className={classes.mb16}>
-          {att.map((a) => (
-            <Grid item xs={12} sm={6} md={4} className={classes.attributeRow}>
+          {att.map((a, idx) => (
+            <Grid key={idx} item xs={12} sm={6} md={4} className={classes.attributeRow}>
               <Button
                 disableElevation
                 key={a.id}
@@ -197,7 +197,7 @@ const AttributesList = ({ product, pack }) => {
             </Grid>
           ))}
         </Grid>
-      </>
+      </div>
     );
   };
 
@@ -208,7 +208,7 @@ const AttributesList = ({ product, pack }) => {
           <Typography gutterBottom component='p' className={classes.title}>
             {t('Options')}:
           </Typography>
-          {attributesGroups.map((g) => renderAttributes(g))}
+          {attributesGroups.map((g, idx) => renderAttributes(g, idx))}
         </>
       )}
     </>

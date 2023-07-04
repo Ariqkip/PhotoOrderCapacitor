@@ -360,7 +360,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
               item
               xs={6}
               md={4}
-              className={[classes.centerContent, classes.p6]}
+              className={`${classes.centerContent} ${classes.p6}`}
             >
               <RemoveButton onClick={handleRemoveAll} color='primary'>
                 {t('REMOVE ALL')}
@@ -370,7 +370,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
               item
               xs={6}
               md={4}
-              className={[classes.centerContent, classes.p6]}
+              className={`${classes.centerContent} ${classes.p6}`}
             >
               <NextButton
                 onClick={() => setOpen3d(true)}
@@ -389,7 +389,7 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
                 <Grid
                   item
                   xs={6}
-                  className={[classes.centerContent, classes.p6]}
+                  className={`${classes.centerContent} ${classes.p6}`}
                 >
                   <OptionsButton onClick={executeOptionsScroll} color='primary'>
                     {t('OPTIONS')}
