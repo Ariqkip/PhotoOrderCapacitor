@@ -21,8 +21,7 @@ function priceCalculator(productId, quantity, photographer, order) {
 
   const { price, productPrices } = product;
   if (price) priceUnitBase = price;
-
-  //calculate if its a package item
+  
   const { quantityRangeMin, quantityRangeMax } = product;
   if (
     quantityRangeMin &&
@@ -31,15 +30,18 @@ function priceCalculator(productId, quantity, photographer, order) {
     quantityRangeMax >= quantityRangeMin
   ) {
     let step = 1;
-    const limit = 30;
-
-    for (step; step < limit; step++) {
-      const stepMin = quantityRangeMin * step;
-      const stepMax = quantityRangeMax * step;
-
-      if (estimatedQuantity >= stepMin && estimatedQuantity <= stepMax)
-        estimatedQuantity = stepMax;
+    while(quantity > quantityRangeMax * step){
+      step++;
     }
+    estimatedQuantity = step;
+
+    // for (step; step < limit; step++) {
+    //   const stepMin = quantityRangeMin * step;
+    //   const stepMax = quantityRangeMax * step;
+    //
+    //   if (estimatedQuantity >= stepMin && estimatedQuantity <= stepMax)
+    //     estimatedQuantity = stepMax;
+    // }
   }
 
   //calculate base price for given range
@@ -53,22 +55,69 @@ function priceCalculator(productId, quantity, photographer, order) {
         priceUnitBase = p.price;
       }
     });
+    estimatedPrice = priceUnitBase;
   }
+
+
+  // if (_attributes.Count > 0)
+  //             {
+  //                 var percentValues = Attributes
+  //                     .OrderByDescending(x => x.PriceCorrectionPercent.Value)
+  //                     .Select(x => x.PriceCorrectionPercent)
+  //                     .ToList();
+  //                 foreach (var percent in percentValues)
+  //                 {
+  //                     if (percent != 0)
+  //                     {
+  //                         _estimatedPrice *= (percent / 100);
+  //                     }
+  //                 }
+  //
+  //                 foreach (var attribute in Attributes)
+  //                 {
+  //                     if (attribute.PriceCorrectionCurrent != 0)
+  //                     {
+  //                         _estimatedPrice += attribute.PriceCorrectionCurrent;
+  //                     }
+  //                 }
+  //             }
+
 
   //calculate by attributes
-  const config = getSelectedAttributes(productId, order, photographer);
+  const attributes = getSelectedAttributes(productId, order, photographer)
+      .sort((a,b)=>b.priceCorrectionPercent - a.priceCorrectionPercent);
 
-  if (config && config.length > 0) {
-    config.map((c) => {
-      if (c.priceCorrectionCurrent !== 0) {
-        priceUnitModificator += c.priceCorrectionCurrent;
-      }
+  if (attributes && attributes.length > 0) {
+    const percentValues = attributes.map(a=>a.priceCorrectionPercent);
 
-      if (c.priceCorrectionPercent !== 0) {
-        priceUnitPercentModificator += c.priceCorrectionPercent;
+    percentValues.forEach(pV =>{
+      if(pV != 0){
+        estimatedPrice *= pV / 100;
       }
     });
+
+    attributes.forEach(a=>{
+      if(a.priceCorrectionCurrent != 0){
+        estimatedPrice += a.priceCorrectionCurrent;
+      }
+    })
   }
+
+  // const config = getSelectedAttributes(productId, order, photographer);
+  //
+  // if (config && config.length > 0) {
+  //   console.log(config, attributes, percentValues)
+  //
+  //   config.map((c) => {
+  //     if (c.priceCorrectionCurrent !== 0) {
+  //       priceUnitModificator += c.priceCorrectionCurrent;
+  //     }
+  //
+  //     if (c.priceCorrectionPercent !== 0) {
+  //       priceUnitPercentModificator += c.priceCorrectionPercent;
+  //     }
+  //   });
+  // }
 
   //prepare product base range prices
   if (productPrices && productPrices.length > 0) {
@@ -109,7 +158,6 @@ function priceCalculator(productId, quantity, photographer, order) {
 
 export function getLabelPrice(productId, quantity, photographer, order) {
   const calculation = priceCalculator(productId, quantity, photographer, order);
-
   if (calculation) return calculation.estimatedPrice;
 
   return 0;

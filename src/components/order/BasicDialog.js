@@ -300,7 +300,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             item
             xs={6}
             md={4}
-            className={[classes.centerContent, classes.p6]}
+            className={`${classes.centerContent} ${classes.p6}`}
           >
             <RemoveButton onClick={handleRemoveAll} color='primary'>
               {t('REMOVE ALL')}
@@ -310,7 +310,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             item
             xs={6}
             md={4}
-            className={[classes.centerContent, classes.p6]}
+            className={`${classes.centerContent} ${classes.p6}`}
           >
             <NextButton
               onClick={handleNext}
@@ -325,7 +325,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
               <Grid
                 item
                 xs={12}
-                className={[classes.centerContent, classes.p6]}
+                className={`${classes.centerContent} ${classes.p6}`}
               >
                 <OptionsButton onClick={executeOptionsScroll} color='primary'>
                   {t('OPTIONS')}
