@@ -12,7 +12,7 @@ function priceCalculator(productId, quantity, photographer, order) {
 
   let priceUnitBase = 0;
   let priceUnitModificator = 0;
-  let priceUnitPercentModificator = 0;
+  let priceUnitPercentModificator = 1;
 
   let estimatedPrice = 0;
   let estimatedQuantity = quantity;
@@ -21,7 +21,7 @@ function priceCalculator(productId, quantity, photographer, order) {
 
   const { price, productPrices } = product;
   if (price) priceUnitBase = price;
-  
+
   const { quantityRangeMin, quantityRangeMax } = product;
   if (
     quantityRangeMin &&
@@ -34,14 +34,8 @@ function priceCalculator(productId, quantity, photographer, order) {
       step++;
     }
     estimatedQuantity = step;
-
-    // for (step; step < limit; step++) {
-    //   const stepMin = quantityRangeMin * step;
-    //   const stepMax = quantityRangeMax * step;
-    //
-    //   if (estimatedQuantity >= stepMin && estimatedQuantity <= stepMax)
-    //     estimatedQuantity = stepMax;
-    // }
+  }else{
+    estimatedQuantity=quantity;
   }
 
   //calculate base price for given range
@@ -58,31 +52,6 @@ function priceCalculator(productId, quantity, photographer, order) {
     estimatedPrice = priceUnitBase;
   }
 
-
-  // if (_attributes.Count > 0)
-  //             {
-  //                 var percentValues = Attributes
-  //                     .OrderByDescending(x => x.PriceCorrectionPercent.Value)
-  //                     .Select(x => x.PriceCorrectionPercent)
-  //                     .ToList();
-  //                 foreach (var percent in percentValues)
-  //                 {
-  //                     if (percent != 0)
-  //                     {
-  //                         _estimatedPrice *= (percent / 100);
-  //                     }
-  //                 }
-  //
-  //                 foreach (var attribute in Attributes)
-  //                 {
-  //                     if (attribute.PriceCorrectionCurrent != 0)
-  //                     {
-  //                         _estimatedPrice += attribute.PriceCorrectionCurrent;
-  //                     }
-  //                 }
-  //             }
-
-
   //calculate by attributes
   const attributes = getSelectedAttributes(productId, order, photographer)
       .sort((a,b)=>b.priceCorrectionPercent - a.priceCorrectionPercent);
@@ -93,55 +62,28 @@ function priceCalculator(productId, quantity, photographer, order) {
     percentValues.forEach(pV =>{
       if(pV != 0){
         estimatedPrice *= pV / 100;
+        priceUnitPercentModificator *= pV/100;
       }
     });
 
     attributes.forEach(a=>{
       if(a.priceCorrectionCurrent != 0){
         estimatedPrice += a.priceCorrectionCurrent;
+        priceUnitModificator += a.priceCorrectionCurrent;
       }
     })
+    estimatedPrice = Math.round(estimatedPrice * 100) / 100;
   }
-
-  // const config = getSelectedAttributes(productId, order, photographer);
-  //
-  // if (config && config.length > 0) {
-  //   console.log(config, attributes, percentValues)
-  //
-  //   config.map((c) => {
-  //     if (c.priceCorrectionCurrent !== 0) {
-  //       priceUnitModificator += c.priceCorrectionCurrent;
-  //     }
-  //
-  //     if (c.priceCorrectionPercent !== 0) {
-  //       priceUnitPercentModificator += c.priceCorrectionPercent;
-  //     }
-  //   });
-  // }
 
   //prepare product base range prices
   if (productPrices && productPrices.length > 0) {
     productBasePrices = productPrices.map((p) => {
       let result = { ...p };
-      var priceStepOne = p.price + priceUnitModificator;
-      var priceStepTwo = priceUnitPercentModificator / 100;
-      let calculatedPrice = priceStepOne;
-      if (priceStepTwo !== 0) {
-        calculatedPrice = priceStepOne * priceStepTwo;
-      }
-      result.price = calculatedPrice;
-
+      const calculatedPrice = (p.price * priceUnitPercentModificator)+priceUnitModificator;
+      result.price = Math.round(calculatedPrice * 100) / 100;
       return result;
     });
   }
-
-  var estimatedPriceStepOne = priceUnitBase + priceUnitModificator;
-  var estimatedPriceStepTwo = priceUnitPercentModificator / 100;
-  let finalEstimatedPrice = estimatedPriceStepOne;
-  if (estimatedPriceStepTwo !== 0) {
-    finalEstimatedPrice = estimatedPriceStepOne * estimatedPriceStepTwo;
-  }
-  estimatedPrice = finalEstimatedPrice;
 
   const result = {
     priceUnitBase,
@@ -158,7 +100,7 @@ function priceCalculator(productId, quantity, photographer, order) {
 
 export function getLabelPrice(productId, quantity, photographer, order) {
   const calculation = priceCalculator(productId, quantity, photographer, order);
-  if (calculation) return calculation.estimatedPrice;
+  if (calculation) return calculation.finalPrice;
 
   return 0;
 }

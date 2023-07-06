@@ -34,7 +34,6 @@ const PriceRangeList = ({ product, photographer, order }) => {
 
   function calculateRangePrice(priceId) {
     const result = getRangePrice(product.id, priceId, photographer, order);
-console.log(result)
     return formatPrice(result);
   }
 
