@@ -99,7 +99,7 @@ function priceCalculator(productId, quantity, photographer, order) {
 }
 
 export function getLabelPrice(productId, quantity, photographer, order) {
-  const calculation = priceCalculator(productId, quantity, photographer, order);
+  const calculation = priceCalculator(productId, quantity || 1, photographer, order);
   if (calculation) return calculation.finalPrice;
 
   return 0;

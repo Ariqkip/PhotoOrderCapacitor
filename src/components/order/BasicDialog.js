@@ -211,7 +211,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     const quantity = order.orderItems
       .filter((item) => item.productId === product.id)
       .reduce((sum, item) => sum + item.qty, 0);
-    return getLabelPrice(product.id, quantity || 1, photographer, order);
+    return getLabelPrice(product.id, quantity, photographer, order);
   };
 
   const attributesAvailable = () => {
