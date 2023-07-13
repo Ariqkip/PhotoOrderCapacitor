@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Menu = ({setSelectId, addText}) =>{
+const Menu = ({setSelectId, addText, addFloatingImageBtn}) =>{
   const { t } = useTranslation();
   const classes = useStyles();
 
@@ -81,6 +81,9 @@ const Menu = ({setSelectId, addText}) =>{
                 <span>{t('Add Text')}</span>
               </Box>
             </RoundButton>
+          </div>
+          <div className={classes.menuBtn}>
+            {addFloatingImageBtn}
           </div>
         </div>
     </div>

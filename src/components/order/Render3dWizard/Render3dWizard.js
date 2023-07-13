@@ -15,8 +15,10 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { createGuid } from '../../../core/helpers/guidHelper';
 
 //UI
+import AddPhotoAlternateOutlined from '@material-ui/icons/AddPhotoAlternateOutlined';
 import Box from '@material-ui/core/Box';
 import CachedIcon from '@material-ui/icons/Cached';
+import DeleteOutlineOutlined from'@material-ui/icons/DeleteOutlineOutlined';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -204,8 +206,44 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const handleUploadClick = () => {
     fileInput.click();
   };
+  const fileInputAddHandler = (event) => {
+    // const limit = getMaxFileLimit();
+    // const actual = getUploadedFilesCount();
+    //
+    // if (limit <= actual) return;
 
-  const fileInputHandler = (e) => {
+    const { files } = event.target;
+    for (let i = 0; i < files.length; i++) {
+      // if (actual + 1 + i > limit) return;
+      const file = files[i];
+      const trackingGuid = createGuid();
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        var tempImg = new Image();
+        tempImg.src = reader.result;
+        tempImg.onload = function () {
+          const orderItem = {
+            maxSize: product.size,
+            guid: trackingGuid,
+            fileAsBase64: reader.result,
+            fileUrl: URL.createObjectURL(file),
+            fileName: file.name,
+            productId: product.id,
+            set: pack,
+            qty: 1,
+            status: 'idle',
+            isLayerItem: true,
+            width: tempImg.width,
+            height: tempImg.height,
+          };
+          orderDispatch({ type: 'ADD_ORDER_ITEM_AT_END', payload: orderItem });
+          // executeScroll();
+        };
+      };
+    }
+  };
+  const fileInputUpateHandler = (e) => {
     const { files } = e.target;
     const newFile = files[0] ?? null;
     if (!newFile) return;
@@ -247,6 +285,15 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
       }, 5000);
     }
   }, [steps.length, refresh, activeStep, isOpen]);
+
+  const removeSelectedPhoto = () =>{
+    setSelectedPhoto(null);
+    orderDispatch({
+      type: 'DECRESE_ORDER_ITEM_QTY',
+      payload: { guid: steps[0].data[selectedPhoto].guid },
+    });
+  }
+
   return (
     <>
       <Dialog
@@ -307,7 +354,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                     type='file'
                     style={{ display: 'none' }}
                     inputprops={{ accept: 'image/*' }}
-                    onChange={fileInputHandler}
+                    onChange={fileInputUpateHandler}
                     ref={(input) => {
                       fileInput = input;
                     }}
@@ -327,6 +374,49 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                   </RoundButton>
                 </div>
               );
+              const removeFileBtn = (
+                <div>
+                  <RoundButton
+                    size='small'
+                    onClick={() => removeSelectedPhoto()}
+                    disabled={selectedPhoto<0}
+                    className={
+                      index == activeStep ? classes.visible : classes.hidden
+                    }
+                  >
+                    <Box className={classes.centerContent}>
+                      <DeleteOutlineOutlined />
+                      <span>{t('Remove photo')}</span>
+                    </Box>
+                  </RoundButton>
+                </div>
+              )
+              const addFloatingImageBtn = (
+                <div>
+                  <input
+                    type='file'
+                    style={{ display: 'none' }}
+                    inputprops={{ accept: 'image/*' }}
+                    onChange={fileInputAddHandler}
+                    ref={(input) => {
+                      fileInput = input;
+                    }}
+                  />
+                  <RoundButton
+                    size='small'
+                    onClick={() => handleUploadClick()}
+                    disabled={false}
+                    className={
+                      index == activeStep ? classes.visible : classes.hidden
+                    }
+                  >
+                    <Box className={classes.centerContent}>
+                      <AddPhotoAlternateOutlined />
+                      <span>{t('Add Floating Image')}</span>
+                    </Box>
+                  </RoundButton>
+                </div>
+              );
               return (
                 <div className={ index == activeStep ? classes.visible : classes.hidden }>
 
@@ -338,7 +428,9 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
                     setSelectedPhoto={setSelectedPhoto}
                     setEditorRef={setEditorRef}
                     setEditorRatio={setEditorRatio}
-                    replaceFileBtn={replaceFileBtn}/>
+                    replaceFileBtn={replaceFileBtn}
+                    removeFileBtn={removeFileBtn}
+                    addFloatingImageBtn={addFloatingImageBtn}/>
                 </div>
               )
             }

@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ScaleAndRotationTransformer = ({initPos, imgRef, replaceFileBtn, setSelectId}) =>{
+const ScaleAndRotationTransformer = ({initPos, imgRef, isImgRemovable, replaceFileBtn, removeFileBtn, setSelectId}) =>{
   const { t } = useTranslation();
   const classes = useStyles();
   const [rotation, setRotation] = useState(0);
@@ -107,6 +107,9 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, replaceFileBtn, setSelect
       <div className={classes.changeFileBtn}>
         {replaceFileBtn}
       </div>
+      {isImgRemovable && <div className={classes.changeFileBtn}>
+        {removeFileBtn}
+      </div>}
     </>
   )
 
