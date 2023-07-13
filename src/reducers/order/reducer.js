@@ -88,6 +88,9 @@ export function OrderReducer(state = INIT_STATE, action) {
     case 'ADD_ORDER_ITEM':
       return { ...state, orderItems: [action.payload, ...state.orderItems] };
 
+    case 'ADD_ORDER_ITEM_AT_END':
+      return { ...state, orderItems: [...state.orderItems, action.payload] };
+
     case 'REPLACE_ORDER_ITEM':
       const replacedOrderItems = [
         ...state.orderItems.map((item) => {

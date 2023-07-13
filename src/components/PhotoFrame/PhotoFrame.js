@@ -22,11 +22,14 @@ const useStyles = makeStyles((theme) => ({
     minHeight: "300px",
 }}));
 
-const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhoto, setEditorRef, setEditorRatio, replaceFileBtn }) => {
+const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhoto, setEditorRef, setEditorRatio, replaceFileBtn, removeFileBtn, addFloatingImageBtn }) => {
 
     const initialize = () =>{
       const ratio = data.width/parentWidth;
-      const initialLayers = stepData.map((d,i)=>{return{
+      const frameWidth = data.width/ratio;
+      const frameHeight = data.height/ratio;
+
+      const backPhotoLayersConfig = stepData.filter(d=>d.productConfig).map((d,i)=>{return{
         id: "photo"+i,
         x:d.productConfig.positionX/ratio,
         y:d.productConfig.positionY/ratio,
@@ -37,45 +40,81 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
         clipWidth: d.productConfig.width/ratio,
         clipHeight: d.productConfig.height/ratio
       }});
-      const newLayers = [];
-      initialLayers.forEach((iL,i)=>{
-        if(photos[i]){
-          let newLayer = {};
-          if(layers[i] && layers[i].img.props.src === photos[i].props.src){
-            newLayer = layers[i];
+      const newBackPhotoLayers = [];
+      backPhotoLayersConfig.forEach((iL,i)=>{
+        const photo = photos[i];
+        if(photo){
+          let newBackPhotoLayer = {};
+          if(backPhotoLayers[i] && backPhotoLayers[i].img.props.src === photo.props.src){
+            newBackPhotoLayer = backPhotoLayers[i];
           }else{
             const layerRatio = iL.width / iL.height;
-            const photoRatio = photos[i].props.naturalWidth / photos[i].props.naturalHeight;
+            const photoRatio = photo.props.naturalWidth / photo.props.naturalHeight;
 
             let width = 0;
             let height = 0;
 
             if(layerRatio > photoRatio){
               width = iL.width;
-              height = photos[i].props.naturalHeight * (iL.width / photos[i].props.naturalWidth );
+              height = photo.props.naturalHeight * (iL.width / photo.props.naturalWidth );
             }else{
-              width = photos[i].props.naturalWidth * (iL.height / photos[i].props.naturalHeight );
+              width = photo.props.naturalWidth * (iL.height / photo.props.naturalHeight );
               height = iL.height;
             }
-            newLayer.x = iL.width/2;
-            newLayer.y = iL.height/2;
-            newLayer.offsetX = width/2;
-            newLayer.offsetY = height/2;
-            newLayer.width = width;
-            newLayer.height = height;
-            newLayer.id = "photo"+i;
-            newLayer.img = photos[i];
+            newBackPhotoLayer.x = iL.width/2;
+            newBackPhotoLayer.y = iL.height/2;
+            newBackPhotoLayer.offsetX = width/2;
+            newBackPhotoLayer.offsetY = height/2;
+            newBackPhotoLayer.width = width;
+            newBackPhotoLayer.height = height;
+            newBackPhotoLayer.id = "photo"+i;
+            newBackPhotoLayer.img = photo;
           }
-          newLayers.push(newLayer);
+          newBackPhotoLayers.push(newBackPhotoLayer);
         }
       })
 
-      setFrameWidth(data.width/ratio);
-      setFrameHeight(data.height/ratio);
+      const newFrontPhotoLayers = stepData.filter(d=>!d.productConfig).map((d,i)=>{
+        const photo = photos[newBackPhotoLayers.length+i];
+        if(frontPhotoLayers[i] && frontPhotoLayers[i].img.props.src === photo.props.src){
+          return frontPhotoLayers[i];
+        }else{
+          const frameRatio = frameWidth / frameHeight;
+          const photoRatio = photo.props.naturalWidth / photo.props.naturalHeight;
+
+          let width = 0;
+          let height = 0;
+
+          if(frameRatio > photoRatio){
+            width = frameWidth;
+            height = photo.props.naturalHeight * (frameWidth / photo.props.naturalWidth );
+          }else{
+            width = photo.props.naturalWidth * (frameHeight / photo.props.naturalHeight );
+            height = frameHeight;
+          }
+          width = width/4;
+          height = height/4;
+
+          return{
+            x: frameWidth/2,
+            y: frameHeight/2,
+            offsetX: width/2,
+            offsetY: height/2,
+            width: width,
+            height: height,
+            id: "frontPhoto"+i,
+            img: photo,
+          }
+        }
+      });
+
+      setFrameWidth(frameWidth);
+      setFrameHeight(frameHeight);
       setRatio(ratio);
       setEditorRatio(ratio);
-      setInitialLayers(initialLayers);
-      setLayers(newLayers);
+      setBackPhotoLayersConfig(backPhotoLayersConfig);
+      setFrontPhotoLayers(newFrontPhotoLayers);
+      setBackPhotoLayers(newBackPhotoLayers);
     }
 
     const [selectedId, setSelectId] = useState(null);
@@ -85,8 +124,9 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
     const [frameWidth, setFrameWidth] = useState();
     const [frameHeight, setFrameHeight] = useState();
     const [ratio, setRatio] = useState(0);
-    const [initialLayers, setInitialLayers] = useState();
-    const [layers, setLayers] = useState([]);
+    const [backPhotoLayersConfig, setBackPhotoLayersConfig] = useState();
+    const [backPhotoLayers, setBackPhotoLayers] = useState([]);
+    const [frontPhotoLayers, setFrontPhotoLayers] = useState([]);
     const [textLayers, setTextLayers] = useState([]);
     const classes = useStyles();
     const imgRef = React.useRef([]);
@@ -118,10 +158,15 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
     }, [selectedId, trRef]);
 
     useEffect(() =>{
-      const layerIndex = layers.indexOf(layers.find((img,i)=>img.id === selectedId));
-      if(layerIndex>=0){
-        setTransformerPosition(initialLayers[layerIndex]);
-        setSelectedPhoto(layerIndex);
+      const backPhotoSelectedIdx = backPhotoLayers.indexOf(backPhotoLayers.find((img,i)=>img.id === selectedId));
+      const frontPhotoSelectedIdx = frontPhotoLayers.indexOf(frontPhotoLayers.find((img,i)=>img.id === selectedId));
+
+      if(backPhotoSelectedIdx>=0){
+        setTransformerPosition(backPhotoLayersConfig[backPhotoSelectedIdx]);
+        setSelectedPhoto(backPhotoSelectedIdx);
+      }else if(frontPhotoSelectedIdx>=0){
+          setTransformerPosition(null);
+          setSelectedPhoto(backPhotoLayers.length + frontPhotoSelectedIdx);
       }else{
         setTransformerPosition(null);
         setSelectedPhoto(-1);
@@ -152,7 +197,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
     }
 
     let composerView = (<CircularProgress />);
-    if(data && !loading && !error && initialLayers){
+    if(data && !loading && !error && backPhotoLayersConfig){
       composerView = (
         <>
           <Stage
@@ -161,8 +206,8 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
             ref={stageRef}
             onMouseDown={checkDeselect}
             onTouchStart={checkDeselect}>
-              {layers.map((rect, i) =>
-                <Layer key={i} {...initialLayers[i]}>
+              {backPhotoLayers.map((rect, i) =>
+                <Layer key={i} {...backPhotoLayersConfig[i]}>
                   <TransformableImage
                     shapeProps={rect}
                     imgRef={imgRef}
@@ -171,14 +216,32 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
                       setTextSelectedId(null);
                     }}
                     onChange={(newAttrs) => {
-                      const rects = layers.slice();
+                      const rects = backPhotoLayers.slice();
                       rects[i] = newAttrs;
-                      setLayers(rects);
+                      setBackPhotoLayers(rects);
                     }}
                   />
                 </Layer>
               )}
-              {frameUrl && <Frame frameUrl={frameUrl} width={frameWidth} height={frameHeight} initialLayers={initialLayers} selectedId={selectedId} hideSelectors={hideSelectors}/>}
+              {frameUrl && <Frame frameUrl={frameUrl} width={frameWidth} height={frameHeight} backPhotoLayersConfig={backPhotoLayersConfig} selectedId={selectedId} hideSelectors={hideSelectors}/>}
+              {frontPhotoLayers.map((rect, i) =>
+                <Layer>
+                  <TransformableImage
+                    shapeProps={rect}
+                    imgRef={imgRef}
+                    isSelected={rect.id===selectedId}
+                    onSelect={() => {
+                      setSelectId(rect.id);
+                      setTextSelectedId(null);
+                    }}
+                    onChange={(newAttrs) => {
+                      const rects = frontPhotoLayers.slice();
+                      rects[i] = newAttrs;
+                      setFrontPhotoLayers(rects);
+                    }}
+                  />
+                </Layer>
+              )}
               {textLayers.map((textLayer, i) =>
                 <TextLayer
                   key={i}
@@ -189,20 +252,19 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
                       setTextLayers(newTextLayers);
                   }}
                   onSelect={() => {
-                    console.log("dupa")
                     setSelectId(null);
                     setTextSelectedId(i);
                   }}
                 />
               )}
           </Stage>
-          {selectedId && textSelectedId===null && <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} replaceFileBtn={replaceFileBtn} setSelectId={setSelectId}/>}
+          {selectedId && textSelectedId===null && <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} isImgRemovable={selectedId.indexOf("frontPhoto")>=0} replaceFileBtn={replaceFileBtn} removeFileBtn={removeFileBtn} setSelectId={setSelectId}/>}
           {!selectedId && textSelectedId!==null && <TextTransformer textSelectedId={textSelectedId} setTextSelectedId={setTextSelectedId} textLayers={textLayers} setTextLayers={setTextLayers}/>}
-          {!selectedId && textSelectedId===null && <Menu setSelectId={setSelectId} addText={addText}/>}
+          {!selectedId && textSelectedId===null && <Menu setSelectId={setSelectId} addText={addText} addFloatingImageBtn={addFloatingImageBtn}/>}
         </>
       );
     }
-
+    
   return (
     <div className={classes.centerContent} ref={parentRef}>
       {composerView}
