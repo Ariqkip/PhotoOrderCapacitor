@@ -76,35 +76,40 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
 
       const newFrontPhotoLayers = stepData.filter(d=>!d.productConfig).map((d,i)=>{
         const photo = photos[newBackPhotoLayers.length+i];
-        if(frontPhotoLayers[i] && frontPhotoLayers[i].img.props.src === photo.props.src){
-          return frontPhotoLayers[i];
+        const regex = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+        const photoGuid = [...photo.props.src.matchAll(regex)].slice(-1)[0][0];
+        if(frontPhotoLayers[i]){
+          const frontPhotoLayer = frontPhotoLayers.find(fpl=>[...fpl.img.props.src.matchAll(regex)].slice(-1)[0][0] === photoGuid);
+          if(frontPhotoLayer){
+            return frontPhotoLayer;
+          }
+        }
+
+        const frameRatio = frameWidth / frameHeight;
+        const photoRatio = photo.props.naturalWidth / photo.props.naturalHeight;
+
+        let width = 0;
+        let height = 0;
+
+        if(frameRatio > photoRatio){
+          width = frameWidth;
+          height = photo.props.naturalHeight * (frameWidth / photo.props.naturalWidth );
         }else{
-          const frameRatio = frameWidth / frameHeight;
-          const photoRatio = photo.props.naturalWidth / photo.props.naturalHeight;
+          width = photo.props.naturalWidth * (frameHeight / photo.props.naturalHeight );
+          height = frameHeight;
+        }
+        width = width/4;
+        height = height/4;
 
-          let width = 0;
-          let height = 0;
-
-          if(frameRatio > photoRatio){
-            width = frameWidth;
-            height = photo.props.naturalHeight * (frameWidth / photo.props.naturalWidth );
-          }else{
-            width = photo.props.naturalWidth * (frameHeight / photo.props.naturalHeight );
-            height = frameHeight;
-          }
-          width = width/4;
-          height = height/4;
-
-          return{
-            x: frameWidth/2,
-            y: frameHeight/2,
-            offsetX: width/2,
-            offsetY: height/2,
-            width: width,
-            height: height,
-            id: "frontPhoto"+i,
-            img: photo,
-          }
+        return{
+          x: frameWidth/2,
+          y: frameHeight/2,
+          offsetX: width/2,
+          offsetY: height/2,
+          width: width,
+          height: height,
+          id: "frontPhoto"+photoGuid,
+          img: photo,
         }
       });
 
@@ -171,7 +176,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
         setTransformerPosition(null);
         setSelectedPhoto(-1);
       }
-    }, [selectedId]);
+    }, [selectedId, frontPhotoLayers]);
 
     const checkDeselect = (e) => {
       const clickedOnEmpty = e.target === e.target.getStage();
@@ -264,7 +269,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
         </>
       );
     }
-    
+
   return (
     <div className={classes.centerContent} ref={parentRef}>
       {composerView}
