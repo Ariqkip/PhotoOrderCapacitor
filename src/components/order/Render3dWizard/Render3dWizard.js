@@ -237,6 +237,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
             width: tempImg.width,
             height: tempImg.height,
           };
+console.log("create img with id: ", trackingGuid)          
           orderDispatch({ type: 'ADD_ORDER_ITEM_AT_END', payload: orderItem });
           // executeScroll();
         };

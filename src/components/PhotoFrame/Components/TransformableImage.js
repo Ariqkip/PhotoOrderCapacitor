@@ -4,17 +4,19 @@ import useImage from 'use-image';
 
 const TransformableImage = ({ shapeProps, imgRef, isSelected, onSelect, onChange }) => {
   const [image] = useImage(shapeProps.img.props.src, 'Anonymous');
-
+  const isEditable = image ? image.src.indexOf("https")>=0 : false;
+  
   return (
     <Image
       image={image}
       stroke={"#f00"}
       strokeWidth={isSelected?5:0}
-      onClick={onSelect}
-      onTap={onSelect}
+      opacity={isEditable ? 1 : 0.3}
+      onClick={isEditable && onSelect}
+      onTap={isEditable && onSelect}
       ref={el => imgRef.current[shapeProps.id] = el}
       {...shapeProps}
-      draggable
+      draggable={isEditable}
       onDragEnd={(e) => {
         onChange({
           ...shapeProps,
