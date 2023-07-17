@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ScaleAndRotationTransformer = ({initPos, imgRef, isImgRemovable, replaceFileBtn, removeFileBtn, setSelectId}) =>{
+const ScaleAndRotationTransformer = ({initPos, imgRef, isFrontPhoto, replaceFileBtn, removeFileBtn, setSelectId}) =>{
   const { t } = useTranslation();
   const classes = useStyles();
   const [rotation, setRotation] = useState(0);
@@ -94,7 +94,7 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, isImgRemovable, replaceFi
       </div>
       <div className={classes.resizeBtn}>
         <input
-          type="range" min="1" max="10"
+          type="range" min={isFrontPhoto ? "-5" : "1"} max="10"
           value={scale}
           onChange={(e)=>{
             const s = parseInt(e.target.value);
@@ -107,7 +107,7 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, isImgRemovable, replaceFi
       <div className={classes.changeFileBtn}>
         {replaceFileBtn}
       </div>
-      {isImgRemovable && <div className={classes.changeFileBtn}>
+      {isFrontPhoto && <div className={classes.changeFileBtn}>
         {removeFileBtn}
       </div>}
     </>
