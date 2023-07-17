@@ -263,7 +263,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
                 />
               )}
           </Stage>
-          {selectedId && textSelectedId===null && <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} isImgRemovable={selectedId.indexOf("frontPhoto")>=0} replaceFileBtn={replaceFileBtn} removeFileBtn={removeFileBtn} setSelectId={setSelectId}/>}
+          {selectedId && textSelectedId===null && <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} isFrontPhoto={selectedId.indexOf("frontPhoto")>=0} replaceFileBtn={replaceFileBtn} removeFileBtn={removeFileBtn} setSelectId={setSelectId}/>}
           {!selectedId && textSelectedId!==null && <TextTransformer textSelectedId={textSelectedId} setTextSelectedId={setTextSelectedId} textLayers={textLayers} setTextLayers={setTextLayers}/>}
           {!selectedId && textSelectedId===null && <Menu setSelectId={setSelectId} addText={addText} addFloatingImageBtn={addFloatingImageBtn}/>}
         </>
