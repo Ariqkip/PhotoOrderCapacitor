@@ -200,7 +200,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
       setTextLayers([...textLayers, newTextLayer]);
       setTextSelectedId(textLayers.length);
     }
-console.log(selectedId)
+    
     let composerView = (<CircularProgress />);
     if(data && !loading && !error && backPhotoLayersConfig){
       composerView = (
