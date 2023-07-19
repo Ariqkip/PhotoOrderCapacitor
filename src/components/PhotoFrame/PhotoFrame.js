@@ -200,7 +200,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
       setTextLayers([...textLayers, newTextLayer]);
       setTextSelectedId(textLayers.length);
     }
-
+    
     let composerView = (<CircularProgress />);
     if(data && !loading && !error && backPhotoLayersConfig){
       composerView = (
@@ -263,7 +263,7 @@ const PhotoFrame = ({ stepData, frameUrl, photos, hideSelectors, setSelectedPhot
                 />
               )}
           </Stage>
-          {selectedId && textSelectedId===null && <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} isFrontPhoto={selectedId.indexOf("frontPhoto")>=0} replaceFileBtn={replaceFileBtn} removeFileBtn={removeFileBtn} setSelectId={setSelectId}/>}
+          {selectedId && textSelectedId===null && <ScaleAndRotationTransformer position={transformerPosition} imgRef={imgRef.current[selectedId]} isFrontPhoto={selectedId?(""+selectedId).indexOf("frontPhoto")>=0:false} replaceFileBtn={replaceFileBtn} removeFileBtn={removeFileBtn} setSelectId={setSelectId}/>}
           {!selectedId && textSelectedId!==null && <TextTransformer textSelectedId={textSelectedId} setTextSelectedId={setTextSelectedId} textLayers={textLayers} setTextLayers={setTextLayers}/>}
           {!selectedId && textSelectedId===null && <Menu setSelectId={setSelectId} addText={addText} addFloatingImageBtn={addFloatingImageBtn}/>}
         </>

@@ -2,7 +2,10 @@ import React, {useEffect, useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import BackBtn from '../Atoms/BackBtn';
+import Btn from '../Atoms/Btn';
+import UndoIcon from '@material-ui/icons/Undo';
+import AspectRatioIcon from '@material-ui/icons/AspectRatio';
+import RotateRightIcon from '@material-ui/icons/RotateRight';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -43,6 +46,8 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, isFrontPhoto, replaceFile
   const [rotation, setRotation] = useState(0);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState(null);
+  const [showRotationBtn, setShowRotationBtn] = useState(false);
+  const [showResizeBtn, setShowResizeBtn] = useState(false);
 
   useEffect(()=>{
     if(initPos){
@@ -78,38 +83,60 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, isFrontPhoto, replaceFile
     }
   },[imgRef])
 
+
+  const rotationBtn = (
+    <>
+      { !showRotationBtn ?
+        <Btn icon={<RotateRightIcon />} text ={t('Rotation')} fun={()=>{setShowRotationBtn(true); setShowResizeBtn(false)}} />:
+        <div className={classes.resizeBtn}>
+          <input
+            type="range" min="-180" max="180"
+            value={rotation}
+            onChange={(e)=>{
+              const s = parseInt(e.target.value);
+              setRotation(s)
+          }} />
+          <Typography className={classes.resizeLabel} gutterBottom>
+            {t('Rotation')}
+          </Typography>
+        </div>
+      }
+    </>
+  )
+
+  const resizeBtn = (
+    <>
+      { !showResizeBtn ?
+        <Btn icon={<AspectRatioIcon />} text ={t('Resize')} fun={()=>{setShowRotationBtn(false); setShowResizeBtn(true)}} />:
+        <div className={classes.resizeBtn}>
+          <input
+            type="range" min={isFrontPhoto ? "-5" : "1"} max="10"
+            value={scale}
+            onChange={(e)=>{
+              const s = parseInt(e.target.value);
+              setScale(s)
+          }} />
+          <Typography className={classes.resizeLabel} gutterBottom>
+            {t('Resize')}
+          </Typography>
+        </div>
+      }
+    </>
+  )
+
   const buttons=(
     <>
-      <div className={classes.resizeBtn}>
-        <input
-          type="range" min="-180" max="180"
-          value={rotation}
-          onChange={(e)=>{
-            const s = parseInt(e.target.value);
-            setRotation(s)
-        }} />
-        <Typography className={classes.resizeLabel} gutterBottom>
-          {t('Rotation')}
-        </Typography>
-      </div>
-      <div className={classes.resizeBtn}>
-        <input
-          type="range" min={isFrontPhoto ? "-5" : "1"} max="10"
-          value={scale}
-          onChange={(e)=>{
-            const s = parseInt(e.target.value);
-            setScale(s)
-        }} />
-        <Typography className={classes.resizeLabel} gutterBottom>
-          {t('Resize file')}
-        </Typography>
-      </div>
-      <div className={classes.changeFileBtn}>
-        {replaceFileBtn}
-      </div>
-      {isFrontPhoto && <div className={classes.changeFileBtn}>
+      {!showResizeBtn && rotationBtn}
+      {!showRotationBtn && resizeBtn}
+      {showRotationBtn && showResizeBtn &&
+        <div className={classes.changeFileBtn}>
+          {replaceFileBtn}
+        </div>
+      }
+      {showRotationBtn && showResizeBtn && isFrontPhoto && <div className={classes.changeFileBtn}>
         {removeFileBtn}
       </div>}
+      {(showRotationBtn || showResizeBtn) && <Btn icon={<UndoIcon />} text ={t('Back')} fun={()=>{setShowRotationBtn(false); setShowResizeBtn(false)}} />}
     </>
   )
 
@@ -126,7 +153,7 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, isFrontPhoto, replaceFile
         <div>
           {imgRef && buttons}
           {!imgRef && noPhotoSelected}
-          <BackBtn fun={()=>setSelectId(null)} />
+          {!showRotationBtn && !showResizeBtn && <Btn icon={<UndoIcon />} text ={t('Back')} fun={()=>setSelectId(null)} />}
         </div>
     </div>
   )
