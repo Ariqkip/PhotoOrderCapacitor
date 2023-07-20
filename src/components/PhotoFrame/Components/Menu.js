@@ -53,6 +53,9 @@ const Menu = ({setSelectId, addText, addFloatingImageBtn}) =>{
     <div className={classes.scaleAndRotationPlaceholder}>
         <div>
           <div className={classes.menuBtn}>
+            {addFloatingImageBtn}
+          </div>
+          <div className={classes.menuBtn}>
             <RoundButton
               size='small'
               onClick={()=>setSelectId(-1)}
@@ -81,9 +84,6 @@ const Menu = ({setSelectId, addText, addFloatingImageBtn}) =>{
                 <span>{t('Add Text')}</span>
               </Box>
             </RoundButton>
-          </div>
-          <div className={classes.menuBtn}>
-            {addFloatingImageBtn}
           </div>
         </div>
     </div>

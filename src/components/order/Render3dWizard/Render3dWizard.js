@@ -237,7 +237,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
             width: tempImg.width,
             height: tempImg.height,
           };
-console.log("create img with id: ", trackingGuid)          
+console.log("create img with id: ", trackingGuid)
           orderDispatch({ type: 'ADD_ORDER_ITEM_AT_END', payload: orderItem });
           // executeScroll();
         };
@@ -413,7 +413,7 @@ console.log("create img with id: ", trackingGuid)
                   >
                     <Box className={classes.centerContent}>
                       <AddPhotoAlternateOutlined />
-                      <span>{t('Add Floating Image')}</span>
+                      <span>{t('Add photo')}</span>
                     </Box>
                   </RoundButton>
                 </div>
