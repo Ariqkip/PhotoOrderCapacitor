@@ -133,7 +133,7 @@ const ScaleAndRotationTransformer = ({initPos, imgRef, isFrontPhoto, replaceFile
           {replaceFileBtn}
         </div>
       }
-      {showRotationBtn && showResizeBtn && isFrontPhoto && <div className={classes.changeFileBtn}>
+      {!showRotationBtn && !showResizeBtn && isFrontPhoto && <div className={classes.changeFileBtn}>
         {removeFileBtn}
       </div>}
       {(showRotationBtn || showResizeBtn) && <Btn icon={<UndoIcon />} text ={t('Back')} fun={()=>{setShowRotationBtn(false); setShowResizeBtn(false)}} />}

@@ -249,10 +249,10 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
   };
 
   const calculatePrice = () => {
-    const quantity = order.orderItems
-      .filter((item) => item.productId === product.id)
-      .reduce((sum, item) => sum + item.qty, 0);
-    return getLabelPrice(product.id, quantity, photographer, order);
+    // const quantity = order.orderItems
+    //   .filter((item) => item.productId === product.id)
+    //   .reduce((sum, item) => sum + item.qty, 0);
+    return getLabelPrice(product.id, 1, photographer, order);
   };
 
   const attributesAvailable = () => {
