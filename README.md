@@ -2,22 +2,22 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Zasady pracy z repozytorium
+## Repository Workflow Rules
 
-Głównym branchem jest `main` - trigeruje github actions i aktualna wersja aplikacji trafia na środowisko `staging`.
+The main branch is `main` - it triggers GitHub Actions, and the current version of the application goes to the `staging` environment.
 
-Zadania wykonujemy na branchu oddzielonym od `main` i na koniec mergujemy do `main` za pomocą pull requesta.
+Tasks are performed on a separate branch from `main` and merged into `main` at the end using a pull request.
 
-Release do wersji produkcyjnej następuje przez zmergowanie `main` do brancha `release`. Tylko w tym kierunku, nic nie trafia bezpośrednio na `release`. Osobny github actions publikuje produkcję.
+A release to the production version is done by merging `main` into the `release` branch. Only in this direction, nothing goes directly to `release`. A separate GitHub Actions publishes the production version.
 
-## Uruchomienie środowiska staging
+## Running the Staging Environment
 
-Startujemy aplikację z parametrami `.env.staging`
+Start the application with the `.env.staging` parameters.
 
-Musimy zaakceptować brak certyfikatów dla środowiska staging (legacy apka).
-Otwieramy `https://staging.oistigmes.com/` - po zaakceptowaniu można zamknąć.
+You need to accept the lack of certificates for the staging environment (legacy app).
+Open `https://staging.oistigmes.com/` - after accepting, you can close it.
 
-W uruchomionej aplikacji przechodzimy na adres `localhost:3000/photographer/2320`
+In the running application, go to the address `localhost:3000/photographer/2320`.
 
 
 ## Links
@@ -32,4 +32,3 @@ oistigmes STG `https://staging.oistigmes.com`
 
 ## Other
 To learn React, check out the [React documentation](https://reactjs.org/).
-
