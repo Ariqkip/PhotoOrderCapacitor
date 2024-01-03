@@ -4,7 +4,6 @@ import RoundButton from './../../core/RoundButton';
 import Box from '@material-ui/core/Box';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import ColorPicker from 'material-ui-color-picker'
 import Typography from '@material-ui/core/Typography';
 import FormatShapesIcon from '@material-ui/icons/FormatShapes';
 import ColorLensIcon from '@material-ui/icons/ColorLens';
@@ -244,32 +243,32 @@ const TextTransformer = ({textSelectedId, setTextSelectedId, textLayers, setText
   const colorsMenu = (
     <div className={classes.manuPlaceholder}>
       <div className={classes.menuBtn}>
-        <ColorPicker
-          defaultValue={selectedText.fillColor}
-          value={selectedText.fillColor}
-          onChange={color=>{
-            const newTextLayers = [...textLayers];
-            const editedTextLayer = {...selectedText}
-            editedTextLayer.fillColor = color;
-            newTextLayers[textSelectedId] = editedTextLayer;
-            setTextLayers(newTextLayers);
-            console.log(color)
-        }} />
+        {/*<ColorPicker*/}
+        {/*  defaultValue={selectedText.fillColor}*/}
+        {/*  value={selectedText.fillColor}*/}
+        {/*  onChange={color=>{*/}
+        {/*    const newTextLayers = [...textLayers];*/}
+        {/*    const editedTextLayer = {...selectedText}*/}
+        {/*    editedTextLayer.fillColor = color;*/}
+        {/*    newTextLayers[textSelectedId] = editedTextLayer;*/}
+        {/*    setTextLayers(newTextLayers);*/}
+        {/*    console.log(color)*/}
+        {/*}} />*/}
         <Typography className={classes.resizeLabel} gutterBottom>
           {t('Fill')}
         </Typography>
       </div>
       <div className={classes.menuBtn}>
-        <ColorPicker
-          defaultValue={selectedText.strokeColor}
-          value={selectedText.strokeColor}
-          onChange={color=>{
-            const newTextLayers = [...textLayers];
-            const editedTextLayer = {...selectedText}
-            editedTextLayer.strokeColor = color;
-            newTextLayers[textSelectedId] = editedTextLayer;
-            setTextLayers(newTextLayers);
-        }} />
+        {/*<ColorPicker*/}
+        {/*  defaultValue={selectedText.strokeColor}*/}
+        {/*  value={selectedText.strokeColor}*/}
+        {/*  onChange={color=>{*/}
+        {/*    const newTextLayers = [...textLayers];*/}
+        {/*    const editedTextLayer = {...selectedText}*/}
+        {/*    editedTextLayer.strokeColor = color;*/}
+        {/*    newTextLayers[textSelectedId] = editedTextLayer;*/}
+        {/*    setTextLayers(newTextLayers);*/}
+        {/*}} />*/}
         <Typography className={classes.resizeLabel} gutterBottom>
           {t('Stroke')}
         </Typography>
