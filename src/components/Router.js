@@ -33,6 +33,10 @@ const CookiePage = React.lazy(() =>
   import(/* webpackChunkName: "views-404" */ '../views/cookie')
 );
 
+const WelcomeView = React.lazy(() =>
+  import(/* webpackChunkName: "views-404" */ '../views/welcome/WelcomeView.tsx')
+);
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -90,7 +94,7 @@ const Router = (props) => {
             path='/:id'
             render={(props) => <ViewPhotographer {...props} />}
           />
-          <Route render={(props) => <View404 {...props} />} />
+          <Route render={(props) => <WelcomeView {...props} />} />
         </Switch>
       </BrowserRouter>
     </Suspense>

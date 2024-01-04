@@ -47,6 +47,7 @@
   "scripts": {
     "start": "react-scripts start",
     "start:staging": "env-cmd -f .env.staging react-scripts start",
+    "start:production": "env-cmd -f .env.production react-scripts start",
     "build": "react-scripts build",
     "build:staging": "env-cmd -f .env.staging npm run-script build",
     "build:production": "env-cmd -f .env.production npm run-script build",
@@ -71,6 +72,7 @@
       "last 1 safari version"
     ]
   },
+  "proxy": "https://staging.oistigmes.com",
   "devDependencies": {
     "@types/react-router-dom": "^5.3.3",
     "@types/styled-components": "^5.1.34",
