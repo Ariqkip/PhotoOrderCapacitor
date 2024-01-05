@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React, {ComponentType, useContext, useState} from 'react';
 import { TextField, Button, Container, Typography, Snackbar } from '@material-ui/core';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
-import { useHistory } from 'react-router-dom';
 import styled from "styled-components";
 import authService from "../../services/AuthService";
+import {AuthContext} from "../../contexts/AuthContext";
 
-const WelcomeView: React.FC = () => {
+const WelcomeView: ComponentType<any> = () => {
     // const [fullname, setFullname] = useState('');
     // const [phoneNumber, setPhoneNumber] = useState('');
     const [labId, setLabId] = useState('');
     const [phoneNumberError, setPhoneNumberError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
-
-    const history = useHistory();
+    const { setAuthUser } = useContext(AuthContext);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -29,8 +28,8 @@ const WelcomeView: React.FC = () => {
         }
 
         setIsLoading(true);
-        authService.getPhotographer(labId).then(res => {
-            history.push(`photographer/${res.id}`)
+        authService.getPhotographer(labId).then(authUser => {
+            setAuthUser(authUser)
         })
             .catch(err => setErrorSnackbarOpen(true))
             .finally(() => setIsLoading(false))

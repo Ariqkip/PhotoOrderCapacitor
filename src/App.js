@@ -2,7 +2,7 @@
 import './App.css';
 
 //Components
-import Router from './components/Router';
+import Router from './components/router/Router';
 import GlobalProviders from './core/GlobalProviders';
 import CookieConsent from "react-cookie-consent";
 
