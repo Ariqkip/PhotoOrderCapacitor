@@ -1,5 +1,5 @@
 //Core
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 
 //Components
 import RoundButton from './../core/RoundButton';
@@ -16,6 +16,7 @@ import { usePhotographer } from '../../contexts/PhotographerContext';
 //Utils
 import { createGuid } from '../../core/helpers/guidHelper';
 import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
+import { getFileDimensions, getCompressedImage } from '../../core/helpers/uploadImageHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -129,8 +130,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const { t } = useTranslation();
   const history = useHistory();
 
-  let fileInput = null;
-
+  const fileInput = useRef(null);
   const scrollToRef = useRef(null);
   const scrollOptionsRef = useRef(null);
 
@@ -144,49 +144,59 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       block: 'start',
       inline: 'nearest',
     });
+    
   const executeOptionsScroll = () =>
     scrollOptionsRef.current.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
       inline: 'nearest',
     });
-
-  const fileInputHandler = (event) => {
+    
+  const fileInputHandler = useCallback(async (event) => {
     const { files } = event.target;
+    const filesArray = Array.from(files);
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    const compressionPromises = filesArray.map(async (file) => {
+      if (!file.type.startsWith('image')) {
+        return;
+      }
+  
       const trackingGuid = createGuid();
       const reader = new FileReader();
-      reader.readAsDataURL(file);
+      const { width, height } = await getFileDimensions(file);
+  
+      const compressedFile = await getCompressedImage({
+        width,
+        height,
+        maxSize: product.size,
+        file
+      });
+  
+      reader.readAsDataURL(compressedFile);
       reader.onloadend = () => {
         const orderItem = {
           maxSize: product.size,
           guid: trackingGuid,
           fileAsBase64: reader.result,
-          fileUrl: URL.createObjectURL(file),
-          fileName: file.name,
+          fileUrl: URL.createObjectURL(compressedFile),
+          fileName: compressedFile.name,
           productId: product.id,
           set: pack,
           qty: 1,
           status: 'idle',
         };
-
+  
         orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
         executeScroll();
       };
-    }
-  };
+    });
+  
+    await Promise.all(compressionPromises);
+  }, [product, pack, orderDispatch]);
 
-  const handleUploadClick = () => {
-    fileInput.click();
-  };
-
-  const renderFiles = () => {
-    return order.orderItems
-      .filter((item) => item.productId === product.id)
-      ?.map((item) => <FileListItem key={item.guid} file={item} />);
-  };
+  const renderFiles = () => order.orderItems
+    .filter((item) => item.productId === product.id)
+    .map((item) => <FileListItem key={item.guid} file={item} />);
 
   const handleRemoveAll = () => {
     orderDispatch({
@@ -196,11 +206,9 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   };
 
   const isNextDisabled = () => {
-    const files = order.orderItems.filter(
-      (item) => item.productId === product.id
-    );
-    return files.length == 0;
-  };
+    const files = order.orderItems.filter((item) => item.productId === product.id);
+    return files.length === 0;
+  };  
 
   const handleNext = () => {
     closeFn();
@@ -247,11 +255,9 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                   inputprops={{ accept: 'image/*' }}
                   multiple
                   onChange={fileInputHandler}
-                  ref={(input) => {
-                    fileInput = input;
-                  }}
+                  ref={fileInput}
                 />
-                <RoundButton onClick={() => handleUploadClick()}>
+                <RoundButton onClick={() => fileInput.current.click()}>
                   <Box className={classes.centerContent}>
                     <AddPhotoAlternateIcon />
                     <span>{t('Pick files')}</span>
