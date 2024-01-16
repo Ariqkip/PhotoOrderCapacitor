@@ -69,12 +69,9 @@ const OrderIndex = ({ match }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const url = cleanMatchUrl(match);
-  const [, dispatch] = usePhotographer();
   const [order, orderDispatch] = useOrder();
-  const [, alertDispatch] = useAlerts();
 
   const photographerQuery = useGetPhotographer(match?.params?.id ?? 0);
-  const bannersQuery = useGetBanners(match?.params?.id ?? 0);
 
   function redirectCategoriesFlag(query) {
     if (!query) {
@@ -114,12 +111,6 @@ const OrderIndex = ({ match }) => {
     return false;
   }
 
-  const { data } = photographerQuery;
-  useEffect(() => {
-    if (data) {
-      dispatch({ type: 'SET_INFO', data: data });
-    }
-  }, [data, dispatch]);
 
   //create new order in shop, need that for file upload
   useEffect(() => {

@@ -40,6 +40,9 @@ const WelcomeView = React.lazy(() =>
   import(/* webpackChunkName: "views-404" */ '../../views/welcome/WelcomeView.tsx')
 );
 
+const PhotographerWelcomeView = React.lazy(() => 
+  import(/* webpackChunkName: "views-404" */ '../../views/photographerWelcome/PhotographerWelcomeView')
+);
 
 
 const useStyles = makeStyles((theme) => ({
@@ -96,6 +99,10 @@ const Router = (props) => {
             <PrivateRoute
               path='/:id'
               component={ViewPhotographer}
+            />
+            <PrivateRoute
+              path='/required-screen'
+              component={PhotographerWelcomeView}
             />
             <Route path="/" render={(props) => <Redirect to="/login" />} />
           </Switch>
