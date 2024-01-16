@@ -1,14 +1,62 @@
 import imageCompression from 'browser-image-compression';
+import heic2any from 'heic2any';
+
+export const isHeicFile = (fileName) => {
+  return fileName.endsWith('.heic');
+};
+
+const replaceFileName = (fileName) => {
+  return fileName?.replace('.heic', '.jpg');
+}
 
 export const getFileDimensions = async (selectedFile) => {
+  const isHeic = isHeicFile(selectedFile.name);
+
+  if (isHeic) {
+    try {
+      const convertedBlob = await convertHeicToJpg(selectedFile);
+
+      return await getDimensionsFromBlob(convertedBlob, selectedFile);
+    } catch (error) {
+      console.error('Error converting HEIC to JPEG:', error);
+      throw new Error('Failed to convert HEIC to JPEG');
+    }
+  } else {
+    return await getDimensionsFromBlob(selectedFile);
+  }
+};
+
+const convertHeicToJpg = async (heicBlob) => {
+  try {
+    const jpgBlob = await heic2any({
+      blob: heicBlob,
+      toType: 'image/jpeg',
+    });
+    return jpgBlob;
+  } catch (error) {
+    console.error('Error converting HEIC to JPEG:', error);
+    throw new Error('Failed to convert HEIC to JPEG');
+  }
+};
+
+const getDimensionsFromBlob = (blob, selectedFile) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
+    
+    const file = new File([blob], 
+      replaceFileName(selectedFile?.name),
+      { 
+        type: "image/jpeg", 
+      }
+    );
+
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
         resolve({
           width: img.width,
           height: img.height,
+          convertedFile: file
         });
       };
       img.src = e.target.result;
@@ -16,7 +64,7 @@ export const getFileDimensions = async (selectedFile) => {
     reader.onerror = (error) => {
       reject(error);
     };
-    reader.readAsDataURL(selectedFile);
+    reader.readAsDataURL(blob);
   });
 };
 

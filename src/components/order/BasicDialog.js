@@ -16,7 +16,7 @@ import { usePhotographer } from '../../contexts/PhotographerContext';
 //Utils
 import { createGuid } from '../../core/helpers/guidHelper';
 import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
-import { getFileDimensions, getCompressedImage } from '../../core/helpers/uploadImageHelper';
+import { getFileDimensions, getCompressedImage, isHeicFile } from '../../core/helpers/uploadImageHelper';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -34,6 +34,7 @@ import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
 import Typography from '@material-ui/core/Typography';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Divider from '@material-ui/core/Divider';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const placeholderImg = 'https://via.placeholder.com/400?text=No%20image';
 
@@ -155,44 +156,51 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const fileInputHandler = useCallback(async (event) => {
     const { files } = event.target;
     const filesArray = Array.from(files);
-
-    const compressionPromises = filesArray.map(async (file) => {
-      if (!file.type.startsWith('image')) {
-        return;
-      }
   
-      const trackingGuid = createGuid();
-      const reader = new FileReader();
-      const { width, height } = await getFileDimensions(file);
+    for (const file of filesArray) {
+      try {
+        const isHeic = isHeicFile(file.name);
+        if (!file.type.startsWith('image') && !isHeic) {
+          continue;
+        }
   
-      const compressedFile = await getCompressedImage({
-        width,
-        height,
-        maxSize: product.size,
-        file
-      });
+        const trackingGuid = createGuid();
+        const reader = new FileReader();
+        const { width, height, convertedFile } = await getFileDimensions(file);
   
-      reader.readAsDataURL(compressedFile);
-      reader.onloadend = () => {
-        const orderItem = {
+        const compressedFile = !isHeic && await getCompressedImage({
+          width,
+          height,
           maxSize: product.size,
-          guid: trackingGuid,
-          fileAsBase64: reader.result,
-          fileUrl: URL.createObjectURL(compressedFile),
-          fileName: compressedFile.name,
-          productId: product.id,
-          set: pack,
-          qty: 1,
-          status: 'idle',
+          file
+        });
+  
+        reader.readAsDataURL(isHeic ? convertedFile : compressedFile);
+        reader.onloadend = () => {
+          const orderItem = {
+            maxSize: product.size,
+            guid: trackingGuid,
+            fileAsBase64: reader.result,
+            fileUrl: URL.createObjectURL(isHeic ? convertedFile : compressedFile),
+            fileName: isHeic ? convertedFile.name : compressedFile.name,
+            productId: product.id,
+            set: pack,
+            qty: 1,
+            status: 'idle',
+          };
+  
+          orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
+          executeScroll();
         };
-  
-        orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
-        executeScroll();
-      };
-    });
-  
-    await Promise.all(compressionPromises);
-  }, [product, pack, orderDispatch]);
+      } catch (error) {
+        console.error(`Error processing file ${file.name}:`, error);
+      }
+    }
+  }, [product, pack, orderDispatch, executeScroll]);
+
+  const isAllImagesDone = () => {
+    return order.orderItems.every(item => item.status === "success");
+  };
 
   const renderFiles = () => order.orderItems
     .filter((item) => item.productId === product.id)
@@ -252,10 +260,11 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                 <input
                   type='file'
                   style={{ display: 'none' }}
-                  inputprops={{ accept: 'image/*' }}
+                  inputprops={{ accept: 'image/*, .heic' }}
                   multiple
                   onChange={fileInputHandler}
                   ref={fileInput}
+                  accept="image/*, .heic"
                 />
                 <RoundButton onClick={() => fileInput.current.click()}>
                   <Box className={classes.centerContent}>
@@ -321,9 +330,15 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             <NextButton
               onClick={handleNext}
               color='primary'
-              disabled={isNextDisabled()}
+              disabled={isNextDisabled() || !isAllImagesDone()}
             >
-              {t('Next step')} <ShoppingCartIcon fontSize='small' />
+              {!isAllImagesDone() ? (
+                <CircularProgress size={22} />
+              ) : (
+                <>
+                  {t('Next step')} <ShoppingCartIcon fontSize='small' />
+                </>
+              )}
             </NextButton>
           </Grid>
           <Hidden mdUp>

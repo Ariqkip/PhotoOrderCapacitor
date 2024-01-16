@@ -18,6 +18,7 @@
     "browser-image-compression": "^2.0.2",
     "cropperjs": "^1.5.12",
     "env-cmd": "^10.1.0",
+    "heic2any": "^0.0.4",
     "i18next": "^20.3.5",
     "konva": "^8.1.1",
     "moment": "2.26.0",
