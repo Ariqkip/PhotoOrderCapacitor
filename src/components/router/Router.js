@@ -66,7 +66,6 @@ const SuspenseContainer = () => {
         <Grid item xs>
           <CircularProgress />
           <br />
-          Loading
         </Grid>
       </Grid>
     </>

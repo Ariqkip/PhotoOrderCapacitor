@@ -1,4 +1,4 @@
-import { ComponentType, useContext, useEffect } from 'react';
+import { ComponentType, useContext, useEffect, useState } from 'react';
 import { Button, Container, Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import { useHistory } from 'react-router-dom';
@@ -92,70 +92,74 @@ const PhotographerWelcomeView: ComponentType<any> = ({ userId }) => {
 
   const [photographer, dispatch] = usePhotographer();
   const { data } = photographerQuery;
+  
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
     if (data) {
-      dispatch({ type: 'SET_INFO', data: data })
+      dispatch({ type: 'SET_INFO', data: data });
+      setIsDataLoaded(true);
     }
   }, [data, dispatch]);
 
   useEffect(() => {
-    if (data && !isLoading(photographerQuery)) {
-      const timeoutId = setTimeout(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    if (isDataLoaded) {
+      timeoutId = setTimeout(() => {
         history.push(`/photographer/${authUser.id}`);
       }, 3000);
-  
-      return () => clearTimeout(timeoutId);
     }
-  }, [authUser.id, data, history, photographerQuery]);
+
+    return () => clearTimeout(timeoutId);
+  }, [authUser.id, isDataLoaded, history]);
 
   return (
     <>
-      <Backdrop
-        className={classes.backdrop}
-        open={isLoading(photographerQuery)}
-      >
-        <CircularProgress className={classes.spinner} />
-      </Backdrop>
-      {!isLoading(photographerQuery) && (        
-        <S.View>
-          <Container maxWidth="md" className={classes.container}>
-            <Grid
-              container
-              spacing={3}
-              className={classes.gridConainer}
-              direction='column'
-            >
-                <Grid item className={classes.logoContainer}>
-                  <img
-                    src={photographer.logoUrl}
-                    alt='company logo'
-                    className={classes.logo}
-                  />
-                </Grid>
-                <Grid item className={classes.gridItem}>
-                  <Typography variant="h5" align="center" gutterBottom className={classes.boldText}>
-                      Black point
-                  </Typography>
-                  <Typography variant="h5" align="center" gutterBottom>
-                    {photographer.street} {photographer.companyName}
-                  </Typography>
-                  <a href={photographer.website} className={classes.link}>
-                    {photographer.website}
-                  </a>
-                  <Button 
-                    className={classes.callButton}
-                    variant="contained"
-                    onClick={() => {window.location.href = `tel:${photographer.phone}`}}
-                  >
-                    <ContactPhoneIcon className={classes.callIcon} />
-                    Call Us
-                  </Button>
+      <S.View>
+        <Container maxWidth="md" className={classes.container}>
+          <Grid
+            container
+            spacing={3}
+            className={classes.gridConainer}
+            direction='column'
+          >
+              <Grid item className={classes.logoContainer}>
+                {
+                  photographer.logoUrl
+                    ? (
+                      <img
+                        src={photographer.logoUrl}
+                        alt='company logo'
+                        className={classes.logo}
+                      />
+                    ) : (
+                      <CircularProgress className={classes.spinner} /> 
+                    )
+                }
               </Grid>
+              <Grid item className={classes.gridItem}>
+                <Typography variant="h5" align="center" gutterBottom className={classes.boldText}>
+                  {photographer.companyName}
+                </Typography>
+                <Typography variant="h5" align="center" gutterBottom>
+                  {photographer.street}
+                </Typography>
+                <a href={photographer.website} className={classes.link}>
+                  {photographer.website}
+                </a>
+                <Button 
+                  className={classes.callButton}
+                  variant="contained"
+                  onClick={() => {window.location.href = `tel:${photographer.phone}`}}
+                >
+                  <ContactPhoneIcon className={classes.callIcon} />
+                  Call Us
+                </Button>
             </Grid>
-          </Container>
-        </S.View>
-      )}
+          </Grid>
+        </Container>
+      </S.View>
     </>
   );
 };
