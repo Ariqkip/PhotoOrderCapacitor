@@ -29,7 +29,7 @@ const OrderService = () => {
     return legacy.post(endpoint, body);
   }
 
-  function FinalizeOrder(order, photographer) {
+  const FinalizeOrder = async (order, photographer) => {
     const endpoint = `photographer/order/${order.orderId}`;
 
     const { productAttributes } = photographer;
@@ -82,6 +82,7 @@ const OrderService = () => {
         ProductId: item.productId,
         Quantity: item.qty,
         Attributes: itemAttributes,
+        // SavedFiles: item.savedFiles
       };
       let layerIndex = -1;
       if (item.isLayerItem === true) {
@@ -114,6 +115,12 @@ const OrderService = () => {
       PaymentMethod: order.paymentMethod,
     };
 
+    await setLocalStorageOrder(
+      order.photographerId, 
+      body
+      // orderedItems.SavedFiles
+    )
+
     if (order.paymentMethod == 2) {
       var vivawalletUrl = photographer.vivawallet;
 
@@ -141,6 +148,30 @@ const OrderService = () => {
     return legacy.post(endpoint, body);
   }
 
+  const setLocalStorageOrder = async (userId, orderData) => {
+    try {
+      const currentTime = new Date().getTime().toString();
+      const serializedValue = JSON.stringify({ ...orderData, currentTime });
+      
+      localStorage.setItem(`${userId}_${currentTime}`, serializedValue);
+    } catch (error) {
+      console.error('Error setting localStorage item:', error);
+    }
+  };
+
+  const getAllLocalStorageOrders = async (userId) => {
+    const items = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      
+      if (key.startsWith(`${userId}_`)) {
+        const value = localStorage.getItem(key);
+        items.push({ key, value });
+      }
+    }
+    return items;
+  };
+
   return {
     GetPhotographer,
     GetBanners,
@@ -149,6 +180,7 @@ const OrderService = () => {
     FinalizeOrder,
     MarkOrderAsDone,
     UploadImage,
+    getAllLocalStorageOrders
   };
 };
 

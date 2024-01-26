@@ -17,8 +17,9 @@ const useStyles = makeStyles((theme) => ({
   },
   container: {
     height: '100%',
-    backgroundColor: 'black',
+    backgroundColor: 'transparent',
     color: 'white',
+    zIndex: 1,
   },
   gridConainer: {
     height: "100%",
@@ -50,20 +51,21 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
   },
   callButton: {
-    backgroundColor: '#4556ac',
+    backgroundColor: '#white',
     width: 'fit-content',
-    color: 'white',
+    color: '#4556ac',
     padding: '0.5rem',
     '&:hover': {
-      backgroundColor: '#ffffff',
-      color: '#000000',
+      backgroundColor: '#4556ac',
+      color: '#ffffff',
     },
   },
   callIcon: {
-    color: 'white',
+    color: '#4556ac',
     paddingRight: '0.5rem',
     '&:hover': {
-      color: '#000000',
+      backgroundColor: '#4556ac',
+      color: '#ffffff',
     },
   },
   backdrop: {
@@ -73,6 +75,14 @@ const useStyles = makeStyles((theme) => ({
   spinner: {
     color: '#743c6e',
   },
+  welcomeBackground: {
+    position: 'absolute',
+    left: '0',
+    top: '0',
+    height: '100%',
+    width: '100%',
+    backgroundColor: "#5F9EA0"
+  }
 }));
 
 function isLoading(query: any) {
@@ -117,6 +127,11 @@ const PhotographerWelcomeView: ComponentType<any> = ({ userId }) => {
   return (
     <>
       <S.View>
+        <div 
+          // src={WelcomeBackground} 
+          // alt='background'
+          className={classes.welcomeBackground}  
+        />
         <Container maxWidth="md" className={classes.container}>
           <Grid
             container

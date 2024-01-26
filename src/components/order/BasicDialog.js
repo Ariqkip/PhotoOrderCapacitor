@@ -176,7 +176,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
         });
   
         reader.readAsDataURL(isHeic ? convertedFile : compressedFile);
-        reader.onloadend = () => {
+        reader.onloadend = async () => {
           const orderItem = {
             maxSize: product.size,
             guid: trackingGuid,
@@ -188,7 +188,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             qty: 1,
             status: 'idle',
           };
-  
+
           orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
           executeScroll();
         };
