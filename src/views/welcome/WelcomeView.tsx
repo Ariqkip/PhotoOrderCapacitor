@@ -9,9 +9,6 @@ import { makeStyles } from '@material-ui/core/styles';
 // @ts-ignore
 import WelcomeBackground from '../../assets/login_background.jpg';
 
-// import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite';
-// import { Filesystem, FilesystemDirectory } from '@capacitor/filesystem';
-
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -92,17 +89,6 @@ const WelcomeView: ComponentType<any> = () => {
             .finally(() => setIsLoading(false))
     };
 
-    // const authUserWithOldToken = async (token: string) => {
-    //     if (token) {
-    //         setIsLoading(true);
-    //         authService.getPhotographer(token).then((authUser: any) => {
-    //             setAuthUser(authUser)
-    //         })
-    //             .catch(() => setErrorSnackbarOpen(true))
-    //             .finally(() => setIsLoading(false))
-    //     }
-    // };
-
     const validatePhoneNumber = (value: string): boolean => {
         const phoneRegex = /^\d{10}$/;
         return phoneRegex.test(value);
@@ -123,39 +109,6 @@ const WelcomeView: ComponentType<any> = () => {
         setErrorSnackbarOpen(false);
     };
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             await Filesystem.rename({
-    //                 from: '/data/user/0/photoorder.droid/files/junki.sql',
-    //                 to: '/data/user/0/photoorder.droid/files/junkiSQLite.db',
-    //             });
-        
-    //             const sqlite = new SQLiteConnection(CapacitorSQLite);
-    //             const db = await sqlite.createConnection(
-    //                 '/data/user/0/photoorder.droid/files/junki', 
-    //                 false, 
-    //                 'no-encryption', 
-    //                 1, 
-    //                 true
-    //             );
-                
-    //             await db.open();
-    
-    //             const query = "SELECT * FROM Settings WHERE key='OriginalUserEnteredToken';";
-    //             const result = await db.query(query);
-                
-    //             if (result?.values) {
-    //                await authUserWithOldToken(result.values[0].Value)
-    //             }
-    //         } catch (error) {
-    //             console.error('Error fetching data:', error);
-    //         }
-    //     };
-    
-    //     fetchData();
-    // }, []);
-    
     return (
         <S.View>
             <img 
