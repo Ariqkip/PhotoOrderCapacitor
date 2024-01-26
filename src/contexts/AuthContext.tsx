@@ -10,7 +10,7 @@ export const AuthContext = createContext<AuthContextProps>({
     setAuthUser: () => {},
 });
 
-const AuthProvider: React.FC = ({ children }) => {
+const AuthProvider: React.FC<any> = ({ children }) => {
     const [authUser, setAuthUserState] = useState<any | null>(null);
 
     useEffect(() => {
