@@ -24,6 +24,8 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import Collapse from '@material-ui/core/Collapse';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import Divider from '@material-ui/core/Divider';
+import HistoryIcon from '@material-ui/icons/History';
+import PolicyIcon from '@material-ui/icons/Policy';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -151,6 +153,30 @@ const MenuList = (props) => {
           <ContactPhoneIcon />
         </ListItemIcon>
         <ListItemText>{t('Contact')}</ListItemText>
+      </ListItem>
+      <ListItem
+        className={classes.gutters}
+        button
+        onClick={() => props.requestClose && props.requestClose()}
+        component={Link}
+        to={`/photographer/${props.photographerId}/last-orders`}
+      >
+        <ListItemIcon>
+          <HistoryIcon />
+        </ListItemIcon>
+        <ListItemText>{t('Last Orders')}</ListItemText>
+      </ListItem>
+      <ListItem
+        className={classes.gutters}
+        button
+        onClick={() => props.requestClose && props.requestClose()}
+        component={Link}
+        to={`/photographer/${props.photographerId}/policy`}
+      >
+        <ListItemIcon>
+          <PolicyIcon />
+        </ListItemIcon>
+        <ListItemText>{t('Privacy Policy')}</ListItemText>
       </ListItem>
     </List>
   );

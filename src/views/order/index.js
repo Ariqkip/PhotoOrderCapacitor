@@ -10,6 +10,8 @@ import CheckoutView from './CheckoutView';
 import ContactView from './ContactView';
 import UploadManager from '../../components/order/UploadManager';
 import UncategorizedView from './UncategorizedView';
+import LastOrderView from './LastOrdersView';
+import PolicyView from './PolicyView';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -199,6 +201,14 @@ const OrderIndex = ({ match }) => {
           <Route
             path={`${url}/contact`}
             render={(props) => <ContactView {...props} />}
+          />
+          <Route
+            path={`${url}/last-orders`}
+            render={(props) => <LastOrderView {...props} />}
+          />
+          <Route 
+             path={`${url}/policy`}
+             render={(props) => <PolicyView {...props} />}
           />
         </Switch>
       </Suspense>
