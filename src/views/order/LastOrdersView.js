@@ -1,4 +1,4 @@
-import React, { ComponentType, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button, Card, Container, Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -7,7 +7,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 import styled from 'styled-components';
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -67,61 +66,12 @@ const S = {
   `,
 };
 
-// const IMAGE_DIR = 'stored-images';
-
 const LastOrdersView = () => {
   const classes = useStyles();
   const { authUser: { id } } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
-  // const [images, setImages] = useState([]);
 
   const orderService = OrderService();
-
-  // const loadFiles = async () => {
-  //   Filesystem.readdir({
-  //     directory: Directory.Data,
-  //     path: IMAGE_DIR
-  //   }).then(result => {
-  //     console.log('REsult', result)
-  //     loadFileData(result.files)
-  //   }, async error => {
-  //     console.log('Error', error);
-  //     Filesystem.mkdir({
-  //       directory: Directory.Data,
-  //       path: IMAGE_DIR
-  //     })
-  //   })
-  // }
-
-  // const loadFileData = async (fileNames) => {
-  //   const updatedImages = [];
-  
-  //   for (let f of fileNames) {
-  //     const filePath = `${IMAGE_DIR}/${f.name}`;
-  //     try {
-  //       const readFile = await Filesystem.readFile({
-  //         directory: Directory.Data,
-  //         path: filePath
-  //       });
-  
-  //       updatedImages.push({
-  //         name: f,
-  //         path: filePath,
-  //         data: readFile.data
-  //       });
-  //     } catch (error) {
-  //       console.error(`Error reading file ${filePath}:`, error);
-  //     }
-  //   }
-  
-  //   setImages(images => [...images, ...updatedImages]);
-  // };
-
-  // const getStoredImageData = (fileName) => {
-  //   const cleanedFileName = fileName.replace('/DATA/', '');
-  //   const foundImage = images.find(image => cleanedFileName.startsWith(image.path));
-  //   return foundImage ? foundImage.data : null;
-  // };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -137,7 +87,6 @@ const LastOrdersView = () => {
       }
     };
     
-    // loadFiles();
     fetchData();
   }, []);
 
@@ -219,17 +168,8 @@ const LastOrdersView = () => {
                   }`}
                 >
                   {order.OrderItems.map((item, index) => {
-                    // const base64String = btoa(images[0]?.data);
-
-                    // const imageData = getStoredImageData(item.SavedFiles.uri);
                     return (
                       <div key={index} className={classes.imgWrap}>
-                        {/* <h1>images[0]:</h1>
-                        <pre>{JSON.stringify(images[0], null, 2)}</pre>
-
-                        <h1>item:</h1>
-                        <pre>{JSON.stringify(item, null, 2)}</pre>
-                        <img src={item.SavedFiles.uri} alt={item.FileName} className={classes.orderImg} /> */}
                         {item ? (<img
                           src={item.FileUrl}
                           alt={item.FileName}

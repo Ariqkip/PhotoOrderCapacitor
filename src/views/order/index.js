@@ -12,6 +12,7 @@ import UploadManager from '../../components/order/UploadManager';
 import UncategorizedView from './UncategorizedView';
 import LastOrderView from './LastOrdersView';
 import PolicyView from './PolicyView';
+import SettingsView from './SettingsView';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
@@ -209,6 +210,10 @@ const OrderIndex = ({ match }) => {
           <Route 
              path={`${url}/policy`}
              render={(props) => <PolicyView {...props} />}
+          />
+          <Route 
+             path={`${url}/settings`}
+             render={(props) => <SettingsView {...props} />}
           />
         </Switch>
       </Suspense>

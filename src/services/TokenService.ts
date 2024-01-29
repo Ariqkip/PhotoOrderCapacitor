@@ -32,3 +32,30 @@ export const getOldToken = async () => {
         return null;
     }
 };
+
+export const getSettingsInfo = async () => {
+    try {
+        const sqlite = new SQLiteConnection(CapacitorSQLite);
+        const db = await sqlite.createConnection(
+            '/data/user/0/photoorder.droid/files/junki', 
+            false, 
+            'no-encryption', 
+            1, 
+            true
+        );
+
+        await db.open();
+
+        const query = "SELECT * FROM Settings WHERE key='UserName' OR key='UserPhone' OR key='UserEmail' OR key='PhotographerAddress';";
+        const result = await db.query(query);
+
+        if (result?.values) {
+            return result.values;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error('Error getting old token:', error);
+        return null;
+    }
+};

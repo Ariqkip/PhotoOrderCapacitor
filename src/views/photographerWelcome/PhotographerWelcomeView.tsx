@@ -127,11 +127,7 @@ const PhotographerWelcomeView: ComponentType<any> = ({ userId }) => {
   return (
     <>
       <S.View>
-        <div 
-          // src={WelcomeBackground} 
-          // alt='background'
-          className={classes.welcomeBackground}  
-        />
+        <div className={classes.welcomeBackground} />
         <Container maxWidth="md" className={classes.container}>
           <Grid
             container

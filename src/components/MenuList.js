@@ -26,6 +26,7 @@ import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import Divider from '@material-ui/core/Divider';
 import HistoryIcon from '@material-ui/icons/History';
 import PolicyIcon from '@material-ui/icons/Policy';
+import SettingsIcon from '@material-ui/icons/Settings';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -130,6 +131,18 @@ const MenuList = (props) => {
   return (
     <List>
       {renderProductsOrCategories()}
+      <ListItem
+        className={classes.gutters}
+        button
+        onClick={() => props.requestClose && props.requestClose()}
+        component={Link}
+        to={`/photographer/${props.photographerId}/settings`}
+      >
+        <ListItemIcon>
+          <SettingsIcon />
+        </ListItemIcon>
+        <ListItemText>{t('Settings')}</ListItemText>
+      </ListItem>
       <ListItem
         className={classes.gutters}
         button
