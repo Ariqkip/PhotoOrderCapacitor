@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Button, Container, Typography, Snackbar } from '@material-ui/core';
+import { Button, Container, Typography, Snackbar, Collapse, Divider, Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../../contexts/AuthContext';
 import { getSettingsInfo } from '../../services/TokenService';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import MuiAlert from '@material-ui/lab/Alert';
-import { Divider } from '@material-ui/core';
 import { setLocalStorageSettings } from '../../services/SettingsService';
+import PlusIcon from '@material-ui/icons/Add';
+import MinusIcon from '@material-ui/icons/Remove';
+
 import styled from 'styled-components';
 
 const useStyles = makeStyles((theme) => ({
@@ -67,13 +69,33 @@ const useStyles = makeStyles((theme) => ({
     marginTop: '1rem',
     width: '100%',
     fontWeight: '800'
+  },
+  collapseButton: {
+    color: '#5F9EA0',
+    backgroundColor: '#fff',
+    borderRadius: '50%',
+    height: '4rem',
+    marginBottom: '2rem',
+    marginRight: '1rem',
+    '&:hover': {
+      backgroundColor: '#fff',
+    }
+  },
+  collapseWrap: {
+    marginBottom: '1rem',
+  },
+  collapseBox: {
+    display: 'flex'
   }
 }));
 
 const S = {
   View: styled.div`
-    height: 100%;
     display: flex;
+    min-height: 85vh;
+    padding-top: 16px;
+    height: 100%;
+    position: relative;
     justify-content: center;
   `,
 };
@@ -86,11 +108,18 @@ const SettingsView = () => {
   const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
   const [successSnackbarOpen, setSuccessSnackbarOpen] = useState(false);
   const [userData, setUserData] = useState({
-    name: authUser?.firstName || "",
+    firstName: authUser?.firstName || "",
+    lastName: authUser?.lastName || "",
     phone: authUser?.phone || "",
     email: authUser?.email || "",
-    address: authUser?.street || ""
+    address: authUser?.street || "",
+    zipCode: authUser?.zipCode || "",
+    city: authUser?.city || "",
+    country: authUser?.country || ""
   });
+  const [isUserInfoOpen, setIsUserInfoOpen] = useState(false);
+  const [isDeliveryInfoOpen, setIsDeliveryInfoOpen] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingForm, setIsLoadingForm] = useState(false);
   
@@ -101,14 +130,21 @@ const SettingsView = () => {
           !authUser?.firstName || 
           !authUser?.phone || 
           !authUser?.street || 
-          !authUser?.email  
+          !authUser?.email ||
+          !authUser?.zipCode ||
+          !authUser?.city ||
+          !authUser?.country
         ) {
           const data = await getSettingsInfo();
           setUserData({
-            name: authUser?.firstName && data[2]?.Value,
+            firstName: authUser?.firstName && data[2]?.Value,
+            lastName: authUser?.lastName || "",
             phone: authUser?.phone && data[3]?.Value,
             email: authUser?.email && data[1]?.Value,
-            address: authUser?.street && data[0]?.Value
+            address: authUser?.street && data[0]?.Value,
+            zipCode: authUser?.zipCode,
+            city: authUser?.city,
+            country: authUser?.country
           });
         }
       } catch (error) {
@@ -132,19 +168,27 @@ const SettingsView = () => {
       setIsLoadingForm(true);
       const updatedUserData = {
         ...userData,
-        name: userData.name,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         phone: userData.phone,
         email: userData.email,
-        address: userData.address
+        address: userData.address,
+        zipCode: userData.zipCode,
+        city: userData.city,
+        country: userData.country
       };
 
       await setLocalStorageSettings(updatedUserData);
       setAuthUser({
         ...authUser,
-        firstName: updatedUserData.name,
+        firstName: updatedUserData.firstName,
+        lastName: updatedUserData.lastName,
         phone: updatedUserData.phone,
         email: updatedUserData.email,
-        street: updatedUserData.address
+        street: updatedUserData.address,
+        zipCode: userData.zipCode,
+        city: userData.city,
+        country: userData.country
       });
       setSuccessSnackbarOpen(true);
     } catch (e) {
@@ -188,46 +232,113 @@ const SettingsView = () => {
           <Typography className={`${classes.subtitleText} ${classes.token}`}>{authUser?.mobileToken}</Typography>
         </Typography>
         <form onSubmit={handleSaveChanges} className={classes.welcomeForm}>
-          <Typography className={classes.subtitleBlock}>
-            <Typography className={classes.subtitleMainText}>Name & Surname:</Typography> 
-            <input 
-              className={classes.subtitleText} 
-              type="text" 
-              name="name" 
-              value={userData.name} 
-              onChange={handleInputChange} 
-            />
-          </Typography>
-          <Typography className={classes.subtitleBlock}>
-            <Typography className={classes.subtitleMainText}>Phone number:</Typography> 
-            <input 
-              className={classes.subtitleText} 
-              type="number" 
-              name="phone" 
-              value={userData.phone} 
-              onChange={handleInputChange} 
-            />
-          </Typography>
-          <Typography className={classes.subtitleBlock}>
-            <Typography className={classes.subtitleMainText}>Email:</Typography> 
-            <input 
-              className={classes.subtitleText} 
-              type="email" 
-              name="email" 
-              value={userData.email} 
-              onChange={handleInputChange} 
-            />
-          </Typography>
-          <Typography className={classes.subtitleBlock}>
-            <Typography className={classes.subtitleMainText}>Address:</Typography> 
-            <input 
-              className={classes.subtitleText} 
-              type="text" 
-              name="address" 
-              value={userData.address} 
-              onChange={handleInputChange} 
-            />
-          </Typography>
+          <Box className={classes.collapseBox}>
+            <Button className={classes.collapseButton} onClick={() => setIsUserInfoOpen(!isUserInfoOpen)}>
+              {
+                !isUserInfoOpen
+                  ? <PlusIcon />
+                  : <MinusIcon />
+              }
+            </Button>
+            <h2>User Info</h2>
+          </Box>
+          <Collapse in={isUserInfoOpen} className={classes.collapseWrap}>
+            <Typography className={classes.subtitleBlock}>
+              <Typography className={classes.subtitleMainText}>First name:</Typography> 
+              <input 
+                className={classes.subtitleText} 
+                type="text" 
+                name="firstName" 
+                value={userData.firstName} 
+                onChange={handleInputChange} 
+              />
+            </Typography>
+            <Typography className={classes.subtitleBlock}>
+              <Typography className={classes.subtitleMainText}>Last name:</Typography> 
+              <input 
+                className={classes.subtitleText} 
+                type="text" 
+                name="lastName" 
+                value={userData.lastName} 
+                onChange={handleInputChange} 
+              />
+            </Typography>
+            <Typography className={classes.subtitleBlock}>
+              <Typography className={classes.subtitleMainText}>Phone number:</Typography> 
+              <input 
+                className={classes.subtitleText} 
+                type="number" 
+                name="phone" 
+                value={userData.phone} 
+                onChange={handleInputChange} 
+              />
+            </Typography>
+            <Typography className={classes.subtitleBlock}>
+              <Typography className={classes.subtitleMainText}>Email:</Typography> 
+              <input 
+                className={classes.subtitleText} 
+                type="email" 
+                name="email" 
+                value={userData.email} 
+                onChange={handleInputChange} 
+              />
+            </Typography>
+          </Collapse>
+          
+          <Box className={classes.collapseBox}>
+            <Button className={classes.collapseButton} onClick={() => setIsDeliveryInfoOpen(!isDeliveryInfoOpen)}>
+              {
+                !isDeliveryInfoOpen
+                  ? <PlusIcon />
+                  : <MinusIcon />
+              }
+            </Button>
+            <h2>Delivery Info</h2>
+          </Box>
+
+          <Collapse in={isDeliveryInfoOpen}>
+            <Typography className={classes.subtitleBlock}>
+              <Typography className={classes.subtitleMainText}>Street Address:</Typography> 
+              <input 
+                className={classes.subtitleText} 
+                type="text" 
+                name="address" 
+                value={userData.address} 
+                onChange={handleInputChange} 
+              />
+            </Typography>
+            <Typography className={classes.subtitleBlock}>
+              <Typography className={classes.subtitleMainText}>ZIP Code:</Typography> 
+              <input 
+                className={classes.subtitleText} 
+                type="number" 
+                name="zipCode" 
+                value={userData.zipCode} 
+                onChange={handleInputChange} 
+              />
+            </Typography>
+            <Typography className={classes.subtitleBlock}>
+              <Typography className={classes.subtitleMainText}>City:</Typography> 
+              <input 
+                className={classes.subtitleText} 
+                type="text" 
+                name="city" 
+                value={userData.city} 
+                onChange={handleInputChange} 
+              />
+            </Typography>
+            <Typography className={classes.subtitleBlock}>
+              <Typography className={classes.subtitleMainText}>Country:</Typography> 
+              <input 
+                className={classes.subtitleText} 
+                type="text" 
+                name="country" 
+                value={userData.country} 
+                onChange={handleInputChange} 
+              />
+            </Typography>
+          </Collapse>
+          
           <Button
             type="submit"
             disabled={isLoadingForm}

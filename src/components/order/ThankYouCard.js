@@ -1,5 +1,5 @@
 //Core
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 //Components
 
@@ -9,6 +9,7 @@ import { usePhotographer } from '../../contexts/PhotographerContext';
 import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
+import OrderService from '../../services/OrderService';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -41,6 +42,9 @@ const useStyles = makeStyles((theme) => ({
     textDecoration: 'none',
     color: '#3a3a3a',
   },
+  conatiner: {
+    paddingTop: '16px'
+  }
 }));
 
 const ActiveButton = withStyles((theme) => ({
@@ -64,8 +68,11 @@ const ThankYouCard = (props) => {
   const [photographer] = usePhotographer();
   const [order, orderDispatch] = useOrder();
 
+  const orderService = OrderService();
+  const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+
   return (
-    <Container maxWidth='md'>
+    <Container maxWidth='md' className={classes.conatiner} >
       <Paper square className={classes.paper}>
         <Grid
           container
@@ -81,12 +88,23 @@ const ThankYouCard = (props) => {
             />
           </Grid>
           <Grid item>
-            <Typography variant='h5' component='p' align='center'>
-              Order no:
-            </Typography>
-            <Typography variant='h4' component='h1' align='center'>
-              {order.orderId}
-            </Typography>
+            {
+              order.orderId || orderDataFromStorage?.orderId
+                ? (
+                  <>
+                    <Typography variant='h5' component='p' align='center'>
+                      Order no:
+                    </Typography>
+                    <Typography variant='h4' component='h1' align='center'>
+                      {order.orderId || orderDataFromStorage?.orderId}
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography variant='h5' component='p' align='center'>
+                    Order
+                  </Typography>
+                ) 
+            }
             <Typography variant='h5' component='p' align='center'>
               has been accepted
             </Typography>

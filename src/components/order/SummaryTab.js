@@ -41,6 +41,9 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     textAlign: 'center',
   },
+  container: {
+    paddingTop: '16px'
+  }
 }));
 
 const SummaryTab = (props) => {
@@ -104,7 +107,7 @@ const SummaryTab = (props) => {
   }, [order, photographer]);
 
   return (
-    <Container maxWidth='md'>
+    <Container maxWidth='md' className={classes.container}>
       <Paper square className={classes.paper}>
         <Grid
           container

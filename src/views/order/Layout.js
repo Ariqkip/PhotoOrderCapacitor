@@ -23,11 +23,11 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: theme.spacing(0, 1),
-    minHeight: 80,
+    minHeight: 65,
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(1),
+    // padding: theme.spacing(1),
   },
 }));
 

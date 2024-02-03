@@ -38,6 +38,9 @@ const useStyles = makeStyles((theme) => ({
     textDecoration: 'none',
     color: '#3a3a3a',
   },
+  conatiner: {
+    paddingTop: '16px'
+  }
 }));
 
 const ContactCard = (props) => {
@@ -46,7 +49,7 @@ const ContactCard = (props) => {
   const [photographer] = usePhotographer();
 
   return (
-    <Container maxWidth='md'>
+    <Container maxWidth='md' className={classes.conatiner} >
       <Paper square className={classes.paper}>
         <Grid
           container

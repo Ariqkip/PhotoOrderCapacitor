@@ -6,6 +6,8 @@ import React, { useState } from 'react';
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { useOrder } from '../../contexts/OrderContext';
+import { usePhotographer } from '../../contexts/PhotographerContext';
+import OrderService from '../../services/OrderService';
 
 //Utils
 
@@ -63,9 +65,23 @@ const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
   const classes = useStyles();
   const { t } = useTranslation();
 
+  const [qty, setQty] = useState(file.qty);
   const [, orderDispatch] = useOrder();
 
+  const [photographer] = usePhotographer();
+  const orderService = OrderService();
+
   const handleAddQuantity = () => {
+    const orderData = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+    const updatedOrderItems = orderData.orderItems.map(item => {
+      if (item.guid === file.guid) {
+        item.qty++;
+      }
+      return item;
+    });
+    orderService.setCurrentOrderToStorage({ ...orderData, orderItems: updatedOrderItems }, photographer.photographId);
+  
+    setQty(qty + 1);
     orderDispatch({
       type: 'INCREASE_ORDER_ITEM_QTY',
       payload: { guid: file.guid },
@@ -73,6 +89,20 @@ const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
   };
 
   const handleRemoveQuantity = () => {
+    const orderData = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+    const updatedOrderItems = orderData.orderItems
+      .map(item => {
+        if (item.guid === file.guid) {
+          if (item.qty > 1) {
+            item.qty--;
+          }
+        }
+        return item;
+      })
+      .filter(item => item.qty > 0);
+    orderService.setCurrentOrderToStorage({ ...orderData, orderItems: updatedOrderItems }, photographer.photographId);
+    
+    setQty(qty - 1 >= 1 ? qty - 1 : 1);
     orderDispatch({
       type: 'DECRESE_ORDER_ITEM_QTY',
       payload: { guid: file.guid },

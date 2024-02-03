@@ -29,6 +29,8 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+    display: 'flex',
+    justifyContent: 'space-between'
   },
   drawerClose: {
     transition: theme.transitions.create('width', {
@@ -49,11 +51,23 @@ const useStyles = makeStyles((theme) => ({
     minHeight: 48,
     //  height: 35
   },
+  currentVersion: {
+    padding: '12px',
+  }
 }));
 
 const MenuDrawer = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
+
+  const getCurrentVersion = () => {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear().toString().slice(-2);
+    const month = (currentDate.getMonth() + 1).toString();
+    const day = currentDate.getDate().toString();
+  
+    return `ver 1.${year}.${month}.${day}`;
+  };  
 
   return (
     <Drawer
@@ -75,6 +89,7 @@ const MenuDrawer = (props) => {
         requestClose={() => props.requestClose && props.requestClose()}
         photographerId={props.photographerId}
       />
+      <div className={classes.currentVersion}>{getCurrentVersion()}</div>
     </Drawer>
   );
 };

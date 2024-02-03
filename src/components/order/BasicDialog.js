@@ -1,5 +1,5 @@
 //Core
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 //Components
 import RoundButton from './../core/RoundButton';
@@ -17,6 +17,7 @@ import { usePhotographer } from '../../contexts/PhotographerContext';
 import { createGuid } from '../../core/helpers/guidHelper';
 import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 import { getFileDimensions, getCompressedImage, isHeicFile } from '../../core/helpers/uploadImageHelper';
+import OrderService from '../../services/OrderService';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -138,6 +139,26 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const [pack, setPack] = useState(1);
   const [order, orderDispatch] = useOrder();
   const [photographer] = usePhotographer();
+  const orderService = OrderService();
+  const [orderData, setOrderData] = useState();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const fileInputGallery = useRef(null);
+  const fileInputDrive = useRef(null);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+    
+    setOrderData(orderDataFromStorage);
+  }, [photographer.photographId]);  
 
   const executeScroll = () =>
     scrollToRef.current.scrollIntoView({
@@ -189,7 +210,18 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             status: 'idle',
           };
 
+          const updatedOrderData = { ...orderData };
+
+          if (!updatedOrderData?.orderItems) {
+            updatedOrderData.orderItems = [];
+          }
+          updatedOrderData?.orderItems.push(orderItem);
+
+          orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
+          setOrderData(updatedOrderData);
+
           orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
+          handleCloseModal();
           executeScroll();
         };
       } catch (error) {
@@ -199,14 +231,28 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   }, [product, pack, orderDispatch, executeScroll]);
 
   const isAllImagesDone = () => {
-    return order.orderItems.every(item => item.status === "success");
+    return order?.orderItems.every(item => item.status === "success");
   };
 
-  const renderFiles = () => order.orderItems
-    .filter((item) => item.productId === product.id)
-    .map((item) => <FileListItem key={item.guid} file={item} />);
+  const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+
+  useEffect(() => {
+    if (orderDataFromStorage?.orderItems.length > 0 && orderDataFromStorage?.orderItems.length !== order?.orderItems.length) {
+      orderDispatch({ type: 'ADD_ORDER_ITEMS_AT_END', payload: orderDataFromStorage.orderItems });
+    }
+  }, [orderDataFromStorage?.orderItems.length]);
+
+  const renderFiles = () => {
+    return order?.orderItems
+      .filter((item) => item.productId === product.id)
+      .map((item) => <FileListItem key={item.guid} file={item} />)
+  };
 
   const handleRemoveAll = () => {
+    const updatedOrderData = { ...orderData, orderItems: [] };
+    orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
+    setOrderData(updatedOrderData);
+
     orderDispatch({
       type: 'REMOVE_ORDER_ITEMS_FOR_PRODUCT',
       payload: { productId: product.id },
@@ -214,7 +260,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   };
 
   const isNextDisabled = () => {
-    const files = order.orderItems.filter((item) => item.productId === product.id);
+    const files = order?.orderItems.filter((item) => item.productId === product.id);
     return files.length === 0;
   };  
 
@@ -224,7 +270,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   };
 
   const calculatePrice = () => {
-    const quantity = order.orderItems
+    const quantity = order?.orderItems
       .filter((item) => item.productId === product.id)
       .reduce((sum, item) => sum + item.qty, 0);
     return getLabelPrice(product.id, quantity, photographer, order);
@@ -257,22 +303,46 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                 />
               </Container>
               <Box className={classes.centerContent}>
-                <input
-                  type='file'
-                  style={{ display: 'none' }}
-                  inputprops={{ accept: 'image/*, .heic' }}
-                  multiple
-                  onChange={fileInputHandler}
-                  ref={fileInput}
-                  accept="image/*, .heic"
-                />
-                <RoundButton onClick={() => fileInput.current.click()}>
+                <RoundButton onClick={handleOpenModal}>
                   <Box className={classes.centerContent}>
                     <AddPhotoAlternateIcon />
                     <span>{t('Pick files')}</span>
                   </Box>
                 </RoundButton>
               </Box>
+              <Dialog open={isModalOpen} onClose={handleCloseModal}>
+                <DialogContent style={{ display: 'flex', flexDirection: 'column'}}>
+                  <RoundButton 
+                    onClick={() => fileInputGallery.current.click()}
+                    style={{ width: '100%', marginBottom: '1rem' }}  
+                  >
+                    Gallery
+                  </RoundButton>
+                  <input
+                    type='file'
+                    style={{ display: 'none' }}
+                    inputprops={{ accept: 'image/*, .heic' }}
+                    multiple
+                    onChange={fileInputHandler}
+                    ref={fileInputGallery}
+                    accept="image/*, .heic"
+                  />
+                  <RoundButton 
+                    onClick={() => fileInputDrive.current.click()}
+                    style={{ width: '100%' }}  
+                  >
+                    Google Drive
+                  </RoundButton>
+                  <input
+                    type='file'
+                    style={{ display: 'none' }}
+                    accept='image/*,.heic,application/vnd.google-apps.drive-sdk'
+                    multiple
+                    onChange={fileInputHandler}
+                    ref={fileInputDrive}
+                  />
+                </DialogContent>
+              </Dialog>
             </Grid>
             <Grid item xs={12} md={6}>
               <Box className={classes.spaceBetweenContent}>

@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    padding: '8px',
     width: '100%',
   },
   orderCard: {
@@ -50,16 +51,29 @@ const useStyles = makeStyles((theme) => ({
     padding: '2rem',
   },
   noOrders: {
+    color: '#fff',
+    zIndex: 2,
     margin: '3rem',
   },
   notFound: {
     textAlign: 'center',
-  }
+  },
+  welcomeBackground: {
+    position: 'absolute',
+    left: '0',
+    top: '0',
+    height: '100%',
+    width: '100%',
+    backgroundColor: "#5F9EA0"
+  },
 }));
 
 const S = {
   View: styled.div`
     height: 100%;
+    position: relative;
+    min-height: 85vh;
+    padding: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -115,6 +129,7 @@ const LastOrdersView = () => {
   
   return (
     <S.View>
+      <div className={classes.welcomeBackground} />
       <Container maxWidth="md">
         <Grid container spacing={3} direction="column">
           {orders.length ? orders.map((order, key) => (
@@ -139,6 +154,27 @@ const LastOrdersView = () => {
                   <span className={classes.orderLabel}>Street Address:</span> {
                     order.StreetAddress 
                       ? order.StreetAddress
+                      : 'Not specified'
+                  }
+                </Typography>
+                <Typography variant="h6" gutterBottom>
+                  <span className={classes.orderLabel}>Zip Code:</span> {
+                    order.ZipCode 
+                      ? order.ZipCode
+                      : 'Not specified'
+                  }
+                </Typography>
+                <Typography variant="h6" gutterBottom>
+                  <span className={classes.orderLabel}>City:</span> {
+                    order.City 
+                      ? order.City
+                      : 'Not specified'
+                  }
+                </Typography>
+                <Typography variant="h6" gutterBottom>
+                  <span className={classes.orderLabel}>Country:</span> {
+                    order.Country 
+                      ? order.Country
                       : 'Not specified'
                   }
                 </Typography>

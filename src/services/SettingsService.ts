@@ -7,8 +7,12 @@ export const setLocalStorageSettings = async (settings: any) => {
         ...authUser,
         firstName: settings?.name || "",
         phone: settings?.phone || "",
+        lastName: settings?.lastName || "",
         email: settings?.email || "",
-        street: settings?.address || ""
+        street: settings?.address || "",
+        zipCode: settings?.zipCode || "",
+        city: settings?.city || "",
+        country: settings?.country || "",
       };
       localStorage.setItem("authUser", JSON.stringify(updatedAuthUser));
     }

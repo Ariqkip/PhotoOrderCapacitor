@@ -103,13 +103,18 @@ const OrderService = () => {
       return result;
     });
 
+    const orderData = JSON.parse(getCurrentOrderFromStorage(order.photographerId));
+    console.log(orderData, 1)
     const body = {
-      FirstName: order.firstName,
-      LastName: order.lastName,
-      Phone: order.phone,
-      Email: order.email,
-      StreetAddress: order.shippingAddress,
-      IsShippingChoosen: order.shippingSelected,
+      FirstName: orderData?.firstName,
+      LastName: orderData?.lastName,
+      Phone: orderData?.phone,
+      Email: orderData?.email,
+      StreetAddress: orderData?.shippingStreet || "",
+      City: orderData?.shippingCity || "",
+      Country: orderData?.shippingCountry || "",
+      ZipCode: orderData?.shippingZip || "",
+      IsShippingChoosen: orderData.shippingSelected,
       OrderGuid: order.orderGuid,
       OrderItems: orderedItems,
       PaymentMethod: order.paymentMethod,
@@ -118,8 +123,9 @@ const OrderService = () => {
     await setLocalStorageOrder(
       order.photographerId, 
       body
-      // orderedItems.SavedFiles
     )
+
+    removeOrderFromLocalStorage(order.photographerId);
 
     if (order.paymentMethod == 2) {
       var vivawalletUrl = photographer.vivawallet;
@@ -152,6 +158,7 @@ const OrderService = () => {
     try {
       const currentTime = new Date().getTime().toString();
       const serializedValue = JSON.stringify({ ...orderData, currentTime });
+      console.log(serializedValue, 2)
       
       localStorage.setItem(`${userId}_${currentTime}`, serializedValue);
     } catch (error) {
@@ -172,6 +179,45 @@ const OrderService = () => {
     return items;
   };
 
+  const setCurrentOrderToStorage = (orderData, userId) => {
+    try {
+      const currentData = localStorage.getItem(userId);
+      let mergedData = {};
+  
+      if (currentData) {
+        mergedData = JSON.parse(currentData);
+      }
+  
+      mergedData = { ...mergedData, ...orderData };
+  
+      if (mergedData.shippingSelected === false) {
+        const { shippingCountry, shippingStreet, shippingZip, shippingCity, ...rest } = mergedData;
+        mergedData = rest;
+      }
+  
+      const serializedValue = JSON.stringify(mergedData);
+      localStorage.setItem(userId, serializedValue);
+    } catch (err) {
+      console.error('Error setting localStorage item:', err);
+    }
+  };  
+
+  const getCurrentOrderFromStorage = (userId) => {
+    try {
+      return localStorage.getItem(userId);
+    } catch (err) {
+      console.error('Error setting localStorage item:', err);
+    }
+  };
+
+  const removeOrderFromLocalStorage = (id) => {
+    try {
+      localStorage.removeItem(id);
+    } catch (err) {
+      console.error('Error setting localStorage item:', err);
+    }
+  }
+
   return {
     GetPhotographer,
     GetBanners,
@@ -180,7 +226,9 @@ const OrderService = () => {
     FinalizeOrder,
     MarkOrderAsDone,
     UploadImage,
-    getAllLocalStorageOrders
+    getAllLocalStorageOrders,
+    setCurrentOrderToStorage,
+    getCurrentOrderFromStorage
   };
 };
 

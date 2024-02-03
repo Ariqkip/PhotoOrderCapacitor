@@ -1,12 +1,13 @@
 //Core
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useContext } from 'react';
 
 //Components
 
 //Hooks
 import { useTranslation } from 'react-i18next';
 import { usePhotographer } from '../../contexts/PhotographerContext';
-import { useOrder } from '../../contexts/OrderContext';
+import { AuthContext } from '../../contexts/AuthContext';
+import OrderService from '../../services/OrderService';
 
 //Utils
 import { formValidationHelper } from '../../core/helpers/formValidationHelper';
@@ -35,20 +36,26 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const fieldValidation = {
-  shippingName: {
-    error: '',
-    minLength: 2,
-    maxLength: 50,
-  },
-  shippingAddress: {
+  shippingStreet: {
     error: '',
     minLength: 2,
     maxLength: 150,
   },
-  shippingEmail: {
+  shippingZip: {
     error: '',
-    validate: 'email',
+    minLength: 3,
+    maxLength: 10,
   },
+  shippingCity: {
+    error: '',
+    minLength: 2,
+    maxLength: 20,
+  },
+  shippingCountry: {
+    error: '',
+    minLength: 2,
+    maxLength: 20,
+  }
 };
 
 const IOSSwitch = withStyles((theme) => ({
@@ -110,110 +117,95 @@ const UserDeliveryInfo = (props) => {
 
   const [formValues, setFormValues] = useState({});
   const [formErrors, setFormErrors] = useState({});
+  const [isChecked, setIsChecked] = useState(false);
 
   const [photographer] = usePhotographer();
-  const [order, orderDispatch] = useOrder();
+  const { authUser } = useContext(AuthContext);
+  const orderService = OrderService();
 
-  const handleFormChange = (e) => {
-    let { name, value } = e.target;
-
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
     const error = formValidationHelper(name, value, fieldValidation);
 
     setFormErrors((prev) => ({
       ...prev,
       [name]: error,
     }));
+
+    const newFormData = { ...formValues, shippingSelected: true, [name]: value };
+
+    setFormValues(newFormData);
+  
+    orderService.setCurrentOrderToStorage(
+      newFormData, 
+      authUser.id
+    )
   };
 
   const setShippingSelection = (e) => {
     const { checked } = e.target;
 
-    orderDispatch({
-      type: 'ORDER_SET_SHIPPING',
-      payload: {
-        shipping: checked,
-      },
-    });
-  };
-
-  const setShippingName = (e) => {
-    const { value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      shippingName: value,
-    }));
-    orderDispatch({
-      type: 'ORDER_SET_SHIPPING_NAME',
-      payload: { shippingName: value },
-    });
-    handleFormChange(e);
-  };
-
-  const setShippingAddress = (e) => {
-    const { value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      shippingAddress: value,
-    }));
-    orderDispatch({
-      type: 'ORDER_SET_SHIPPING_ADDRESS',
-      payload: { shippingAddress: value },
-    });
-    handleFormChange(e);
-  };
-
-  const setShippingEmail = (e) => {
-    const { value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      shippingEmail: value,
-    }));
-    orderDispatch({
-      type: 'ORDER_SET_SHIPPING_EMAIL',
-      payload: { shippingEmail: value },
-    });
-    handleFormChange(e);
+    if (checked) {
+      orderService.setCurrentOrderToStorage(({ ...formValues, shippingSelected: true }), authUser.id)
+    } else {
+      orderService.setCurrentOrderToStorage({ shippingSelected: false }, authUser.id)
+    }
+    setIsChecked(!isChecked)
   };
 
   const renderDeliveryForm = () => {
-    if (order.shippingSelected) {
+    if (isChecked) {
       return (
         <Paper square className={classes.paper}>
           <TextField
             required
-            name='shippingName'
-            id='shipping-name'
-            label={t('Name')}
+            name='shippingStreet'
+            id='shipping-street'
+            label={t('Street Address')}
             variant='outlined'
             className={classes.textfield}
-            value={formValues.shippingName || ''}
-            onChange={setShippingName}
-            error={!!formErrors.shippingName}
-            helperText={formErrors.shippingName}
+            value={formValues.shippingStreet || ''}
+            onChange={handleInputChange}
+            error={!!formErrors.shippingStreet}
+            helperText={formErrors.shippingStreet}
           />
           <TextField
             required
-            name='shippingAddress'
-            id='shipping-address'
-            label={t('Address')}
+            type="number"
+            name='shippingZip'
+            id='shipping-zip'
+            label={t('Zip code')}
             variant='outlined'
             className={classes.textfield}
-            value={formValues.shippingAddress || ''}
-            onChange={setShippingAddress}
-            error={!!formErrors.shippingAddress}
-            helperText={formErrors.shippingAddress}
+            value={formValues.shippingZip || ''}
+            onChange={handleInputChange}
+            error={!!formErrors.shippingZip}
+            helperText={formErrors.shippingZip}
           />
           <TextField
             required
-            name='shippingEmail'
-            id='shipping-email'
-            label={t('Email')}
+            name='shippingCity'
+            id='shipping-city'
+            label={t('City')}
             variant='outlined'
             className={classes.textfield}
-            value={formValues.shippingEmail || ''}
-            onChange={setShippingEmail}
-            error={!!formErrors.shippingEmail}
-            helperText={formErrors.shippingEmail}
+            value={formValues.shippingCity || ''}
+            onChange={handleInputChange}
+            error={!!formErrors.shippingCity}
+            helperText={formErrors.shippingCity}
+          />
+          <TextField
+            required
+            name='shippingCountry'
+            id='shipping-country'
+            label={t('Country')}
+            variant='outlined'
+            className={classes.textfield}
+            value={formValues.shippingCountry || ''}
+            onChange={handleInputChange}
+            error={!!formErrors.shippingCountry}
+            helperText={formErrors.shippingCountry}
           />
         </Paper>
       );
@@ -223,12 +215,27 @@ const UserDeliveryInfo = (props) => {
   };
 
   useLayoutEffect(() => {
-    setFormValues({
-      shippingName: order.shippingName,
-      shippingAddress: order.shippingAddress,
-      shippingEmail: order.shippingEmail,
-    });
-  }, [order.shippingAddress, order.shippingEmail, order.shippingName]);
+    const unsavedOrder = JSON.parse(orderService.getCurrentOrderFromStorage(authUser.id));
+
+    setIsChecked(unsavedOrder?.shippingSelected);
+
+    const initialData = {
+      shippingSelected: unsavedOrder?.shippingSelected || false,
+      shippingStreet: unsavedOrder?.shippingStreet || authUser.street,
+      shippingZip: unsavedOrder?.shippingZip || authUser.zipCode,
+      shippingCity: unsavedOrder?.shippingCity || authUser.city,
+      shippingCountry: unsavedOrder?.shippingCountry || authUser.country
+    };
+
+    setFormValues(initialData);
+    
+    if (!unsavedOrder) {
+      orderService.setCurrentOrderToStorage(
+        { shippingSelected: false }, 
+        authUser.id
+      )
+    }
+  }, []);
 
   return (
     <Container maxWidth='md'>
@@ -237,7 +244,7 @@ const UserDeliveryInfo = (props) => {
       </p>
       <IOSSwitch
         name='shipping'
-        checked={order.shippingSelected}
+        checked={isChecked}
         onChange={setShippingSelection}
       />
       {renderDeliveryForm()}

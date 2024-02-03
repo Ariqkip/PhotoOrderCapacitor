@@ -23,6 +23,8 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     paddingLeft: '60px',
     paddingRight: '60px',
+    paddingTop: '8px',
+    paddingBottom: '8px'
   },
   grid: {
     flexGrow: 1,

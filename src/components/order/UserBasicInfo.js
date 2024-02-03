@@ -1,11 +1,12 @@
 //Core
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useContext } from 'react';
 
 //Components
 
 //Hooks
 import { useTranslation } from 'react-i18next';
-import { useOrder } from '../../contexts/OrderContext';
+import { AuthContext } from '../../contexts/AuthContext';
+import OrderService from '../../services/OrderService';
 
 //Utils
 import { formValidationHelper } from '../../core/helpers/formValidationHelper';
@@ -57,79 +58,46 @@ const UserBasicInfo = (props) => {
   const [formValues, setFormValues] = useState({});
   const [formErrors, setFormErrors] = useState({});
 
-  const [order, orderDispatch] = useOrder();
+  const { authUser } = useContext(AuthContext);
+  const orderService = OrderService();
 
-  const handleFormChange = (e) => {
-    let { name, value } = e.target;
-
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
     const error = formValidationHelper(name, value, fieldValidation);
 
     setFormErrors((prev) => ({
       ...prev,
       [name]: error,
     }));
-  };
 
-  const setFirstName = (e) => {
-    const { value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      firstName: value,
-    }));
-    orderDispatch({
-      type: 'ORDER_SET_FIRST_NAME',
-      payload: { firstName: value },
-    });
-    handleFormChange(e);
-  };
+    const newFormData = { ...formValues, [name]: value };
 
-  const setLastName = (e) => {
-    const { value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      lastName: value,
-    }));
-    orderDispatch({
-      type: 'ORDER_SET_LAST_NAME',
-      payload: { lastName: value },
-    });
-    handleFormChange(e);
-  };
-
-  const setEmail = (e) => {
-    const { value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      email: value,
-    }));
-    orderDispatch({
-      type: 'ORDER_SET_EMAIL',
-      payload: { email: value },
-    });
-    handleFormChange(e);
-  };
-
-  const setPhone = (e) => {
-    const { value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      phone: value,
-    }));
-    orderDispatch({
-      type: 'ORDER_SET_PHONE',
-      payload: { phone: value },
-    });
-    handleFormChange(e);
+    setFormValues(newFormData);
+  
+    orderService.setCurrentOrderToStorage(
+      newFormData, 
+      authUser.id
+    )
   };
 
   useLayoutEffect(() => {
-    setFormValues({
-      firstName: order.firstName === 'missing' ? '' : order.firstName,
-      lastName: order.lastName === 'missing' ? '' : order.lastName,
-      email: order.email === 'missing' ? '' : order.email,
-      phone: order.phone === 'missing' ? '' : order.phone,
-    });
-  }, [order.email, order.firstName, order.lastName, order.phone]);
+    const unsavedOrder = JSON.parse(orderService.getCurrentOrderFromStorage(authUser.id));
+
+    const initialData = {
+      firstName: unsavedOrder?.firstName || authUser.firstName,
+      lastName: unsavedOrder?.lastName || authUser.lastName,
+      email: unsavedOrder?.email || authUser.email,
+      phone: unsavedOrder?.phone || authUser.phone
+    };
+
+    setFormValues(initialData);
+
+    orderService.setCurrentOrderToStorage(
+      initialData, 
+      authUser.id
+    )
+  }, []);
 
   return (
     <Container maxWidth='md'>
@@ -143,7 +111,7 @@ const UserBasicInfo = (props) => {
           variant='outlined'
           className={classes.textfield}
           value={formValues.firstName || ''}
-          onChange={setFirstName}
+          onChange={handleInputChange}
           error={!!formErrors.firstName}
           helperText={formErrors.firstName}
         />
@@ -155,7 +123,7 @@ const UserBasicInfo = (props) => {
           variant='outlined'
           className={classes.textfield}
           value={formValues.lastName || ''}
-          onChange={setLastName}
+          onChange={handleInputChange}
           error={!!formErrors.lastName}
           helperText={formErrors.lastName}
         />
@@ -167,7 +135,7 @@ const UserBasicInfo = (props) => {
           variant='outlined'
           className={classes.textfield}
           value={formValues.email || ''}
-          onChange={setEmail}
+          onChange={handleInputChange}
           error={!!formErrors.email}
           helperText={formErrors.email}
         />
@@ -179,7 +147,7 @@ const UserBasicInfo = (props) => {
           variant='outlined'
           className={classes.textfield}
           value={formValues.phone || ''}
-          onChange={setPhone}
+          onChange={handleInputChange}
           error={!!formErrors.phone}
           helperText={formErrors.phone}
         />

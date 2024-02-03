@@ -1,28 +1,17 @@
-//Core
-import React, { useState } from 'react';
-
-//Components
-
-//Hooks
+import React, { useState, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOrder } from '../../contexts/OrderContext';
-
-//Utils
 import { valueValidationHelper } from '../../core/helpers/formValidationHelper';
-
-//UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import { AuthContext } from '../../contexts/AuthContext';
+import OrderService from '../../services/OrderService';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import LinearProgress from '@material-ui/core/LinearProgress';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-  },
   error: {
     color: '#dc3545',
   },
@@ -70,136 +59,122 @@ const HtmlTooltip = withStyles((theme) => ({
   },
 }))(Tooltip);
 
-const SendOrderButton = (props) => {
+const SendOrderButton = () => {
   const classes = useStyles();
   const { t } = useTranslation();
+  
+  const orderService = OrderService();
+  const { authUser } = useContext(AuthContext); 
+  
+  const getOrderFromStorage = () => {
+    return JSON.parse(orderService.getCurrentOrderFromStorage(authUser.id));
+  };
 
   const [tooltipOpen, setTooltipOpen] = useState(false);
-
   const [order, orderDispatch] = useOrder();
+  const [errors, setErrors] = useState([]);
+  const [orderData, setOrderData] = useState();
 
-  const clearMissingValue = (value) => {
-    if (value === undefined) return '';
-    if (value === 'missing') return '';
+  const clearMissingValue = (value) => (value === undefined || value === 'missing' ? '' : value);
 
-    return value;
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setOrderData(getOrderFromStorage());
+    }, 1500);
+    return () => clearInterval(interval);
+  });
 
-  const validateSendOrder = () => {
-    let errors = [];
+  useEffect(() => {
+    const validateSendOrder = () => {
+      const orderData = getOrderFromStorage();
+      const newErrors = [];
 
-    const validateFirstName = valueValidationHelper(
-      t('First name'),
-      clearMissingValue(order.firstName),
-      {
-        minLength: 2,
-        maxLength: 50,
+      const validateField = (fieldName, value, options) => {
+        const error = valueValidationHelper(t(fieldName), clearMissingValue(value), options);
+        if (error) newErrors.push(error);
+      };
+
+      validateField('First name', orderData?.firstName || "", { minLength: 2, maxLength: 50 });
+      validateField('Last name', orderData?.lastName || "", { minLength: 2, maxLength: 50 });
+      validateField('Email', orderData?.email || "", { validate: 'email' });
+      validateField('Phone', orderData?.phone || "", { validate: 'phone' });
+
+      if (orderData.orderItems.reduce((sum, item) => sum + item.qty, 0) === 0) {
+        newErrors.push(t('No products in the cart'));
       }
-    );
-    if (validateFirstName) {
-      errors.push(validateFirstName);
-    }
 
-    const validateLastName = valueValidationHelper(
-      t('Last name'),
-      clearMissingValue(order.lastName),
-      {
-        minLength: 2,
-        maxLength: 50,
-      }
-    );
-    if (validateLastName) {
-      errors.push(validateLastName);
-    }
-
-    const validateEmail = valueValidationHelper(
-      t('Email'),
-      clearMissingValue(order.email),
-      {
-        validate: 'email',
-      }
-    );
-    if (validateEmail) {
-      errors.push(validateEmail);
-    }
-
-    const validatePhone = valueValidationHelper(
-      t('Phone'),
-      clearMissingValue(order.phone),
-      {
-        validate: 'phone',
-      }
-    );
-    if (validatePhone) {
-      errors.push(validatePhone);
-    }
-
-    const orderedItems =
-      order.orderItems.reduce((sum, item) => sum + item.qty, 0) > 0;
-    if (!orderedItems) {
-      errors.push(t('No products in the cart'));
-    }
-
-    return errors;
-  };
-
-  function RenderButton({ children }) {
-    const errors = validateSendOrder();
-
-    const renderChildren = () => {
-      if (order.status === 'FINALIZING')
-        return (
-          <>
-            {t('Sending')}{' '}
-            <CircularProgress size={22} className={classes.progress} />
-          </>
-        );
-
-      if (order.status === 'SUCCESS') return <>{t('SUCCESS')}</>;
-
-      return children;
+      return newErrors;
     };
 
-    if (errors.length === 0)
+    setErrors(validateSendOrder());
+  }, [
+    order.orderItems, 
+    orderData?.firstName, 
+    orderData?.lastName, 
+    orderData?.email, 
+    orderData?.phone
+  ]);
+
+  const handleSendOrder = () => {
+    const orderData = getOrderFromStorage();
+    orderDispatch({ type: 'FINALIZE' });
+    orderService.setCurrentOrderToStorage({ ...orderData, status: 'FINALIZE' }, authUser.id)
+  };
+
+  const renderChildren = () => {
+    if (order.status === 'FINALIZING') {
       return (
-        <ActiveButton
+        <>
+          {t('Sending')} <CircularProgress size={22} className={classes.progress} />
+        </>
+      );
+    }
+
+    if (order.status === 'SUCCESS') {
+      return t('SUCCESS');
+    }
+
+    return t('Send order');
+  };
+
+  if (errors.length === 0) {
+    return (
+      <ActiveButton
+        size='large'
+        onClick={() => handleSendOrder()}
+        disabled={errors.length !== 0}
+      >
+        {renderChildren()}
+      </ActiveButton>
+    );
+  };
+
+  return (
+    <ClickAwayListener onClickAway={() => setTooltipOpen(false)}>
+      <HtmlTooltip
+        open={tooltipOpen}
+        arrow
+        enterDelay={500}
+        leaveDelay={500}
+        title={
+          <React.Fragment>
+            <Typography className={classes.error}>Can't continue</Typography>
+            {errors.map((error, index) => (
+              <li key={`validation_error_${index}`}>{error}</li>
+            ))}
+          </React.Fragment>
+        }
+      >
+        <DisabledButton
           size='large'
-          onClick={() => orderDispatch({ type: 'FINALIZE' })}
-          disabled={order.status !== 'INITIALIZED'}
+          onClick={() => setTooltipOpen(true)}
+          onMouseEnter={() => setTooltipOpen(true)}
         >
           {renderChildren()}
-        </ActiveButton>
-      );
-
-    return (
-      <ClickAwayListener onClickAway={() => setTooltipOpen(false)}>
-        <HtmlTooltip
-          open={tooltipOpen}
-          arrow
-          enterDelay={500}
-          leaveDelay={500}
-          title={
-            <React.Fragment>
-              <Typography className={classes.error}>Cant continue</Typography>
-              {errors.map((e, i) => (
-                <li key={`validation_error_${i}`}>{e}</li>
-              ))}
-            </React.Fragment>
-          }
-        >
-          <DisabledButton
-            size='large'
-            onClick={() => setTooltipOpen(true)}
-            onMouseEnter={() => setTooltipOpen(true)}
-          >
-            {children}
-          </DisabledButton>
-        </HtmlTooltip>
-      </ClickAwayListener>
-    );
-  }
-
-  return <RenderButton>{t('Send order')}</RenderButton>;
+        </DisabledButton>
+      </HtmlTooltip>
+    </ClickAwayListener>
+  );
 };
 
 export default SendOrderButton;

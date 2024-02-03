@@ -118,11 +118,29 @@ const OrderIndex = ({ match }) => {
   //create new order in shop, need that for file upload
   useEffect(() => {
     function initOrder(photographerId) {
+      const orderService = OrderService();
+
+      const orderData = JSON.parse(orderService.getCurrentOrderFromStorage(photographerId));
+      if (orderData) return;
+
       if (order.status !== 'NEW') return;
 
       OrderService()
         .CreateOrder(photographerId)
         .then((resp) => {
+          orderService.setCurrentOrderToStorage({
+            photographerId,
+            orderId: resp.data.Id,
+            orderGuid: resp.data.OrderGuid,
+            phone: "",
+            email: "",
+            firstName: "",
+            lastName: "",
+            shippingSelected: resp.data.IsShippingChoosen,
+            status: 'INITIALIZED',
+            orderItems: [],
+            orderItemsConfig: []
+          }, photographerId)
           orderDispatch({
             type: 'CREATE',
             payload: {

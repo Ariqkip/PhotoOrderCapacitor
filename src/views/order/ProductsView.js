@@ -22,8 +22,7 @@ import Grid from '@material-ui/core/Grid';
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
-    paddingLeft: '60px',
-    paddingRight: '60px',
+    padding: '16px 60px',
   },
   grid: {
     flexGrow: 1,
