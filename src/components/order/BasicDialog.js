@@ -188,7 +188,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
         const trackingGuid = createGuid();
         const reader = new FileReader();
         const { width, height, convertedFile } = await getFileDimensions(file);
-  
+        
         const compressedFile = !isHeic && await getCompressedImage({
           width,
           height,
@@ -219,8 +219,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
 
           orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
           setOrderData(updatedOrderData);
-
-          orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
+          orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: reader.result} });
           handleCloseModal();
           executeScroll();
         };

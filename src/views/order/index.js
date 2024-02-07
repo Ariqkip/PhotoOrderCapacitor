@@ -24,6 +24,7 @@ import { useAlerts } from '../../contexts/AlertContext';
 //Utils
 import OrderService from '../../services/OrderService';
 import { ADD } from '../../reducers/alert/reducer';
+import { getUnsavedImages } from '../../services/TokenService';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -117,7 +118,7 @@ const OrderIndex = ({ match }) => {
 
   //create new order in shop, need that for file upload
   useEffect(() => {
-    function initOrder(photographerId) {
+    async function initOrder(photographerId) {
       const orderService = OrderService();
 
       const orderData = JSON.parse(orderService.getCurrentOrderFromStorage(photographerId));
@@ -125,6 +126,10 @@ const OrderIndex = ({ match }) => {
 
       if (order.status !== 'NEW') return;
 
+      const unsavedImage = await getUnsavedImages();
+
+      const isHaveUnsavedImages = unsavedImage && unsavedImage?.length > 0;
+      
       OrderService()
         .CreateOrder(photographerId)
         .then((resp) => {
@@ -138,7 +143,21 @@ const OrderIndex = ({ match }) => {
             lastName: "",
             shippingSelected: resp.data.IsShippingChoosen,
             status: 'INITIALIZED',
-            orderItems: [],
+            orderItems: isHaveUnsavedImages
+              ? unsavedImage.map((imgObj) => {
+                return {
+                  maxSize: 1920,
+                  guid: "",
+                  fileAsBase64: imgObj.imageData,
+                  fileUrl: null,
+                  fileName: imgObj?.FileName,
+                  productId: imgObj?.ProductId,
+                  set: 1,
+                  qty: imgObj.Count,
+                  status: 'success',
+                }
+              })
+              : [],
             orderItemsConfig: []
           }, photographerId)
           orderDispatch({

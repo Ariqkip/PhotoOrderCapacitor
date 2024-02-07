@@ -1,5 +1,21 @@
-import { CapacitorSQLite, SQLiteConnection } from '@capacitor-community/sqlite';
-import { Filesystem } from '@capacitor/filesystem';
+import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+
+let dbConnection: SQLiteDBConnection;
+
+const createDbConnection = async () => {
+    if (!dbConnection) {
+        const sqlite = new SQLiteConnection(CapacitorSQLite);
+        dbConnection = await sqlite.createConnection(
+            '/data/user/0/photoorder.droid/files/junki', 
+            false, 
+            'no-encryption', 
+            1, 
+            false
+        );
+    }
+    return dbConnection;
+}
 
 export const getOldToken = async () => {
     try {
@@ -8,14 +24,7 @@ export const getOldToken = async () => {
             to: '/data/user/0/photoorder.droid/files/junkiSQLite.db',
         });
 
-        const sqlite = new SQLiteConnection(CapacitorSQLite);
-        const db = await sqlite.createConnection(
-            '/data/user/0/photoorder.droid/files/junki', 
-            false, 
-            'no-encryption', 
-            1, 
-            true
-        );
+        const db = await createDbConnection();
 
         await db.open();
 
@@ -35,14 +44,7 @@ export const getOldToken = async () => {
 
 export const getSettingsInfo = async () => {
     try {
-        const sqlite = new SQLiteConnection(CapacitorSQLite);
-        const db = await sqlite.createConnection(
-            '/data/user/0/photoorder.droid/files/junki', 
-            false, 
-            'no-encryption', 
-            1, 
-            true
-        );
+        const db = await createDbConnection();
 
         await db.open();
 
@@ -58,4 +60,81 @@ export const getSettingsInfo = async () => {
         console.error('Error getting old token:', error);
         return null;
     }
+};
+
+export const getUnsavedImages = async () => {
+    try {
+        const db = await createDbConnection();
+
+        await db.open();
+
+        const query = "SELECT ProductId, Count, ImagePath, FileName FROM OrderItem;";
+        const result = await db.query(query);
+
+        if (!result) return;
+        
+        const formattedImages = result?.values?.map(image => ({
+            ProductId: image.ProductId,
+            Count: image.Count,
+            ImagePath: image.ImagePath,
+            FileName: image.FileName
+        }));
+
+        await addImageDataToFormattedImages(formattedImages);
+        
+        return formattedImages;
+    } catch (error) {
+        console.error('Error getting unsaved images:', error);
+        throw error;
+    }
+};
+
+const getImageData = async (imagePath: string) => {
+    try {
+        const imageData = await getImageFromDevice(imagePath);
+        
+        return imageData;
+    } catch (error) {
+        console.error('Error fetching image data:', error);
+        throw error;
+    }
+};
+
+const addImageDataToFormattedImages = async (formattedImages: any) => {
+    for (let i = 0; i < formattedImages.length; i++) {
+        const imgObj = formattedImages[i];
+        const imageData = await getImageData(imgObj.ImagePath);
+        imgObj.imageData = `data:image/png;base64,${imageData.data}`
+    }
+};
+
+const getImageFromDevice = async (initPath: string) => {
+    try {
+        const path = getShortImagePath(initPath);
+        const file = await Filesystem.readFile({
+            path: path,
+            directory: Directory.ExternalStorage
+        });
+        
+        return file;
+    } catch (error) {
+        console.error('Error getting image from device:', error);
+        throw error;
+    }
+};
+
+const getShortImagePath = (path: string) => {
+    const slashIndices = [];
+  
+    for (let i = 0; i < path?.length; i++) {
+        if (path[i] === '/') {
+            slashIndices.push(i);
+        }
+    }
+
+    if (slashIndices.length < 4) {
+        return path;
+    }
+    
+    return path.substring(slashIndices[3]);
 };

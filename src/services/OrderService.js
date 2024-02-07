@@ -104,7 +104,7 @@ const OrderService = () => {
     });
 
     const orderData = JSON.parse(getCurrentOrderFromStorage(order.photographerId));
-    console.log(orderData, 1)
+
     const body = {
       FirstName: orderData?.firstName,
       LastName: orderData?.lastName,
@@ -158,7 +158,6 @@ const OrderService = () => {
     try {
       const currentTime = new Date().getTime().toString();
       const serializedValue = JSON.stringify({ ...orderData, currentTime });
-      console.log(serializedValue, 2)
       
       localStorage.setItem(`${userId}_${currentTime}`, serializedValue);
     } catch (error) {
@@ -183,12 +182,18 @@ const OrderService = () => {
     try {
       const currentData = localStorage.getItem(userId);
       let mergedData = {};
-  
+      
       if (currentData) {
         mergedData = JSON.parse(currentData);
       }
   
       mergedData = { ...mergedData, ...orderData };
+      
+      if (mergedData.orderItems && mergedData.orderItems.length > 0) {
+        mergedData.orderItems.forEach(orderItem => {
+            orderItem.fileAsBase64 = "";
+        });
+      }
   
       if (mergedData.shippingSelected === false) {
         const { shippingCountry, shippingStreet, shippingZip, shippingCity, ...rest } = mergedData;
@@ -196,6 +201,7 @@ const OrderService = () => {
       }
   
       const serializedValue = JSON.stringify(mergedData);
+      
       localStorage.setItem(userId, serializedValue);
     } catch (err) {
       console.error('Error setting localStorage item:', err);

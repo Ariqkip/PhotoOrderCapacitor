@@ -37,8 +37,6 @@ const UploadManager = (props) => {
   };
 
   const uploadFiles = async () => {
-    // console.log(order, 243324)
-
     if (!order.status) return;
     if (order.status === '') return;
     if (order.status === 'SUCCESS') return;

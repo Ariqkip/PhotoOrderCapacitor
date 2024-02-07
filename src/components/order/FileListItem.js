@@ -112,7 +112,7 @@ const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
   return (
     <Paper square key={key} className={classes.root}>
       <img
-        src={file.fileUrl}
+        src={file.fileUrl || file.fileAsBase64}
         className={classes.thumbnail}
         alt={file.fileName}
       />
