@@ -236,10 +236,10 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
 
   useEffect(() => {
-    if (orderDataFromStorage?.orderItems.length > 0 && orderDataFromStorage?.orderItems.length !== order?.orderItems.length) {
+    if (orderDataFromStorage?.orderItems?.length > 0 && orderDataFromStorage?.orderItems?.length !== order?.orderItems?.length) {
       orderDispatch({ type: 'ADD_ORDER_ITEMS_AT_END', payload: orderDataFromStorage.orderItems });
     }
-  }, [orderDataFromStorage?.orderItems.length]);
+  }, [orderDataFromStorage?.orderItems?.length]);
 
   const renderFiles = () => {
     return order?.orderItems

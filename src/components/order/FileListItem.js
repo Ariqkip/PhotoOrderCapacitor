@@ -1,5 +1,5 @@
 //Core
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 //Components
 
@@ -10,6 +10,7 @@ import { usePhotographer } from '../../contexts/PhotographerContext';
 import OrderService from '../../services/OrderService';
 
 //Utils
+import { getUnsavedImages } from '../../services/TokenService';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -70,6 +71,19 @@ const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
 
   const [photographer] = usePhotographer();
   const orderService = OrderService();
+  const [unsavedImgData, setUnsavedImgData] = useState();
+
+  useEffect(() => {
+    async function initOrder() {
+      const unsavedImage = await getUnsavedImages();
+      const unsavedFileData = unsavedImage.find(imgObj => imgObj.FileName === file.fileName);
+
+      if (unsavedFileData) {
+        setUnsavedImgData(unsavedFileData.imageData)
+      }
+    }
+    initOrder();
+  }, []);
 
   const handleAddQuantity = () => {
     const orderData = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
@@ -112,7 +126,7 @@ const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
   return (
     <Paper square key={key} className={classes.root}>
       <img
-        src={file.fileUrl || file.fileAsBase64}
+        src={file.fileUrl || unsavedImgData}
         className={classes.thumbnail}
         alt={file.fileName}
       />

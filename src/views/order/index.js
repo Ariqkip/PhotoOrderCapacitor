@@ -128,7 +128,7 @@ const OrderIndex = ({ match }) => {
 
       const unsavedImage = await getUnsavedImages();
 
-      const isHaveUnsavedImages = unsavedImage && unsavedImage?.length > 0;
+      const isHaveUnsavedImages = unsavedImage && unsavedImage?.length > 0 && !orderData?.orderItems?.length;
       
       OrderService()
         .CreateOrder(photographerId)
@@ -143,11 +143,12 @@ const OrderIndex = ({ match }) => {
             lastName: "",
             shippingSelected: resp.data.IsShippingChoosen,
             status: 'INITIALIZED',
+            unsavedFiles: [],
             orderItems: isHaveUnsavedImages
               ? unsavedImage.map((imgObj) => {
                 return {
                   maxSize: 1920,
-                  guid: "",
+                  guid: Math.floor(Math.random() * 100000),
                   fileAsBase64: imgObj.imageData,
                   fileUrl: null,
                   fileName: imgObj?.FileName,
