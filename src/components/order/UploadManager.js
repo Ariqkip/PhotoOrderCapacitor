@@ -95,7 +95,7 @@ const UploadManager = (props) => {
             },
           });
           setCurrentOrderToStorage({
-            guid: itemToUpload.guid,
+            guid: res.data.TrackingGuid,
             orderGuid: order.orderGuid,
             status: 'success',
             url: res.data.ImageUri,

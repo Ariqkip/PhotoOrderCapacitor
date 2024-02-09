@@ -24,7 +24,6 @@ import { useAlerts } from '../../contexts/AlertContext';
 //Utils
 import OrderService from '../../services/OrderService';
 import { ADD } from '../../reducers/alert/reducer';
-import { getUnsavedImages } from '../../services/TokenService';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
@@ -126,10 +125,6 @@ const OrderIndex = ({ match }) => {
 
       if (order.status !== 'NEW') return;
 
-      const unsavedImage = await getUnsavedImages();
-
-      const isHaveUnsavedImages = unsavedImage && unsavedImage?.length > 0 && !orderData?.orderItems?.length;
-      
       OrderService()
         .CreateOrder(photographerId)
         .then((resp) => {
@@ -144,21 +139,7 @@ const OrderIndex = ({ match }) => {
             shippingSelected: resp.data.IsShippingChoosen,
             status: 'INITIALIZED',
             unsavedFiles: [],
-            orderItems: isHaveUnsavedImages
-              ? unsavedImage.map((imgObj) => {
-                return {
-                  maxSize: 1920,
-                  guid: Math.floor(Math.random() * 100000),
-                  fileAsBase64: imgObj.imageData,
-                  fileUrl: null,
-                  fileName: imgObj?.FileName,
-                  productId: imgObj?.ProductId,
-                  set: 1,
-                  qty: imgObj.Count,
-                  status: 'success',
-                }
-              })
-              : [],
+            orderItems: [],
             orderItemsConfig: []
           }, photographerId)
           orderDispatch({

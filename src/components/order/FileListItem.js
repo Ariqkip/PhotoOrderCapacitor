@@ -73,17 +73,17 @@ const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
   const orderService = OrderService();
   const [unsavedImgData, setUnsavedImgData] = useState();
 
-  useEffect(() => {
-    async function initOrder() {
-      const unsavedImage = await getUnsavedImages();
-      const unsavedFileData = unsavedImage.find(imgObj => imgObj.FileName === file.fileName);
+  // useEffect(() => {
+  //   async function initOrder() {
+  //     const unsavedImage = await getUnsavedImages();
+  //     const unsavedFileData = unsavedImage.find(imgObj => imgObj.FileName === file.fileName);
 
-      if (unsavedFileData) {
-        setUnsavedImgData(unsavedFileData.imageData)
-      }
-    }
-    initOrder();
-  }, []);
+  //     if (unsavedFileData) {
+  //       setUnsavedImgData(unsavedFileData.imageData)
+  //     }
+  //   }
+  //   initOrder();
+  // }, []);
 
   const handleAddQuantity = () => {
     const orderData = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));

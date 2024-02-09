@@ -1,5 +1,6 @@
 //Core
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 //Components
 import RoundButton from './../core/RoundButton';
@@ -18,6 +19,7 @@ import { createGuid } from '../../core/helpers/guidHelper';
 import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 import { getFileDimensions, getCompressedImage, isHeicFile } from '../../core/helpers/uploadImageHelper';
 import OrderService from '../../services/OrderService';
+import { getUnsavedImages } from '../../services/TokenService';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -153,12 +155,54 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+  const [test, setTest] = useState();
 
   useEffect(() => {
     const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
     
     setOrderData(orderDataFromStorage);
-  }, [photographer.photographId]);  
+
+    async function initOldImages() {
+      const unsavedImage = await getUnsavedImages();
+      const isUnsavedImagesUploaded = localStorage.getItem("isUnsavedImagesUploaded");
+      const isHaveUnsavedImages = 
+        unsavedImage && 
+        unsavedImage?.length > 0 && 
+        !orderDataFromStorage?.orderItems?.length &&
+        !isUnsavedImagesUploaded &&
+        unsavedImage?.[0].ProductId === product.id;
+        
+      const updatedOrderData = { ...orderData };
+      
+      if (isHaveUnsavedImages) {
+        unsavedImage.map((imgObj) => {
+          const orderItem = {
+            maxSize: product.size,
+            guid: createGuid(),
+            fileAsBase64: imgObj.imageData,
+            fileUrl: null,
+            fileName: imgObj?.FileName,
+            productId: imgObj?.ProductId,
+            set: pack,
+            qty: 1,
+            status: 'idle',
+          };
+  
+          if (!updatedOrderData?.orderItems) {
+            updatedOrderData.orderItems = [];
+          }
+  
+          updatedOrderData?.orderItems.push(orderItem);
+          orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
+          
+          setOrderData(updatedOrderData);
+          orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: imgObj.imageData} });
+        })
+      }
+    }
+
+    !orderDataFromStorage?.orderItems?.length && initOldImages()
+  }, []);  
 
   const executeScroll = () =>
     scrollToRef.current.scrollIntoView({
@@ -173,6 +217,21 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       block: 'start',
       inline: 'nearest',
     });
+
+  // const [test, setTest] = useState();
+
+  // const selectFile = async () => {
+  //   try {
+  //     const fileUri = await Filesystem.getUri({ 
+  //       path: '1661526806164_scooter.jpg',
+  //       directory: Directory.Pictures,
+  //     });
+  
+  //     setTest(fileUri);
+  //   } catch (error) {
+  //     console.error('Error selecting file:', error);
+  //   }
+  // };
     
   const fileInputHandler = useCallback(async (event) => {
     const { files } = event.target;
@@ -201,7 +260,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           const orderItem = {
             maxSize: product.size,
             guid: trackingGuid,
-            fileAsBase64: reader.result,
+            fileAsBase64: null,
             fileUrl: URL.createObjectURL(isHeic ? convertedFile : compressedFile),
             fileName: isHeic ? convertedFile.name : compressedFile.name,
             productId: product.id,
@@ -216,8 +275,17 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             updatedOrderData.orderItems = [];
           }
           updatedOrderData?.orderItems.push(orderItem);
+          const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+          const orderDataList = orderDataFromStorage?.orderItems;
 
-          orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
+          orderService.setCurrentOrderToStorage(
+            { 
+              ...updatedOrderData, 
+              orderItems: [...orderDataList, orderItem],  
+            },
+            photographer.photographId
+          );
+
           setOrderData(updatedOrderData);
           orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: reader.result} });
           handleCloseModal();

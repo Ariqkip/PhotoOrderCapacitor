@@ -93,7 +93,6 @@ export function OrderReducer(state = INIT_STATE, action) {
 
     case 'ADD_ORDER_ITEMS_AT_END':
       const newItems = action.payload.filter((newItem) => !state.orderItems.some((existingItem) => existingItem.guid === newItem.guid));
-      console.log(newItems, 'newItems')
       return { ...state, orderItems: [...state.orderItems, ...newItems] };
       
     case 'REPLACE_ORDER_ITEM':
