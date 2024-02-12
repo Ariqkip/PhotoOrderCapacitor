@@ -82,6 +82,7 @@ const OrderService = () => {
         ProductId: item.productId,
         Quantity: item.qty,
         Attributes: itemAttributes,
+        FilePath: item.filePath,
         // SavedFiles: item.savedFiles
       };
       let layerIndex = -1;

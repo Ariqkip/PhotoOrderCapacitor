@@ -205,15 +205,18 @@ const LastOrdersView = () => {
                 >
                   {order.OrderItems.map((item, index) => {
                     return (
-                      <div key={index} className={classes.imgWrap}>
-                        {item ? (<img
-                          src={item.FileUrl}
-                          alt={item.FileName}
-                          className={classes.orderImg}
-                        />) : (
-                          <div className={classes.notFound}>Image not found</div>
-                        )}
-                      </div>
+                      <>
+                        <pre>{JSON.stringify(order.OrderItems, null, 3)}</pre>
+                        <div key={index} className={classes.imgWrap}>
+                          {item ? (<img
+                            src={item.FileUrl}
+                            alt={item.FileName}
+                            className={classes.orderImg}
+                            />) : (
+                              <div className={classes.notFound}>Image not found</div>
+                              )}
+                        </div>
+                      </>
                     );
                   })}
                 </div>

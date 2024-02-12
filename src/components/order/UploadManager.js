@@ -100,6 +100,7 @@ const UploadManager = (props) => {
             status: 'success',
             url: res.data.ImageUri,
             fileGuid: res.data.ImageGuid,
+            filePath: orderDataFromStorage2?.filePath,
           });
         },
         (err) => {

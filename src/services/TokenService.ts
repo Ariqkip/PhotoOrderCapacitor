@@ -138,3 +138,10 @@ const getShortImagePath = (path: string) => {
     
     return path.substring(slashIndices[3]);
 };
+
+const extractFilePath = (inputString: string) => {
+    const parts = inputString.split('%2F');
+    const encodedPath = parts.slice(5).join('/');
+    const decodedPath = decodeURIComponent(encodedPath);
+    return '/' + decodedPath;
+}

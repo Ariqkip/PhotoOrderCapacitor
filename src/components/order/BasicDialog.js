@@ -232,6 +232,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           fileUrl: URL.createObjectURL(compressedFile.file),
           fileName: compressedFile.file.name,
           productId: product.id,
+          filePath: file.path,
           set: pack,
           qty: 1,
           status: 'idle',
