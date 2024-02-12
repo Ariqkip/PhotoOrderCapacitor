@@ -1,6 +1,6 @@
 //Core
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Filesystem, Directory } from '@capacitor/filesystem';
+import { FilePicker } from '@capawesome/capacitor-file-picker';
 
 //Components
 import RoundButton from './../core/RoundButton';
@@ -17,7 +17,7 @@ import { usePhotographer } from '../../contexts/PhotographerContext';
 //Utils
 import { createGuid } from '../../core/helpers/guidHelper';
 import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
-import { getFileDimensions, getCompressedImage, isHeicFile } from '../../core/helpers/uploadImageHelper';
+import { getCompressedImage } from '../../core/helpers/uploadImageHelper';
 import OrderService from '../../services/OrderService';
 import { getUnsavedImages } from '../../services/TokenService';
 
@@ -134,7 +134,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const { t } = useTranslation();
   const history = useHistory();
 
-  const fileInput = useRef(null);
   const scrollToRef = useRef(null);
   const scrollOptionsRef = useRef(null);
 
@@ -143,19 +142,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const [photographer] = usePhotographer();
   const orderService = OrderService();
   const [orderData, setOrderData] = useState();
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const fileInputGallery = useRef(null);
-  const fileInputDrive = useRef(null);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-  const [test, setTest] = useState();
 
   useEffect(() => {
     const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
@@ -218,79 +204,59 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       inline: 'nearest',
     });
 
-  // const [test, setTest] = useState();
+  const fileInputHandler = useCallback(async () => {
+    const result = await FilePicker.pickImages({
+      multiple: true,
+      readData: true
+    });
 
-  // const selectFile = async () => {
-  //   try {
-  //     const fileUri = await Filesystem.getUri({ 
-  //       path: '1661526806164_scooter.jpg',
-  //       directory: Directory.Pictures,
-  //     });
-  
-  //     setTest(fileUri);
-  //   } catch (error) {
-  //     console.error('Error selecting file:', error);
-  //   }
-  // };
+    const filesArray = Array.from(result.files);
     
-  const fileInputHandler = useCallback(async (event) => {
-    const { files } = event.target;
-    const filesArray = Array.from(files);
-  
     for (const file of filesArray) {
       try {
-        const isHeic = isHeicFile(file.name);
-        if (!file.type.startsWith('image') && !isHeic) {
-          continue;
-        }
-  
         const trackingGuid = createGuid();
-        const reader = new FileReader();
-        const { width, height, convertedFile } = await getFileDimensions(file);
         
-        const compressedFile = !isHeic && await getCompressedImage({
-          width,
-          height,
+        const base64Data = file.data;
+        
+        const compressedFile = await getCompressedImage({
+          width: file.width,
+          height: file.height,
           maxSize: product.size,
-          file
+          file: { data: base64Data, name: file.name }
         });
-  
-        reader.readAsDataURL(isHeic ? convertedFile : compressedFile);
-        reader.onloadend = async () => {
-          const orderItem = {
-            maxSize: product.size,
-            guid: trackingGuid,
-            fileAsBase64: null,
-            fileUrl: URL.createObjectURL(isHeic ? convertedFile : compressedFile),
-            fileName: isHeic ? convertedFile.name : compressedFile.name,
-            productId: product.id,
-            set: pack,
-            qty: 1,
-            status: 'idle',
-          };
 
-          const updatedOrderData = { ...orderData };
-
-          if (!updatedOrderData?.orderItems) {
-            updatedOrderData.orderItems = [];
-          }
-          updatedOrderData?.orderItems.push(orderItem);
-          const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
-          const orderDataList = orderDataFromStorage?.orderItems;
-
-          orderService.setCurrentOrderToStorage(
-            { 
-              ...updatedOrderData, 
-              orderItems: [...orderDataList, orderItem],  
-            },
-            photographer.photographId
-          );
-
-          setOrderData(updatedOrderData);
-          orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: reader.result} });
-          handleCloseModal();
-          executeScroll();
+        const orderItem = {
+          maxSize: product.size,
+          guid: trackingGuid,
+          fileAsBase64: null,
+          fileUrl: URL.createObjectURL(compressedFile.file),
+          fileName: compressedFile.file.name,
+          productId: product.id,
+          set: pack,
+          qty: 1,
+          status: 'idle',
         };
+
+        const updatedOrderData = { ...orderData };
+
+        if (!updatedOrderData?.orderItems) {
+          updatedOrderData.orderItems = [];
+        }
+        updatedOrderData?.orderItems.push(orderItem);
+        const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+        const orderDataList = orderDataFromStorage?.orderItems;
+
+        orderService.setCurrentOrderToStorage(
+          { 
+            ...updatedOrderData, 
+            orderItems: [...orderDataList, orderItem],  
+          },
+          photographer.photographId
+        );
+
+        setOrderData(updatedOrderData);
+        orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: compressedFile.fileAsBase64 } });
+        executeScroll();
       } catch (error) {
         console.error(`Error processing file ${file.name}:`, error);
       }
@@ -370,46 +336,13 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                 />
               </Container>
               <Box className={classes.centerContent}>
-                <RoundButton onClick={handleOpenModal}>
+                <RoundButton onClick={fileInputHandler}>
                   <Box className={classes.centerContent}>
                     <AddPhotoAlternateIcon />
                     <span>{t('Pick files')}</span>
                   </Box>
                 </RoundButton>
               </Box>
-              <Dialog open={isModalOpen} onClose={handleCloseModal}>
-                <DialogContent style={{ display: 'flex', flexDirection: 'column'}}>
-                  <RoundButton 
-                    onClick={() => fileInputGallery.current.click()}
-                    style={{ width: '100%', marginBottom: '1rem' }}  
-                  >
-                    Gallery
-                  </RoundButton>
-                  <input
-                    type='file'
-                    style={{ display: 'none' }}
-                    inputprops={{ accept: 'image/*, .heic' }}
-                    multiple
-                    onChange={fileInputHandler}
-                    ref={fileInputGallery}
-                    accept="image/*, .heic"
-                  />
-                  <RoundButton 
-                    onClick={() => fileInputDrive.current.click()}
-                    style={{ width: '100%' }}  
-                  >
-                    Google Drive
-                  </RoundButton>
-                  <input
-                    type='file'
-                    style={{ display: 'none' }}
-                    accept='image/*,.heic,application/vnd.google-apps.drive-sdk'
-                    multiple
-                    onChange={fileInputHandler}
-                    ref={fileInputDrive}
-                  />
-                </DialogContent>
-              </Dialog>
             </Grid>
             <Grid item xs={12} md={6}>
               <Box className={classes.spaceBetweenContent}>
