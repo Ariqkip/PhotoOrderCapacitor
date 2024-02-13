@@ -139,9 +139,23 @@ const getShortImagePath = (path: string) => {
     return path.substring(slashIndices[3]);
 };
 
+export const getLastOrderImageFromDevice = async (initPath: string) => {
+    try {
+        const path = extractFilePath(initPath);
+        const file = await Filesystem.readFile({
+            path: path,
+            directory: Directory.ExternalStorage
+        });
+        return file.data;
+    } catch (error) {
+        console.error('Error getting image from device:', error);
+        throw error;
+    }
+};
+
 const extractFilePath = (inputString: string) => {
     const parts = inputString.split('%2F');
-    const encodedPath = parts.slice(5).join('/');
+    const encodedPath = parts.slice(4).join('/');
     const decodedPath = decodeURIComponent(encodedPath);
     return '/' + decodedPath;
 }

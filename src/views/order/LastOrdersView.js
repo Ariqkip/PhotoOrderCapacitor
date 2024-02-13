@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useMemo  } from 'react';
 import { Button, Card, Container, Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -6,6 +6,7 @@ import OrderService from '../../services/OrderService';
 import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
+import { getLastOrderImageFromDevice } from '../../services/TokenService';
 import styled from 'styled-components';
 
 const useStyles = makeStyles((theme) => ({
@@ -98,11 +99,35 @@ const LastOrdersView = () => {
         setOrders(transformedData);
       } catch (error) {
         console.error('Error fetching data:', error);
+        throw error;
       }
     };
     
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (orders.length) {
+        try {
+          const updatedOrders = await Promise.all(
+            orders.map(async (order) => {
+              const imageUrls = await Promise.all(
+                order.OrderItems.map(async (item) => await getLastOrderImageFromDevice(item.FilePath))
+              );
+              return { ...order, imageUrls };
+            })
+          );
+          setOrders(updatedOrders);
+        } catch (err) {
+          console.error('Error fetching images:', err);
+          throw err;
+        }
+      }
+    };
+
+    fetchData();
+  }, [orders.length])
 
   const toggleImages = (index) => {
     setOrders((prevOrders) => {
@@ -203,22 +228,11 @@ const LastOrdersView = () => {
                     order.expanded ? classes.orderImagesVisible : ''
                   }`}
                 >
-                  {order.OrderItems.map((item, index) => {
-                    return (
-                      <>
-                        <pre>{JSON.stringify(order.OrderItems, null, 3)}</pre>
-                        <div key={index} className={classes.imgWrap}>
-                          {item ? (<img
-                            src={item.FileUrl}
-                            alt={item.FileName}
-                            className={classes.orderImg}
-                            />) : (
-                              <div className={classes.notFound}>Image not found</div>
-                              )}
-                        </div>
-                      </>
-                    );
-                  })}
+                  {order.imageUrls && order.imageUrls.length > 0 ? (
+                    order.imageUrls.map((url, index) => <div key={index} className={classes.imgWrap}><img className={classes.orderImg} src={`data:image/jpg;base64,${url}`}/></div>)
+                  ) : (
+                    <div className={classes.notFound}>No images found</div>
+                  )}
                 </div>
               </Card>
             </Grid>
