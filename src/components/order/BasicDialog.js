@@ -19,7 +19,7 @@ import { createGuid } from '../../core/helpers/guidHelper';
 import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 import { getCompressedImage } from '../../core/helpers/uploadImageHelper';
 import OrderService from '../../services/OrderService';
-import { getUnsavedImages } from '../../services/TokenService';
+import { getUnsavedImages, getReuploadedFiles } from '../../services/TokenService';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -34,6 +34,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Grid from '@material-ui/core/Grid';
 import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
 import Typography from '@material-ui/core/Typography';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Divider from '@material-ui/core/Divider';
@@ -142,11 +143,16 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const [photographer] = usePhotographer();
   const orderService = OrderService();
   const [orderData, setOrderData] = useState();
+  const [isReadyReupload, setIsReadyReupload] = useState(false);
+  const [itemsToReupload, setItemsToReupload] = useState([]);
 
   useEffect(() => {
     const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
-    
-    setOrderData(orderDataFromStorage);
+    const successsOrderData = orderDataFromStorage?.orderItems 
+      ? orderDataFromStorage?.orderItems?.filter(item => item.status === 'success')
+      : orderDataFromStorage;
+
+    setOrderData({...orderDataFromStorage, orderItems: successsOrderData});
 
     async function initOldImages() {
       const unsavedImage = await getUnsavedImages();
@@ -154,7 +160,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       const isHaveUnsavedImages = 
         unsavedImage && 
         unsavedImage?.length > 0 && 
-        !orderDataFromStorage?.orderItems?.length &&
+        (!orderDataFromStorage?.orderItems?.length || (orderDataFromStorage?.orderItems?.length && orderDataFromStorage?.unsavedFiles?.length)) &&
         !isUnsavedImagesUploaded &&
         unsavedImage?.[0].ProductId === product.id;
         
@@ -168,6 +174,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             fileAsBase64: imgObj.imageData,
             fileUrl: null,
             fileName: imgObj?.FileName,
+            filePath: imgObj.ImagePath,
             productId: imgObj?.ProductId,
             set: pack,
             qty: 1,
@@ -187,7 +194,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       }
     }
 
-    !orderDataFromStorage?.orderItems?.length && initOldImages()
+    !successsOrderData?.length && initOldImages()
   }, []);  
 
   const executeScroll = () =>
@@ -211,6 +218,8 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     });
 
     const filesArray = Array.from(result.files);
+    const updatedOrderData = { ...orderData };
+    const updatedUnsavedFiles = [];
     
     for (const file of filesArray) {
       try {
@@ -238,22 +247,11 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           status: 'idle',
         };
 
-        const updatedOrderData = { ...orderData };
-
         if (!updatedOrderData?.orderItems) {
           updatedOrderData.orderItems = [];
         }
         updatedOrderData?.orderItems.push(orderItem);
-        const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
-        const orderDataList = orderDataFromStorage?.orderItems;
-
-        orderService.setCurrentOrderToStorage(
-          { 
-            ...updatedOrderData, 
-            orderItems: [...orderDataList, orderItem],  
-          },
-          photographer.photographId
-        );
+        updatedUnsavedFiles.push({ filePath: file.path, guid: trackingGuid });
 
         setOrderData(updatedOrderData);
         orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: compressedFile.fileAsBase64 } });
@@ -262,6 +260,14 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
         console.error(`Error processing file ${file.name}:`, error);
       }
     }
+
+    orderService.setCurrentOrderToStorage(
+      { 
+        ...updatedOrderData, 
+        unsavedFiles: updatedUnsavedFiles
+      },
+      photographer.photographId
+    );
   }, [product, pack, orderDispatch, executeScroll]);
 
   const isAllImagesDone = () => {
@@ -271,8 +277,22 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
 
   useEffect(() => {
+    const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+    const isThereAnyUnsavedFiles = orderDataFromStorage?.unsavedFiles?.length;
+
+    if (isThereAnyUnsavedFiles) {
+      setIsReadyReupload(true);
+      setItemsToReupload(orderDataFromStorage?.unsavedFiles);
+    }
+  }, [])
+
+  useEffect(() => {
     if (orderDataFromStorage?.orderItems?.length > 0 && orderDataFromStorage?.orderItems?.length !== order?.orderItems?.length) {
-      orderDispatch({ type: 'ADD_ORDER_ITEMS_AT_END', payload: orderDataFromStorage.orderItems });
+      const successsOrderData = orderDataFromStorage?.orderItems 
+        ? orderDataFromStorage?.orderItems?.filter(item => item.status === 'success')
+        : orderDataFromStorage
+
+      orderDispatch({ type: 'ADD_ORDER_ITEMS_AT_END', payload: successsOrderData });
     }
   }, [orderDataFromStorage?.orderItems?.length]);
 
@@ -283,7 +303,9 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   };
 
   const handleRemoveAll = () => {
-    const updatedOrderData = { ...orderData, orderItems: [] };
+    const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+    const updatedOrderData = { ...orderDataFromStorage, orderItems: [], unsavedFiles: [] };
+    
     orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
     setOrderData(updatedOrderData);
 
@@ -317,6 +339,40 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     return product.attributes.length > 0;
   };
 
+  const handleReupload = async () => {
+    const reuploadFIlesAsBase64 = await Promise.all(
+      itemsToReupload.map(async (itemObj) => {
+        const imageObj = await getReuploadedFiles(itemObj.filePath)
+        return { ...imageObj, filePath: itemObj.filePath }
+      })
+    )
+
+    reuploadFIlesAsBase64.map((imgObj) => {
+      const orderItem = {
+        maxSize: product.size,
+        guid: createGuid(),
+        fileAsBase64: imgObj.data,
+        fileUrl: null,
+        filePath: imgObj.filePath,
+        fileName: createGuid(),
+        productId: product.id,
+        set: pack,
+        qty: 1,
+        status: 'idle',
+      };
+
+      const updatedOrderData = { ...orderData, unsavedFiles: [] };
+
+      updatedOrderData?.orderItems.push(orderItem);
+      orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
+      
+      setOrderData(updatedOrderData);
+      orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: imgObj.data} });
+    })
+
+    setIsReadyReupload(false);
+  };
+
   return (
     <Dialog
       key={product.id}
@@ -343,6 +399,17 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                     <span>{t('Pick files')}</span>
                   </Box>
                 </RoundButton>
+                {isReadyReupload && (
+                  <RoundButton 
+                    onClick={handleReupload}
+                    style={{ marginTop: '1rem' }}
+                  >
+                    <Box className={classes.centerContent}>
+                      <AutorenewIcon />
+                      <span>{t('Continue uploading')}</span>
+                    </Box>
+                  </RoundButton>
+                )}
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>

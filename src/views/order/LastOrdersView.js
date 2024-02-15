@@ -6,7 +6,7 @@ import OrderService from '../../services/OrderService';
 import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
-import { getLastOrderImageFromDevice } from '../../services/TokenService';
+import { getLastOrderImageFromDevice, getImageFromDevice } from '../../services/TokenService';
 import styled from 'styled-components';
 
 const useStyles = makeStyles((theme) => ({
@@ -112,9 +112,19 @@ const LastOrdersView = () => {
         try {
           const updatedOrders = await Promise.all(
             orders.map(async (order) => {
-              const imageUrls = await Promise.all(
-                order.OrderItems.map(async (item) => await getLastOrderImageFromDevice(item.FilePath))
-              );
+              const imageUrlsPromises = order.OrderItems.map(async (item) => {
+                try {
+                  const imageUrl = await getLastOrderImageFromDevice(item.FilePath);
+                  
+                  return imageUrl;
+                } catch (error) {
+                  console.error(`Error fetching image for item ${item.FilePath}:`, error);
+                  return null;
+                }
+              });
+      
+              const imageUrls = (await Promise.all(imageUrlsPromises)).filter(url => url !== null);
+                
               return { ...order, imageUrls };
             })
           );
@@ -124,10 +134,10 @@ const LastOrdersView = () => {
           throw err;
         }
       }
-    };
-
+    };    
+  
     fetchData();
-  }, [orders.length])
+  }, [orders.length]);  
 
   const toggleImages = (index) => {
     setOrders((prevOrders) => {

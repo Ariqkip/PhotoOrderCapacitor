@@ -52,27 +52,13 @@ const UploadManager = (props) => {
     );
     if (!itemToUpload) return;
 
-    const orderDataFromStorage = getOrderFromStorage();
-    
-    const updatedOrderItems = orderDataFromStorage?.orderItems.map(item => {
-      if (item.guid === itemToUpload.guid) {
-        item.status = 'processing';
-      }
-      return item;
-    });
-  
-    const updatedOrderData = { ...orderDataFromStorage, orderItems: updatedOrderItems };
-    setOrderData(updatedOrderData);
-  
-    orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);  
-    
     const orderDataFromStorage2 = getOrderFromStorage();
+    const unsavedFiles = orderDataFromStorage2?.unsavedFiles;
 
     orderDispatch({
       type: 'ORDER_ITEM_SET_STATE_PROCESSING',
       payload: { guid: itemToUpload.guid },
     });
-    
     const service = OrderService();
     await service
       .UploadImage({
@@ -101,29 +87,29 @@ const UploadManager = (props) => {
             url: res.data.ImageUri,
             fileGuid: res.data.ImageGuid,
             filePath: orderDataFromStorage2?.filePath,
+            unsavedFiles: getNewUnsavedList(res.data.TrackingGuid, unsavedFiles)
           });
         },
         (err) => {
-          orderDispatch({
-            type: 'ORDER_ITEM_SET_STATE_FAILED',
-            payload: { guid: itemToUpload.fileGuid },
-          });
           setCurrentOrderToStorage({
             guid: itemToUpload.guid,
             status: 'failed',
+            unsavedFiles
           });
         }
       )
       .catch((err) => {
-        orderDispatch({
-          type: 'ORDER_ITEM_SET_STATE_FAILED',
-          payload: { guid: itemToUpload.fileGuid },
-        });
         setCurrentOrderToStorage({
           guid: itemToUpload.guid,
           status: 'failed',
+          unsavedFiles
         });
       });
+  };
+
+  const getNewUnsavedList = (guidToRemove, fileList) => {
+    const updatedFileList = fileList.filter(item => item.guid !== guidToRemove);
+    return updatedFileList;
   };
 
   const setCurrentOrderToStorage = async (updatedOrderData) => {
@@ -144,9 +130,14 @@ const UploadManager = (props) => {
           }
         }
         return item;
-      });
-  
-      const updatedOrder = { ...orderDataFromStorage, status: 'INITIALIZED', orderItems: updatedOrderItems };
+      }).filter(item => item.status !== 'failed');
+      
+      const updatedOrder = { 
+        ...orderDataFromStorage, 
+        status: 'INITIALIZED', 
+        orderItems: updatedOrderItems,
+        unsavedFiles: updatedOrderData?.unsavedFiles
+      };
       
       orderService.setCurrentOrderToStorage(updatedOrder, photographer.photographId)
       setOrderData(updatedOrder);
@@ -192,6 +183,10 @@ const UploadManager = (props) => {
               }, photographer.photographId);
             })
           orderDispatch({ type: 'SUCCESS' });
+          orderDispatch({
+            type: 'REMOVE_ORDER_ITEMS_FOR_PRODUCT',
+            payload: { productId: orderDataFromStorage.orderItems[0].productId },
+          });
           await orderService
             .MarkOrderAsDone(orderDataFromStorage)
         },

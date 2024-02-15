@@ -135,18 +135,45 @@ const getShortImagePath = (path: string) => {
     if (slashIndices.length < 4) {
         return path;
     }
-    
+
     return path.substring(slashIndices[3]);
 };
 
 export const getLastOrderImageFromDevice = async (initPath: string) => {
+    try {
+        const path1 = extractFilePath(initPath);
+        const path2 = getShortImagePath(initPath);
+
+        let file;
+        try {
+            file = await Filesystem.readFile({
+                path: path1,
+                directory: Directory.ExternalStorage
+            });
+        } catch (error) {
+            console.error(`Error reading file from path1: ${path1}`, error);
+            // Try reading from path2 if an error occurred with path1
+            file = await Filesystem.readFile({
+                path: path2,
+                directory: Directory.ExternalStorage
+            });
+        }
+
+        return file.data;
+    } catch (error) {
+        console.error('Error getting image from device:', error);
+        throw error;
+    }
+};
+
+export const getReuploadedFiles = async (initPath: string) => {
     try {
         const path = extractFilePath(initPath);
         const file = await Filesystem.readFile({
             path: path,
             directory: Directory.ExternalStorage
         });
-        return file.data;
+        return file;
     } catch (error) {
         console.error('Error getting image from device:', error);
         throw error;
