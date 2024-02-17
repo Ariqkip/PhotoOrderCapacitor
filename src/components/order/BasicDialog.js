@@ -19,7 +19,7 @@ import { createGuid } from '../../core/helpers/guidHelper';
 import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 import { getCompressedImage } from '../../core/helpers/uploadImageHelper';
 import OrderService from '../../services/OrderService';
-import { getUnsavedImages, getReuploadedFiles } from '../../services/TokenService';
+import DatabaseService from '../../services/TokenService';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -155,12 +155,12 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     setOrderData({...orderDataFromStorage, orderItems: successsOrderData});
 
     async function initOldImages() {
-      const unsavedImage = await getUnsavedImages();
+      const unsavedImage = await DatabaseService.getUnsavedImages();
       const isUnsavedImagesUploaded = localStorage.getItem("isUnsavedImagesUploaded");
       const isHaveUnsavedImages = 
         unsavedImage && 
         unsavedImage?.length > 0 && 
-        (!orderDataFromStorage?.orderItems?.length || (orderDataFromStorage?.orderItems?.length && orderDataFromStorage?.unsavedFiles?.length)) &&
+        // (!orderDataFromStorage?.orderItems?.length || (orderDataFromStorage?.orderItems?.length && orderDataFromStorage?.unsavedFiles?.length)) &&
         !isUnsavedImagesUploaded &&
         unsavedImage?.[0].ProductId === product.id;
         
@@ -191,6 +191,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           setOrderData(updatedOrderData);
           orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: imgObj.imageData} });
         })
+        localStorage.setItem("isUnsavedImagesUploaded", "true");
       }
     }
 
@@ -309,6 +310,8 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
     setOrderData(updatedOrderData);
 
+    localStorage.setItem("isUnsavedImagesUploaded", "true");
+
     orderDispatch({
       type: 'REMOVE_ORDER_ITEMS_FOR_PRODUCT',
       payload: { productId: product.id },
@@ -342,7 +345,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const handleReupload = async () => {
     const reuploadFIlesAsBase64 = await Promise.all(
       itemsToReupload.map(async (itemObj) => {
-        const imageObj = await getReuploadedFiles(itemObj.filePath)
+        const imageObj = await DatabaseService.getReuploadedFiles(itemObj.filePath)
         return { ...imageObj, filePath: itemObj.filePath }
       })
     )

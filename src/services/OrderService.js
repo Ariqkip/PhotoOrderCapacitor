@@ -127,7 +127,6 @@ const OrderService = () => {
     )
 
     removeOrderFromLocalStorage(order.photographerId);
-    localStorage.setItem("isUnsavedImagesUploaded", "true");
 
     if (order.paymentMethod == 2) {
       var vivawalletUrl = photographer.vivawallet;

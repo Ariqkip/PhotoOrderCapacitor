@@ -6,7 +6,7 @@ import OrderService from '../../services/OrderService';
 import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
-import { getLastOrderImageFromDevice, getImageFromDevice } from '../../services/TokenService';
+import DatabaseService from '../../services/TokenService';
 import styled from 'styled-components';
 
 const useStyles = makeStyles((theme) => ({
@@ -114,7 +114,7 @@ const LastOrdersView = () => {
             orders.map(async (order) => {
               const imageUrlsPromises = order.OrderItems.map(async (item) => {
                 try {
-                  const imageUrl = await getLastOrderImageFromDevice(item.FilePath);
+                  const imageUrl = await DatabaseService.getLastOrderImageFromDevice(item.FilePath);
                   
                   return imageUrl;
                 } catch (error) {

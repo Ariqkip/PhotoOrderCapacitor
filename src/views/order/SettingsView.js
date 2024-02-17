@@ -3,7 +3,7 @@ import { Button, Container, Typography, Snackbar, Collapse, Divider, Box } from 
 import { makeStyles } from '@material-ui/core/styles';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../../contexts/AuthContext';
-import { getSettingsInfo } from '../../services/TokenService';
+import DatabaseService from '../../services/TokenService';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import MuiAlert from '@material-ui/lab/Alert';
 import { setLocalStorageSettings } from '../../services/SettingsService';
@@ -135,7 +135,7 @@ const SettingsView = () => {
           !authUser?.city ||
           !authUser?.country
         ) {
-          const data = await getSettingsInfo();
+          const data = await DatabaseService.getSettingsInfo();
           setUserData({
             firstName: authUser?.firstName && data[2]?.Value,
             lastName: authUser?.lastName || "",

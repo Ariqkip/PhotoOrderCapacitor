@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Route } from 'react-router-dom';
-import { getOldToken } from '../../services/TokenService';
+import DatabaseService from "../../services/TokenService";
 import { AuthContext } from "../../contexts/AuthContext";
 import authService from '../../services/AuthService';
 import WelcomeView from "../../views/welcome/WelcomeView";
@@ -16,7 +16,7 @@ const LoginRoute: React.FC = (props) => {
         const checkTokenAndRedirect = async () => {
             try {
                 if (!authUser?.id) {
-                    const token = await getOldToken();
+                    const token = await DatabaseService.getOldToken();
                     if (token) {
                         await authService.getPhotographer(token).then((authUser: any) => {
                             setAuthUser(authUser)

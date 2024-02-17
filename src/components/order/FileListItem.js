@@ -9,9 +9,6 @@ import { useOrder } from '../../contexts/OrderContext';
 import { usePhotographer } from '../../contexts/PhotographerContext';
 import OrderService from '../../services/OrderService';
 
-//Utils
-import { getUnsavedImages } from '../../services/TokenService';
-
 //UI
 import { makeStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
