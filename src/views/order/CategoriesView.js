@@ -1,5 +1,6 @@
 //Core
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 
 //Components
 import CategoryCard from '../../components/order/CategoryCard';
@@ -11,12 +12,18 @@ import UncategorizedCard from '../../components/order/UncategorizedCard';
 import { useTranslation } from 'react-i18next';
 import { usePhotographer } from '../../contexts/PhotographerContext';
 import { useGetProducts } from '../../services/OrderUtils';
+import { useOrder } from '../../contexts/OrderContext';
 
 //Utils
+import OrderService from '../../services/OrderService';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogActions from '@material-ui/core/DialogActions';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -62,9 +69,98 @@ function RenderSkeletonList() {
 const CategoriesView = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
+  const history = useHistory(); 
 
   const [photographer, dispatch] = usePhotographer();
   const productsQuery = useGetProducts(photographer?.photographId ?? 0);
+  const orderService = OrderService();
+  const [order, orderDispatch] = useOrder();
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState({
+    modalTitle: "",
+    modalButtonText: "",
+    modalButtonPath: ""
+  });
+
+  useEffect(() => {
+    const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+    const isHasOrderItems = orderDataFromStorage?.orderItems?.length > 0;
+    const isUnsavedFilesExists = orderDataFromStorage?.unsavedFiles?.length > 0;
+    
+    if (isHasOrderItems) {
+      setShowModal(true);
+      if (isUnsavedFilesExists) {
+        setModalContent({
+          modalTitle: 'Your last order was not finish, please open "Last Orders" tab and reload orders',
+          modalButtonText: "Go to the order details",
+          modalButtonPath: "last-orders"
+        })
+
+        OrderService()
+          .setLocalStorageOrder(
+            photographer.photographId, 
+            {
+              FirstName: orderDataFromStorage?.firstName || "",
+              LastName: orderDataFromStorage?.lastName || "",
+              Phone: orderDataFromStorage?.phone || "",
+              Email: orderDataFromStorage?.email || "",
+              StreetAddress: orderDataFromStorage?.shippingStreet || "",
+              City: orderDataFromStorage?.shippingCity || "",
+              Country: orderDataFromStorage?.shippingCountry || "",
+              ZipCode: orderDataFromStorage?.shippingZip || "",
+              IsShippingChoosen: orderDataFromStorage.shippingSelected || false,
+              OrderGuid: orderDataFromStorage.orderGuid,
+              OrderItems: orderDataFromStorage.orderItems,
+              PaymentMethod: orderDataFromStorage.paymentMethod,
+              Status: 'Unsent',
+              UnsavedFiles: orderDataFromStorage?.unsavedFiles
+            }
+          )
+        
+        OrderService().removeOrderFromLocalStorage(photographer.photographId)
+        
+        OrderService()
+          .CreateOrder(photographer.photographId)
+          .then((resp) => {
+            orderService.setCurrentOrderToStorage({
+              photographerId: photographer.photographId,
+              orderId: resp.data.Id,
+              orderGuid: resp.data.OrderGuid,
+              phone: "",
+              email: "",
+              firstName: "",
+              lastName: "",
+              shippingSelected: resp.data.IsShippingChoosen,
+              status: 'INITIALIZED',
+              unsavedFiles: [],
+              orderItems: [],
+              orderItemsConfig: []
+            }, photographer.photographId)
+            orderDispatch({
+              type: 'CREATE',
+              payload: {
+                PhotographerId: photographer.photographId,
+                OrderId: resp.data.Id,
+                OrderGuid: resp.data.OrderGuid,
+                Phone: resp.data.Phone,
+                Email: resp.data.Email,
+                FirstName: resp.data.FirstName,
+                LastName: resp.data.LastName,
+                IsShippingChoosen: resp.data.IsShippingChoosen,
+              },
+            });
+          })
+      } else {
+        const { productId, categoryId } = orderDataFromStorage?.orderItems?.[0]
+        setModalContent({
+          modalTitle: 'You have photos ready to send',
+          modalButtonText: "Go to the order details",
+          modalButtonPath: `categories/${categoryId}/${productId}`
+        })
+      }
+    }
+  }, []);
 
   function showOtherCategory(photographer) {
     let productsList = photographer?.products ?? [];
@@ -112,6 +208,20 @@ const CategoriesView = (props) => {
   return (
     <div className={classes.root}>
       <BanerSlider photographerId={photographer.photographId} />
+      <Dialog open={showModal} onClose={() => setShowModal(false)}>
+        <DialogTitle>{modalContent.modalTitle}</DialogTitle>
+        <DialogActions style={{ justifyContent: "center"}}>
+          <Button onClick={() => {
+            setShowModal(false)
+            if (modalContent.modalButtonPath) {
+              console.log(7, `/photographer/${photographer.photographId}/${modalContent.modalButtonPath}`)
+              history.push(`/photographer/${photographer.photographId}/${modalContent.modalButtonPath}`);
+            }
+          }}>
+            {modalContent.modalButtonText}
+          </Button>
+        </DialogActions>
+      </Dialog>
       {isLoading() && RenderSkeletonList()}
       {!isLoading() && renderCategories()}
     </div>

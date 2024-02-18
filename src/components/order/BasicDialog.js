@@ -10,7 +10,7 @@ import AttributesList from './AttributesList';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useOrder } from '../../contexts/OrderContext';
 import { usePhotographer } from '../../contexts/PhotographerContext';
 
@@ -130,10 +130,16 @@ const RemoveButton = withStyles((theme) => ({
   },
 }))(Button);
 
+const getProductCategory = (url) => {
+  const urlPaths = url.split('/');
+  return urlPaths[urlPaths.length - 2]
+}
+
 const BasicDialog = ({ product, isOpen, closeFn }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const history = useHistory();
+  const location = useLocation();
 
   const scrollToRef = useRef(null);
   const scrollOptionsRef = useRef(null);
@@ -146,57 +152,59 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const [isReadyReupload, setIsReadyReupload] = useState(false);
   const [itemsToReupload, setItemsToReupload] = useState([]);
 
-  useEffect(() => {
-    const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
-    const successsOrderData = orderDataFromStorage?.orderItems 
-      ? orderDataFromStorage?.orderItems?.filter(item => item.status === 'success')
-      : orderDataFromStorage;
+  const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
 
-    setOrderData({...orderDataFromStorage, orderItems: successsOrderData});
+  // useEffect(() => {
+  //   const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+  //   const successsOrderData = orderDataFromStorage?.orderItems 
+  //     ? orderDataFromStorage?.orderItems?.filter(item => item.status === 'success')
+  //     : orderDataFromStorage;
 
-    async function initOldImages() {
-      const unsavedImage = await DatabaseService.getUnsavedImages();
-      const isUnsavedImagesUploaded = localStorage.getItem("isUnsavedImagesUploaded");
-      const isHaveUnsavedImages = 
-        unsavedImage && 
-        unsavedImage?.length > 0 && 
-        // (!orderDataFromStorage?.orderItems?.length || (orderDataFromStorage?.orderItems?.length && orderDataFromStorage?.unsavedFiles?.length)) &&
-        !isUnsavedImagesUploaded &&
-        unsavedImage?.[0].ProductId === product.id;
+  //   setOrderData({...orderDataFromStorage, orderItems: successsOrderData});
+
+  //   async function initOldImages() {
+  //     const unsavedImage = await DatabaseService.getUnsavedImages();
+  //     const isUnsavedImagesUploaded = localStorage.getItem("isUnsavedImagesUploaded");
+  //     const isHaveUnsavedImages = 
+  //       unsavedImage && 
+  //       unsavedImage?.length > 0 && 
+  //       // (!orderDataFromStorage?.orderItems?.length || (orderDataFromStorage?.orderItems?.length && orderDataFromStorage?.unsavedFiles?.length)) &&
+  //       !isUnsavedImagesUploaded &&
+  //       unsavedImage?.[0].ProductId === product.id;
         
-      const updatedOrderData = { ...orderData };
+  //     const updatedOrderData = { ...orderData };
       
-      if (isHaveUnsavedImages) {
-        unsavedImage.map((imgObj) => {
-          const orderItem = {
-            maxSize: product.size,
-            guid: createGuid(),
-            fileAsBase64: imgObj.imageData,
-            fileUrl: null,
-            fileName: imgObj?.FileName,
-            filePath: imgObj.ImagePath,
-            productId: imgObj?.ProductId,
-            set: pack,
-            qty: 1,
-            status: 'idle',
-          };
+  //     if (isHaveUnsavedImages) {
+  //       unsavedImage.map((imgObj) => {
+  //         const orderItem = {
+  //           maxSize: product.size,
+  //           guid: createGuid(),
+  //           fileAsBase64: imgObj.imageData,
+  //           fileUrl: null,
+  //           fileName: imgObj?.FileName,
+  //           filePath: imgObj.ImagePath,
+  //           productId: imgObj?.ProductId,
+  //           set: pack,
+  //           qty: 1,
+  //           status: 'idle',
+  //         };
   
-          if (!updatedOrderData?.orderItems) {
-            updatedOrderData.orderItems = [];
-          }
+  //         if (!updatedOrderData?.orderItems) {
+  //           updatedOrderData.orderItems = [];
+  //         }
   
-          updatedOrderData?.orderItems.push(orderItem);
-          orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
+  //         updatedOrderData?.orderItems.push(orderItem);
+  //         orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
           
-          setOrderData(updatedOrderData);
-          orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: imgObj.imageData} });
-        })
-        localStorage.setItem("isUnsavedImagesUploaded", "true");
-      }
-    }
+  //         setOrderData(updatedOrderData);
+  //         orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: imgObj.imageData} });
+  //       })
+  //       localStorage.setItem("isUnsavedImagesUploaded", "true");
+  //     }
+  //   }
 
-    !successsOrderData?.length && initOldImages()
-  }, []);  
+  //   !successsOrderData?.length && initOldImages()
+  // }, []);  
 
   const executeScroll = () =>
     scrollToRef.current.scrollIntoView({
@@ -219,7 +227,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     });
 
     const filesArray = Array.from(result.files);
-    const updatedOrderData = { ...orderData };
+    const updatedOrderData = { ...orderDataFromStorage };
     const updatedUnsavedFiles = [];
     
     for (const file of filesArray) {
@@ -243,6 +251,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           fileName: compressedFile.file.name,
           productId: product.id,
           filePath: file.path,
+          categoryId: getProductCategory(location.pathname),
           set: pack,
           qty: 1,
           status: 'idle',
@@ -254,7 +263,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
         updatedOrderData?.orderItems.push(orderItem);
         updatedUnsavedFiles.push({ filePath: file.path, guid: trackingGuid });
 
-        setOrderData(updatedOrderData);
         orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: compressedFile.fileAsBase64 } });
         executeScroll();
       } catch (error) {
@@ -275,17 +283,23 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     return order?.orderItems.every(item => item.status === "success");
   };
 
-  const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
-
   useEffect(() => {
-    const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
-    const isThereAnyUnsavedFiles = orderDataFromStorage?.unsavedFiles?.length;
-
-    if (isThereAnyUnsavedFiles) {
-      setIsReadyReupload(true);
-      setItemsToReupload(orderDataFromStorage?.unsavedFiles);
+    const reuploadData = async () => {
+      const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+      const isThereAnyUnsavedFiles = orderDataFromStorage?.unsavedFiles?.length;
+  
+      if (isThereAnyUnsavedFiles) {
+        setIsReadyReupload(true);
+        setItemsToReupload(orderDataFromStorage?.unsavedFiles);
+      }
+      
+      if (orderDataFromStorage?.readyToReupload) {
+        await handleReupload(orderDataFromStorage?.unsavedFiles);
+      }
     }
-  }, [])
+
+    reuploadData();
+  }, [orderDataFromStorage?.id])
 
   useEffect(() => {
     if (orderDataFromStorage?.orderItems?.length > 0 && orderDataFromStorage?.orderItems?.length !== order?.orderItems?.length) {
@@ -308,7 +322,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     const updatedOrderData = { ...orderDataFromStorage, orderItems: [], unsavedFiles: [] };
     
     orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
-    setOrderData(updatedOrderData);
 
     localStorage.setItem("isUnsavedImagesUploaded", "true");
 
@@ -342,9 +355,10 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     return product.attributes.length > 0;
   };
 
-  const handleReupload = async () => {
+  const handleReupload = async (reuploadItems) => {
+    const filesToReupload = reuploadItems.filter(item => item.productId === product.id)
     const reuploadFIlesAsBase64 = await Promise.all(
-      itemsToReupload.map(async (itemObj) => {
+      filesToReupload.map(async (itemObj) => {
         const imageObj = await DatabaseService.getReuploadedFiles(itemObj.filePath)
         return { ...imageObj, filePath: itemObj.filePath }
       })
@@ -358,18 +372,18 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
         fileUrl: null,
         filePath: imgObj.filePath,
         fileName: createGuid(),
+        categoryId: getProductCategory(location.pathname),
         productId: product.id,
         set: pack,
         qty: 1,
         status: 'idle',
       };
-
-      const updatedOrderData = { ...orderData, unsavedFiles: [] };
-
+      
+      const updatedOrderData = { ...orderDataFromStorage, unsavedFiles: [] };
+      
       updatedOrderData?.orderItems.push(orderItem);
       orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
       
-      setOrderData(updatedOrderData);
       orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: imgObj.data} });
     })
 
@@ -402,17 +416,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
                     <span>{t('Pick files')}</span>
                   </Box>
                 </RoundButton>
-                {isReadyReupload && (
-                  <RoundButton 
-                    onClick={handleReupload}
-                    style={{ marginTop: '1rem' }}
-                  >
-                    <Box className={classes.centerContent}>
-                      <AutorenewIcon />
-                      <span>{t('Continue uploading')}</span>
-                    </Box>
-                  </RoundButton>
-                )}
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>

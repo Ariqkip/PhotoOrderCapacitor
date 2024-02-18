@@ -104,7 +104,7 @@ const OrderService = () => {
       return result;
     });
 
-    const orderData = JSON.parse(getCurrentOrderFromStorage(order.photographerId));
+    const orderData = JSON.parse(getCurrentOrderFromStorage(order.id));
 
     const body = {
       FirstName: orderData?.firstName,
@@ -122,19 +122,19 @@ const OrderService = () => {
     };
 
     await setLocalStorageOrder(
-      order.photographerId, 
-      body
+      order.id, 
+      { ...body, Status: 'Sent'}
     )
 
-    removeOrderFromLocalStorage(order.photographerId);
+    removeOrderFromLocalStorage(order.id);
 
     if (order.paymentMethod == 2) {
       var vivawalletUrl = photographer.vivawallet;
 
       window.open(vivawalletUrl);
     }
-
-    return legacy.put(endpoint, body);
+    const response = legacy.put(endpoint, body);
+    return response
   }
 
   function MarkOrderAsDone(order) {
@@ -235,7 +235,9 @@ const OrderService = () => {
     UploadImage,
     getAllLocalStorageOrders,
     setCurrentOrderToStorage,
-    getCurrentOrderFromStorage
+    getCurrentOrderFromStorage,
+    setLocalStorageOrder,
+    removeOrderFromLocalStorage
   };
 };
 
