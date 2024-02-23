@@ -78,7 +78,7 @@ class DatabaseService {
 
             await db.open();
 
-            const query = "SELECT ProductId, Count, ImagePath, FileName FROM OrderItem;";
+            const query = "SELECT ProductId, Count, ImagePath, FileName, CategoryId FROM OrderItem;";
             const result = await db.query(query);
 
             if (!result) return;
@@ -87,7 +87,8 @@ class DatabaseService {
                 ProductId: image.ProductId,
                 Count: image.Count,
                 ImagePath: image.ImagePath,
-                FileName: image.FileName
+                FileName: image.FileName,
+                categoryId: image.CategoryId
             }));
 
             await this.addImageDataToFormattedImages(formattedImages);
@@ -162,14 +163,14 @@ class DatabaseService {
                 });
             } catch (error) {
                 console.error(`Error reading file from path1: ${path1}`, error);
-                // Try reading from path2 if an error occurred with path1
+                
                 file = await Filesystem.readFile({
                     path: path2,
                     directory: Directory.ExternalStorage
                 });
             }
 
-            return file.data;
+            return file;
         } catch (error) {
             console.error('Error getting image from device:', error);
             throw error;
@@ -196,6 +197,19 @@ class DatabaseService {
         const decodedPath = decodeURIComponent(encodedPath);
         return '/' + decodedPath;
     }
+
+    async readImageContent(initPath) {
+        try {
+            const file = await Filesystem.readFile({
+                path: initPath
+            });
+            
+            return file
+        } catch (error) {
+            console.error('Error getting image from device:', error);
+            throw error;
+        }
+    };
 }
 
 export default new DatabaseService();

@@ -154,58 +154,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
 
   const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
 
-  // useEffect(() => {
-  //   const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
-  //   const successsOrderData = orderDataFromStorage?.orderItems 
-  //     ? orderDataFromStorage?.orderItems?.filter(item => item.status === 'success')
-  //     : orderDataFromStorage;
-
-  //   setOrderData({...orderDataFromStorage, orderItems: successsOrderData});
-
-  //   async function initOldImages() {
-  //     const unsavedImage = await DatabaseService.getUnsavedImages();
-  //     const isUnsavedImagesUploaded = localStorage.getItem("isUnsavedImagesUploaded");
-  //     const isHaveUnsavedImages = 
-  //       unsavedImage && 
-  //       unsavedImage?.length > 0 && 
-  //       // (!orderDataFromStorage?.orderItems?.length || (orderDataFromStorage?.orderItems?.length && orderDataFromStorage?.unsavedFiles?.length)) &&
-  //       !isUnsavedImagesUploaded &&
-  //       unsavedImage?.[0].ProductId === product.id;
-        
-  //     const updatedOrderData = { ...orderData };
-      
-  //     if (isHaveUnsavedImages) {
-  //       unsavedImage.map((imgObj) => {
-  //         const orderItem = {
-  //           maxSize: product.size,
-  //           guid: createGuid(),
-  //           fileAsBase64: imgObj.imageData,
-  //           fileUrl: null,
-  //           fileName: imgObj?.FileName,
-  //           filePath: imgObj.ImagePath,
-  //           productId: imgObj?.ProductId,
-  //           set: pack,
-  //           qty: 1,
-  //           status: 'idle',
-  //         };
-  
-  //         if (!updatedOrderData?.orderItems) {
-  //           updatedOrderData.orderItems = [];
-  //         }
-  
-  //         updatedOrderData?.orderItems.push(orderItem);
-  //         orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
-          
-  //         setOrderData(updatedOrderData);
-  //         orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: imgObj.imageData} });
-  //       })
-  //       localStorage.setItem("isUnsavedImagesUploaded", "true");
-  //     }
-  //   }
-
-  //   !successsOrderData?.length && initOldImages()
-  // }, []);  
-
   const executeScroll = () =>
     scrollToRef.current.scrollIntoView({
       behavior: 'smooth',
@@ -357,35 +305,38 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
 
   const handleReupload = async (reuploadItems) => {
     const filesToReupload = reuploadItems.filter(item => item.productId === product.id)
-    const reuploadFIlesAsBase64 = await Promise.all(
-      filesToReupload.map(async (itemObj) => {
-        const imageObj = await DatabaseService.getReuploadedFiles(itemObj.filePath)
-        return { ...imageObj, filePath: itemObj.filePath }
-      })
-    )
 
-    reuploadFIlesAsBase64.map((imgObj) => {
-      const orderItem = {
-        maxSize: product.size,
-        guid: createGuid(),
-        fileAsBase64: imgObj.data,
-        fileUrl: null,
-        filePath: imgObj.filePath,
-        fileName: createGuid(),
-        categoryId: getProductCategory(location.pathname),
-        productId: product.id,
-        set: pack,
-        qty: 1,
-        status: 'idle',
-      };
-      
-      const updatedOrderData = { ...orderDataFromStorage, unsavedFiles: [] };
-      
-      updatedOrderData?.orderItems.push(orderItem);
-      orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
-      
-      orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: imgObj.data} });
-    })
+    for (const itemObj of filesToReupload) {
+      try {
+        let imgObj = {};
+
+        imgObj = itemObj.filePath.startsWith("content://media")
+          ? await DatabaseService.readImageContent(itemObj.filePath)
+          : await DatabaseService.getLastOrderImageFromDevice(itemObj.filePath)
+        
+        const orderItem = {
+          maxSize: product.size,
+          guid: createGuid(),
+          fileAsBase64: imgObj.data,
+          fileUrl: null,
+          filePath: itemObj.filePath,
+          fileName: createGuid(),
+          categoryId: getProductCategory(location.pathname),
+          productId: product.id,
+          set: pack,
+          qty: 1,
+          status: 'idle',
+        };
+        
+        const updatedOrderData = { ...orderDataFromStorage, unsavedFiles: [] };
+        updatedOrderData?.orderItems.push(orderItem);
+        orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
+        
+        orderDispatch({ type: 'ADD_ORDER_ITEM', payload: { ...orderItem, fileAsBase64: imgObj.data } });
+      } catch (error) {
+        console.error('Error fetching image:', error);
+      }
+    }
 
     setIsReadyReupload(false);
   };

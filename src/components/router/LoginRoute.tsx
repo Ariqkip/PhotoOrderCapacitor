@@ -6,11 +6,13 @@ import authService from '../../services/AuthService';
 import WelcomeView from "../../views/welcome/WelcomeView";
 import PhotographerWelcomeView from '../../views/photographerWelcome/PhotographerWelcomeView';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { Camera } from '@capacitor/camera';
 
 const LoginRoute: React.FC = (props) => {
     const { authUser, setAuthUser } = useContext(AuthContext);
     const [isOldTokenExist, setIsOldTokenExist] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [hasPermissions, setHasPermissions] = useState(false);
 
     useEffect(() => {
         const checkTokenAndRedirect = async () => {
@@ -31,6 +33,21 @@ const LoginRoute: React.FC = (props) => {
             }
         };
 
+        const checkPermisstions = async () => {
+            const requestPermissions = async () => {
+              const { camera, photos } = await Camera.requestPermissions();
+              setHasPermissions(camera === 'granted' && photos === 'granted');
+            };
+        
+            const status = await Camera.checkPermissions()
+            setHasPermissions(status.camera === 'granted' && status.photos === 'granted');
+        
+            if (!hasPermissions) {
+              requestPermissions();
+            }
+        }
+
+        checkPermisstions();
         checkTokenAndRedirect();
     }, []);
 

@@ -144,7 +144,7 @@ const LastOrdersView = () => {
                 try {
                   const imageUrl = await DatabaseService.getLastOrderImageFromDevice(item.FilePath);
                   
-                  return imageUrl;
+                  return imageUrl.data;
                 } catch (error) {
                   console.error(`Error fetching image for item ${item.FilePath}:`, error);
                   return null;
@@ -208,10 +208,7 @@ const LastOrdersView = () => {
   }
 
   const handleTransferDataToOrder = (order) => {
-    const { categoryId, productId } = order?.OrderItems?.[0];
-
-    const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(id));
-    const updatedOrderData = {...orderDataFromStorage};
+    const { categoryId } = order?.OrderItems?.[0];
 
     const preparedUnsavedFiles = order?.OrderItems.map(orderData => {
       return {
