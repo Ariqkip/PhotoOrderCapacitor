@@ -104,7 +104,7 @@ const OrderService = () => {
       return result;
     });
 
-    const orderData = JSON.parse(getCurrentOrderFromStorage(order.id));
+    const orderData = JSON.parse(getCurrentOrderFromStorage(photographer.photographerId));
 
     const body = {
       FirstName: orderData?.firstName,
