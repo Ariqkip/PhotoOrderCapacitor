@@ -267,6 +267,14 @@ const LastOrdersView = () => {
     history.push(`/photographer/${id}/categories/${categoryId}`)
   } 
   
+  const getTotalPrice = (order) => {
+    const totalPrice = order.OrderItems.reduce((accumulator, currentItem) => {
+      return accumulator + parseFloat(currentItem.price);
+    }, 0);
+
+    return totalPrice || "No Data";
+  };
+  
   return (
     <S.View>
       <div className={classes.welcomeBackground} />
@@ -310,8 +318,8 @@ const LastOrdersView = () => {
                   <span className={classes.orderValue}>
                     {
                       order.Price
-                        ? `${order.Price} €`
-                        : 'Not specified'
+                        ? `${getTotalPrice(order)} €`
+                        : `order.Price €`
                     }  
                   </span>
                 </Typography>

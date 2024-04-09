@@ -127,7 +127,7 @@ const OrderService = () => {
     
     await setLocalStorageOrder(
       photographer.photographId, 
-      { ...body, Price: totalCost, Status: 'Sent'}
+      { ...body, Price: totalCost || 0, Status: 'Sent'}
     )
 
     removeOrderFromLocalStorage(photographer.photographId);
@@ -156,6 +156,7 @@ const OrderService = () => {
       TrackingGuid: model.fileGuid,
       Attributes: model.attributes,
     };
+    console.log('image data from device' ,JSON.stringify(body, null, 3))
     return legacy.post(endpoint, body);
   }
 

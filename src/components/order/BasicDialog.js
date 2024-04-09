@@ -363,6 +363,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
         // alert(`Success: ${JSON.stringify(imgObj, null, 3)}`)
 
         const orderItem = {
+          price: formatPrice(calculatePrice()),
           maxSize: product.size,
           guid: createGuid(),
           fileAsBase64: imgObj.data,

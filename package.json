@@ -21,6 +21,7 @@
     "axios": "^0.21.1",
     "browser-image-compression": "^2.0.2",
     "capacitor-content-uri-resolver": "file:../capacitor-content-uri-resolver",
+    "capacitor-path-permission-verifier": "file:../../photo-order-react-2/capacitor-path-permission-verifier",
     "cropperjs": "^1.5.12",
     "env-cmd": "^10.1.0",
     "heic2any": "^0.0.4",
