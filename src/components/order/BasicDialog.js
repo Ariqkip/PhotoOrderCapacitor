@@ -1,5 +1,6 @@
 //Core
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FilePicker } from '@capawesome/capacitor-file-picker';
 
 //Components
@@ -19,6 +20,7 @@ import { createGuid } from '../../core/helpers/guidHelper';
 import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
 import { getCompressedImage } from '../../core/helpers/uploadImageHelper';
 import OrderService from '../../services/OrderService';
+import OrderContext from '../../contexts/OrderContext';
 import DatabaseService from '../../services/TokenService';
 
 //UI
@@ -39,6 +41,8 @@ import Typography from '@material-ui/core/Typography';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Divider from '@material-ui/core/Divider';
 import CircularProgress from '@material-ui/core/CircularProgress';
+
+import { ContentUriResolver } from 'capacitor-content-uri-resolver';
 
 const placeholderImg = 'https://via.placeholder.com/400?text=No%20image';
 
@@ -140,6 +144,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
+  const context = useOrder();
 
   const scrollToRef = useRef(null);
   const scrollOptionsRef = useRef(null);
@@ -168,64 +173,100 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       inline: 'nearest',
     });
 
-  const fileInputHandler = useCallback(async () => {
-    const result = await FilePicker.pickImages({
-      multiple: true,
-      readData: true
-    });
-
-    const filesArray = Array.from(result.files);
-    const updatedOrderData = { ...orderDataFromStorage };
-    const updatedUnsavedFiles = [];
-    
-    for (const file of filesArray) {
-      try {
-        const trackingGuid = createGuid();
-        
-        const base64Data = file.data;
-        
-        const compressedFile = await getCompressedImage({
-          width: file.width,
-          height: file.height,
-          maxSize: product.size,
-          file: { data: base64Data, name: file.name }
-        });
-
-        const orderItem = {
-          maxSize: product.size,
-          guid: trackingGuid,
-          fileAsBase64: null,
-          fileUrl: URL.createObjectURL(compressedFile.file),
-          fileName: compressedFile.file.name,
-          productId: product.id,
-          filePath: file.path,
-          categoryId: getProductCategory(location.pathname),
-          set: pack,
-          qty: 1,
-          status: 'idle',
-        };
-
-        if (!updatedOrderData?.orderItems) {
-          updatedOrderData.orderItems = [];
+  const getShortImagePath = (path) => {
+    const slashIndices = [];
+  
+    for (let i = 0; i < path?.length; i++) {
+        if (path[i] === '/') {
+            slashIndices.push(i);
         }
-        updatedOrderData?.orderItems.push(orderItem);
-        updatedUnsavedFiles.push({ filePath: file.path, guid: trackingGuid });
-
-        orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: compressedFile.fileAsBase64 } });
-        executeScroll();
-      } catch (error) {
-        console.error(`Error processing file ${file.name}:`, error);
-      }
     }
 
-    orderService.setCurrentOrderToStorage(
-      { 
-        ...updatedOrderData, 
-        unsavedFiles: updatedUnsavedFiles
-      },
-      photographer.photographId
-    );
-  }, [product, pack, orderDispatch, executeScroll]);
+    if (slashIndices.length < 4) {
+        return path;
+    }
+
+    return path.substring(slashIndices[3]);
+  }
+
+  const fileInputHandler = useCallback(async () => {
+    try {
+      const result = await FilePicker.pickImages({
+        multiple: true
+      });
+  
+      const iterator = result.files[Symbol.iterator]();
+      let nextFile = iterator.next();
+  
+      const updatedOrderData = { ...orderDataFromStorage };
+      const updatedUnsavedFiles = [];
+  
+      const processNextFile = async () => {
+        if (!nextFile.done) {
+          const file = nextFile.value;
+          const trackingGuid = createGuid();
+          
+          const { absolutePath } = await ContentUriResolver.getAbsolutePathFromContentUri({ context: context, contentUri: file.path });
+          const shortPath = getShortImagePath(absolutePath);
+
+          const readedFile = await Filesystem.readFile({
+            path: shortPath,
+            directory: Directory.ExternalStorage
+          });
+
+          const base64Data = readedFile.data;
+          
+          const compressedFile = await getCompressedImage({
+            width: file.width,
+            height: file.height,
+            maxSize: product.size,
+            file: { data: base64Data, name: file.name }
+          });
+          
+          const orderItem = {
+            price: formatPrice(calculatePrice()),
+            maxSize: product.size,
+            guid: trackingGuid,
+            fileAsBase64: null,
+            fileUrl: "test",
+            fileName: compressedFile.file.name,
+            productId: product.id,
+            filePath: absolutePath || file.path,
+            categoryId: getProductCategory(location.pathname),
+            set: pack,
+            qty: 1,
+            status: 'idle',
+          };
+  
+          if (!updatedOrderData?.orderItems) {
+            updatedOrderData.orderItems = [];
+          }
+          updatedOrderData?.orderItems.push(orderItem);
+          updatedUnsavedFiles.push({ filePath: file.path, guid: trackingGuid });
+  
+          orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: compressedFile.fileAsBase64 } });
+          executeScroll();
+  
+          nextFile = iterator.next();
+          processNextFile();
+        } else {
+          orderService.setCurrentOrderToStorage(
+            { 
+              ...updatedOrderData, 
+              unsavedFiles: updatedUnsavedFiles
+            },
+            photographer.photographId
+          );
+        }
+      };
+  
+      processNextFile();
+    } catch (error) {
+      alert(error)
+      alert(JSON.stringify(error))
+      console.error('Error picking images:', error);
+    }
+  }, [product, pack, orderDispatch, executeScroll]);  
 
   const isAllImagesDone = () => {
     return order?.orderItems.every(item => item.status === "success");
@@ -310,10 +351,17 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       try {
         let imgObj = {};
 
-        imgObj = itemObj.filePath.startsWith("content://media")
-          ? await DatabaseService.readImageContent(itemObj.filePath)
-          : await DatabaseService.getLastOrderImageFromDevice(itemObj.filePath)
-        
+        try {
+          imgObj = itemObj.filePath.startsWith("content://media")
+            ? await DatabaseService.readImageContent(itemObj.filePath)
+            : await DatabaseService.getLastOrderImageFromDevice(itemObj.filePath)
+        } catch (error) {
+          // alert(`Error: ${error}`)
+          // alert(`FilePath: ${itemObj.filePath}`)
+          return;
+        }
+        // alert(`Success: ${JSON.stringify(imgObj, null, 3)}`)
+
         const orderItem = {
           maxSize: product.size,
           guid: createGuid(),

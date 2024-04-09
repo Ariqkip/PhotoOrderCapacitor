@@ -151,7 +151,7 @@ const UploadManager = (props) => {
     
     if (!orderDataFromStorage) return;
     if (order.status !== 'FINALIZING') return;
-
+    
     const notDeliveredFiles = order.orderItems.filter(
       (item) => item.status !== 'success'
     );

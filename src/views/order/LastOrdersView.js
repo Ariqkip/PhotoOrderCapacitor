@@ -22,8 +22,12 @@ const useStyles = makeStyles((theme) => ({
   },
   orderCard: {
     position: 'relative',
-    padding: '4rem',
     marginBottom: '1rem',
+    borderRadius: "15px",
+    boxShadow: "0px 0px 30px 0px #d6d6d6",
+    padding: "2rem",
+    paddingBottom: "2rem",
+    paddingTop: "4rem",
   },
   orderNum: {
     position: 'absolute',
@@ -38,7 +42,23 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 'bold',
   },
   orderLabel: {
-    fontWeight: 'bold'
+    width: "50%",
+    color: "#3A3A3A",
+    fontWeight: "600"
+  },
+  orderValue: {
+    color: "#0000008A",
+    textAlign: "end",
+    fontSize: "1.25rem",
+    fontWeight: "400",
+    lineHeight: "1.43",
+  },
+  orderField: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: "10px",
+    borderBottom: "1px solid #e2d7d7",
   },
   orderImg: {
     maxWidth: '150px'
@@ -52,10 +72,13 @@ const useStyles = makeStyles((theme) => ({
   },
   orderImagesWrap: {
     display: 'flex',
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingTop: '2rem',
+    color: "#3A3A3A",
   },
   orderImgBtn: {
-    border: "1px solid #4556ac",
+    border: "1px solid #0000008A",
     width: 'fit-content',
     padding: '0.5rem',
     marginLeft: '1rem',
@@ -64,11 +87,12 @@ const useStyles = makeStyles((theme) => ({
     padding: '2rem',
   },
   noOrders: {
-    color: '#fff',
+    color: '#3A3A3A',
     zIndex: 2,
     margin: '3rem',
   },
   notFound: {
+    fontSize: "1rem",
     textAlign: 'center',
   },
   welcomeBackground: {
@@ -77,11 +101,10 @@ const useStyles = makeStyles((theme) => ({
     top: '0',
     height: '100%',
     width: '100%',
-    backgroundColor: "#5F9EA0"
   },
   reopenButton: {
     border: '1px solid #3f51b5',
-    position: 'absolute',
+    // position: 'absolute',
     marginTop: '0.5rem'
   }
 }));
@@ -282,80 +305,127 @@ const LastOrdersView = () => {
                 >
                   {orderStatus[order.Status]}
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>First Name:</span> {
-                    order.FirstName
-                      ? order.FirstName
-                      : 'Not specified'
-                  }
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>Price: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.Price
+                        ? `${order.Price} €`
+                        : 'Not specified'
+                    }  
+                  </span>
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>Last Name:</span> {
-                    order.LastName
-                      ? order.LastName
-                      : 'Not specified'
-                  }
+                {/* <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>First Name: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.FirstName
+                        ? order.FirstName
+                        : 'Not specified'
+                    }  
+                  </span>
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>Phone:</span> {
-                    order.Phone
-                      ? order.Phone
-                      : 'Not specified'
-                  }
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>Last Name: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.LastName
+                        ? order.LastName
+                        : 'Not specified'
+                    }  
+                  </span>
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>Email:</span> {
-                    order.Email
-                      ? order.Email
-                      : 'Not specified'
-                  }
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>Phone: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.Phone
+                        ? order.Phone
+                        : 'Not specified'
+                    }  
+                  </span>
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>Street Address:</span> {
-                    order.StreetAddress 
-                      ? order.StreetAddress
-                      : 'Not specified'
-                  }
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>Email: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.Email
+                        ? order.Email
+                        : 'Not specified'
+                    }  
+                  </span>
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>Zip Code:</span> {
-                    order.ZipCode 
-                      ? order.ZipCode
-                      : 'Not specified'
-                  }
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>Street Address: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.StreetAddress
+                        ? order.StreetAddress
+                        : 'Not specified'
+                    }  
+                  </span>
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>City:</span> {
-                    order.City 
-                      ? order.City
-                      : 'Not specified'
-                  }
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>Zip Code: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.ZipCode
+                        ? order.ZipCode
+                        : 'Not specified'
+                    }  
+                  </span>
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>Country:</span> {
-                    order.Country 
-                      ? order.Country
-                      : 'Not specified'
-                  }
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>City: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.City
+                        ? order.City
+                        : 'Not specified'
+                    }  
+                  </span>
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>Order Id:</span> {order.OrderGuid}
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>Country: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.Country
+                        ? order.Country
+                        : 'Not specified'
+                    }  
+                  </span>
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>Payment Method:</span> {
-                    order.PaymentMethod 
-                      ? order.PaymentMethod
-                      : 'Not specified'
-                  }
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>Order Id: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.OrderGuid
+                        ? order.OrderGuid
+                        : 'Not specified'
+                    }  
+                  </span>
                 </Typography>
-                <Typography variant="h6" gutterBottom>
-                  <span className={classes.orderLabel}>Order Time:</span> {getOrderTime(order.currentTime)}
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>Payment Method: </span> 
+                  <span className={classes.orderValue}>
+                    {
+                      order.PaymentMethod
+                        ? order.PaymentMethod
+                        : 'Not specified'
+                    }  
+                  </span>
+                </Typography> */}
+                <Typography variant="h6" gutterBottom className={classes.orderField}>
+                  <span className={classes.orderLabel}>Order Time: </span> 
+                  <span className={classes.orderValue}>
+                    {getOrderTime(order.currentTime)}
+                  </span>
                 </Typography>
 
-                {order.Status !== orderStatus.Unsent ? (
+                {/* {order.Status !== orderStatus.Unsent ? (
                   <>
                     <div className={classes.orderImagesWrap}>
-                      <Typography variant="h5" gutterBottom>Order Images:</Typography>
+                      <Typography variant="h6" gutterBottom style={{ fontWeight: "600" }}>Order Images: </Typography>
                       <Button onClick={() => toggleImages(key)} className={classes.orderImgBtn}>
                         {order.expanded ? <RemoveIcon /> : <AddIcon />}
                       </Button>
@@ -372,7 +442,8 @@ const LastOrdersView = () => {
                       )}
                     </div>
                   </>
-                ) : (
+                ) : ( */}
+                {order.Status === orderStatus.Unsent ? (
                   <Button 
                     color='primary' 
                     className={classes.reopenButton}
@@ -381,11 +452,13 @@ const LastOrdersView = () => {
                     <RefreshIcon />
                     Reopen the order
                   </Button>
+                ) : (
+                  <></>
                 )}
               </Card>
             </Grid>
           )) : (
-            <Typography variant="h3" className={classes.noOrders}>
+            <Typography variant="h5" className={classes.noOrders}>
               You have no orders yet
             </Typography>
           )}

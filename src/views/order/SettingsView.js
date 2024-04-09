@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Button, Container, Typography, Snackbar, Collapse, Divider, Box } from '@material-ui/core';
+import { Button, Card, Container, Typography, Snackbar, Collapse, Divider, Box, TextField, Paper } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -21,19 +21,26 @@ const useStyles = makeStyles((theme) => ({
     left: '0',
     top: '0',
     height: '100%',
-    width: '100%',
-    backgroundColor: "#5F9EA0"
+    width: '100%'
+  },
+  settingsCard: {
+    position: 'relative',
+    marginBottom: '1rem',
+    borderRadius: "15px",
+    boxShadow: "0px 0px 30px 0px #d6d6d6",
+    padding: "2rem"
   },
   settingsContainer: {
-    color: '#ffffff',
+    color: '#e2d7d7',
     zIndex: 2,
   },
   titleText: {
+    color: "#3A3A3A",
     fontSize: '2rem',
   },
   divider: {
-    backgroundColor: "#ffffff",
-    marginBottom: '3rem', 
+    backgroundColor: "#e2d7d7",
+    marginBottom: '1rem', 
   },
   subtitleBlock: {
     display: 'flex',
@@ -42,13 +49,17 @@ const useStyles = makeStyles((theme) => ({
   },
   subtitleMainText: {
     fontSize: '1.2rem',
-    fontWeight: "700",
-    paddingRight: '1rem'
+    paddingRight: '1rem',
+    color: "#3A3A3A",
+    fontWeight: "600"
   },
   subtitleText: {
-    fontSize: '1.2rem',
+    color: "#0000008A",
+    fontSize: "1.25rem",
+    fontWeight: "400",
+    lineHeight: "1.43",
     borderRadius: '5px',
-    border: 'none',
+    border: '1px solid #e2d7d7',
     padding: '10px',
     marginTop: '5px',
   },
@@ -59,20 +70,34 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: '1.5rem',
   },
   token: {
-    marginTop: '0'
+    marginTop: '0',
+    border: 'none'
   },
   formButton: {
-    padding: '1rem',
-    border: '2px solid white',
-    backgroundColor: '#5F9EA0',
-    color: '#fff',
-    marginTop: '1rem',
     width: '100%',
-    fontWeight: '800'
+    maxWidth: '320px',
+    color: 'white',
+    borderRadius: '50px',
+    padding: '12px 28px',
+    marginLeft: "1rem",
+    marginTop: "1rem",
+    backgroundColor: '#28a745',
+    '&:hover': {
+      backgroundColor: '#218838',
+    },
+    // padding: '1rem',
+    // backgroundColor: '#fff',
+    // color: "#3A3A3A",
+    // border: "1px solid #0000008A",
+    // marginTop: '1rem',
+    // width: '100%',
+    // borderRadius: "15px",
+    // fontWeight: '800'
   },
   collapseButton: {
-    color: '#5F9EA0',
+    color: '#0000008A',
     backgroundColor: '#fff',
+    border: "1px solid #e2d7d7",
     borderRadius: '50%',
     height: '4rem',
     marginBottom: '2rem',
@@ -81,12 +106,24 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: '#fff',
     }
   },
+  collapseButtonLable: {
+    color: "#3A3A3A",
+    fontWeight: "600",
+  },
   collapseWrap: {
     marginBottom: '1rem',
   },
   collapseBox: {
     display: 'flex'
-  }
+  },
+  paper: {
+    padding: '28px',
+    paddingBottom: "0"
+  },
+  textfield: {
+    width: '100%',
+    marginBottom: '28px',
+  },
 }));
 
 const S = {
@@ -223,162 +260,155 @@ const SettingsView = () => {
     <S.View>
       <div className={classes.welcomeBackground} />
       <Container maxWidth="md" className={classes.settingsContainer}>
-        <Typography className={classes.titleText}>
-          Settings
-        </Typography>
-        <Divider className={classes.divider} />
-        <Typography className={classes.tokenBlock}>
-          <Typography className={classes.subtitleMainText}>Token:</Typography> 
-          <Typography className={`${classes.subtitleText} ${classes.token}`}>{authUser?.mobileToken}</Typography>
-        </Typography>
-        <form onSubmit={handleSaveChanges} className={classes.welcomeForm}>
-          <Box className={classes.collapseBox}>
-            <Button className={classes.collapseButton} onClick={() => setIsUserInfoOpen(!isUserInfoOpen)}>
-              {
-                !isUserInfoOpen
-                  ? <PlusIcon />
-                  : <MinusIcon />
-              }
-            </Button>
-            <h2>User Info</h2>
-          </Box>
-          <Collapse in={isUserInfoOpen} className={classes.collapseWrap}>
-            <Typography className={classes.subtitleBlock}>
-              <Typography className={classes.subtitleMainText}>First name:</Typography> 
-              <input 
-                className={classes.subtitleText} 
-                type="text" 
-                name="firstName" 
-                value={userData.firstName} 
-                onChange={handleInputChange} 
-              />
-            </Typography>
-            <Typography className={classes.subtitleBlock}>
-              <Typography className={classes.subtitleMainText}>Last name:</Typography> 
-              <input 
-                className={classes.subtitleText} 
-                type="text" 
-                name="lastName" 
-                value={userData.lastName} 
-                onChange={handleInputChange} 
-              />
-            </Typography>
-            <Typography className={classes.subtitleBlock}>
-              <Typography className={classes.subtitleMainText}>Phone number:</Typography> 
-              <input 
-                className={classes.subtitleText} 
-                type="number" 
-                name="phone" 
-                value={userData.phone} 
-                onChange={handleInputChange} 
-              />
-            </Typography>
-            <Typography className={classes.subtitleBlock}>
-              <Typography className={classes.subtitleMainText}>Email:</Typography> 
-              <input 
-                className={classes.subtitleText} 
-                type="email" 
-                name="email" 
-                value={userData.email} 
-                onChange={handleInputChange} 
-              />
-            </Typography>
-          </Collapse>
-          
-          <Box className={classes.collapseBox}>
-            <Button className={classes.collapseButton} onClick={() => setIsDeliveryInfoOpen(!isDeliveryInfoOpen)}>
-              {
-                !isDeliveryInfoOpen
-                  ? <PlusIcon />
-                  : <MinusIcon />
-              }
-            </Button>
-            <h2>Delivery Info</h2>
-          </Box>
+        {/* <Card className={classes.settingsCard}> */}
+          <Typography className={classes.titleText}>
+            Settings
+          </Typography>
+          <Divider className={classes.divider} />
+          <Typography className={classes.tokenBlock}>
+            <Typography className={classes.subtitleMainText}>Token:</Typography> 
+            <Typography className={`${classes.subtitleText} ${classes.token}`}>{authUser?.mobileToken}</Typography>
+          </Typography>
+          <form onSubmit={handleSaveChanges} className={classes.welcomeForm}>
+            <p style={{ color: "#000000DE", fontSize: "14px" }}>Basic information:</p>
 
-          <Collapse in={isDeliveryInfoOpen}>
-            <Typography className={classes.subtitleBlock}>
-              <Typography className={classes.subtitleMainText}>Street Address:</Typography> 
-              <input 
-                className={classes.subtitleText} 
-                type="text" 
-                name="address" 
-                value={userData.address} 
-                onChange={handleInputChange} 
-              />
-            </Typography>
-            <Typography className={classes.subtitleBlock}>
-              <Typography className={classes.subtitleMainText}>ZIP Code:</Typography> 
-              <input 
-                className={classes.subtitleText} 
-                type="number" 
-                name="zipCode" 
-                value={userData.zipCode} 
-                onChange={handleInputChange} 
-              />
-            </Typography>
-            <Typography className={classes.subtitleBlock}>
-              <Typography className={classes.subtitleMainText}>City:</Typography> 
-              <input 
-                className={classes.subtitleText} 
-                type="text" 
-                name="city" 
-                value={userData.city} 
-                onChange={handleInputChange} 
-              />
-            </Typography>
-            <Typography className={classes.subtitleBlock}>
-              <Typography className={classes.subtitleMainText}>Country:</Typography> 
-              <input 
-                className={classes.subtitleText} 
-                type="text" 
-                name="country" 
-                value={userData.country} 
-                onChange={handleInputChange} 
-              />
-            </Typography>
-          </Collapse>
-          
-          <Button
-            type="submit"
-            disabled={isLoadingForm}
-            className={classes.formButton}
+            <Paper square className={classes.paper}>
+              <Typography className={classes.subtitleBlock}>
+                <TextField
+                  name='firstName'
+                  id='basic-first-name'
+                  label={t('First name')}
+                  variant='outlined'
+                  className={classes.textfield}
+                  value={userData.firstName} 
+                  onChange={handleInputChange}
+                />
+              </Typography>
+              <Typography className={classes.subtitleBlock}>
+                <TextField
+                  name='lastName'
+                  id='basic-last-name'
+                  label={t('Last name')}
+                  variant='outlined'
+                  className={classes.textfield}
+                  value={userData.lastName} 
+                  onChange={handleInputChange}
+                />
+              </Typography>
+              <Typography className={classes.subtitleBlock}>
+                <TextField
+                  name='phone'
+                  id='basic-phone'
+                  label={t('Phone')}
+                  variant='outlined'
+                  className={classes.textfield}
+                  value={userData.phone} 
+                  onChange={handleInputChange}
+                />
+              </Typography>
+              <Typography className={classes.subtitleBlock}>
+                <TextField
+                  name='email'
+                  id='basic-email'
+                  label={t('Email')}
+                  variant='outlined'
+                  className={classes.textfield}
+                  value={userData.email} 
+                  onChange={handleInputChange}
+                />
+              </Typography>
+            </Paper>
+
+            <p style={{ color: "#000000DE", fontSize: "14px" }}>Delivery information:</p>
+
+            <Paper square className={classes.paper}>
+              <Typography className={classes.subtitleBlock}>
+                <TextField
+                  name='address'
+                  id='basic-address'
+                  label={t('Street address')}
+                  variant='outlined'
+                  className={classes.textfield}
+                  value={userData.address} 
+                  onChange={handleInputChange}
+                />
+              </Typography>
+              <Typography className={classes.subtitleBlock}>
+                <TextField
+                  name='zipCode'
+                  id='basic-zipCode'
+                  label={t('ZIP Code')}
+                  variant='outlined'
+                  className={classes.textfield}
+                  value={userData.zipCode} 
+                  onChange={handleInputChange}
+                />
+              </Typography>
+              <Typography className={classes.subtitleBlock}>
+                <TextField
+                  name='city'
+                  id='basic-city'
+                  label={t('City')}
+                  variant='outlined'
+                  className={classes.textfield}
+                  value={userData.city} 
+                  onChange={handleInputChange}
+                />
+              </Typography>
+              <Typography className={classes.subtitleBlock}>
+                <TextField
+                  name='country'
+                  id='basic-country'
+                  label={t('Country')}
+                  variant='outlined'
+                  className={classes.textfield}
+                  value={userData.country} 
+                  onChange={handleInputChange}
+                />
+              </Typography>
+            </Paper>
+
+            <Button
+              type="submit"
+              disabled={isLoadingForm}
+              className={classes.formButton}
+            >
+              {isLoadingForm 
+                ? 
+                  <div 
+                    style={{ 
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      color: '#0000008A'
+                    }}
+                  >
+                    <CircularProgress color='#0000008A' size={25} />
+                  </div> 
+                : 'Save Changes'
+              }
+            </Button>
+          </form>
+          <Snackbar
+            open={errorSnackbarOpen}
+            autoHideDuration={4000}
+            onClose={handleSnackbarClose}
           >
-            {isLoadingForm 
-              ? 
-                <div 
-                  style={{ 
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    color: 'white'
-                  }}
-                >
-                  <CircularProgress color='#5F9EA0' size={25} />
-                </div> 
-              : 'Save Changes'
-            }
-          </Button>
-        </form>
-        <Snackbar
-          open={errorSnackbarOpen}
-          autoHideDuration={4000}
-          onClose={handleSnackbarClose}
-        >
-          <Alert severity="error">
-            Internal server error. Please try again.
-          </Alert>
-        </Snackbar>
-        <Snackbar
-          open={successSnackbarOpen}
-          autoHideDuration={4000}
-          onClose={handleSnackbarClose}
-        >
-          <Alert severity="success">
-            Data successfully saved.
-          </Alert>
-        </Snackbar>
+            <Alert severity="error">
+              Internal server error. Please try again.
+            </Alert>
+          </Snackbar>
+          <Snackbar
+            open={successSnackbarOpen}
+            autoHideDuration={4000}
+            onClose={handleSnackbarClose}
+          >
+            <Alert severity="success">
+              Data successfully saved.
+            </Alert>
+          </Snackbar>
+        {/* </Card> */}
       </Container>
     </S.View>
   );

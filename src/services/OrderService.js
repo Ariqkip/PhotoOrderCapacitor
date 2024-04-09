@@ -104,7 +104,7 @@ const OrderService = () => {
       return result;
     });
 
-    const orderData = JSON.parse(getCurrentOrderFromStorage(photographer.photographerId));
+    const orderData = JSON.parse(getCurrentOrderFromStorage(photographer.photographId));
 
     const body = {
       FirstName: orderData?.firstName,
@@ -121,12 +121,16 @@ const OrderService = () => {
       PaymentMethod: order.paymentMethod,
     };
 
+    const totalCost = order.orderItems.reduce((accumulator, currentItem) => {
+      return accumulator + parseFloat(currentItem.price);
+    }, 0);
+    
     await setLocalStorageOrder(
-      order.id, 
-      { ...body, Status: 'Sent'}
+      photographer.photographId, 
+      { ...body, Price: totalCost, Status: 'Sent'}
     )
 
-    removeOrderFromLocalStorage(order.id);
+    removeOrderFromLocalStorage(photographer.photographId);
 
     if (order.paymentMethod == 2) {
       var vivawalletUrl = photographer.vivawallet;

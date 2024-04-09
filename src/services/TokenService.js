@@ -152,8 +152,8 @@ class DatabaseService {
 
     async getLastOrderImageFromDevice(initPath) {
         try {
-            const path1 = this.extractFilePath(initPath);
-            const path2 = this.getShortImagePath(initPath);
+            const path1 = this.getShortImagePath(initPath);
+            const path2 = this.extractFilePath(initPath);
 
             let file;
             try {
