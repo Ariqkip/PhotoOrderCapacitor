@@ -296,7 +296,7 @@ const LastOrdersView = () => {
                   gutterBottom 
                   className={classes.orderNum}
                 >
-                  №{key + 1}
+                  №{order.OrderId}
                 </Typography>
                 
                 <Typography 
@@ -318,8 +318,8 @@ const LastOrdersView = () => {
                   <span className={classes.orderValue}>
                     {
                       order.Price
-                        ? `${getTotalPrice(order)} €`
-                        : `order.Price €`
+                        ? `${order.Price} €`
+                        : `${getTotalPrice(order)} €`
                     }  
                   </span>
                 </Typography>

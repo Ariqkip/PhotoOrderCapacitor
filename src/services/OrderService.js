@@ -29,7 +29,7 @@ const OrderService = () => {
     return legacy.post(endpoint, body);
   }
 
-  const FinalizeOrder = async (order, photographer) => {
+  const FinalizeOrder = async (order, photographer, authUser, setAuthUser) => {
     const endpoint = `photographer/order/${order.orderId}`;
 
     const { productAttributes } = photographer;
@@ -105,7 +105,7 @@ const OrderService = () => {
     });
 
     const orderData = JSON.parse(getCurrentOrderFromStorage(photographer.photographId));
-
+    
     const body = {
       FirstName: orderData?.firstName,
       LastName: orderData?.lastName,
@@ -120,6 +120,19 @@ const OrderService = () => {
       OrderItems: orderedItems,
       PaymentMethod: order.paymentMethod,
     };
+    
+    setAuthUser({
+      ...authUser,
+      firstName: orderData.firstName,
+      lastName: orderData.lastName,
+      phone: orderData.phone,
+      email: orderData.email,
+      street: orderData.shippingStreet,
+      zipCode: orderData.shippingZip,
+      city: orderData.shippingCity,
+      country: orderData.shippingCountry,
+      lastOrderId: orderData.orderId,
+    })
 
     const totalCost = order.orderItems.reduce((accumulator, currentItem) => {
       return accumulator + parseFloat(currentItem.price);
@@ -127,7 +140,12 @@ const OrderService = () => {
     
     await setLocalStorageOrder(
       photographer.photographId, 
-      { ...body, Price: totalCost || 0, Status: 'Sent'}
+      { 
+        ...body, 
+        Price: totalCost || 0, 
+        OrderId: orderData.orderId, 
+        Status: 'Sent'
+      }
     )
 
     removeOrderFromLocalStorage(photographer.photographId);

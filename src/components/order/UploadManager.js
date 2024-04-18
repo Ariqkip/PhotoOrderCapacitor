@@ -1,5 +1,5 @@
 //Core
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 //Components
 
@@ -13,6 +13,7 @@ import OrderService from '../../services/OrderService';
 
 //UI
 import { makeStyles } from '@material-ui/core/styles';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -31,6 +32,7 @@ const UploadManager = (props) => {
   const [orderData, setOrderData] = useState();
   const [photographer] = usePhotographer();
   const orderService = OrderService();
+  const { authUser, setAuthUser } = useContext(AuthContext);
 
   const getOrderFromStorage = () => {
     return JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
@@ -162,7 +164,7 @@ const UploadManager = (props) => {
     orderDispatch({ type: 'FINALIZE_REQUESTED' });
     
     orderDataFromStorage?.status === "FINALIZE" && await orderService
-      .FinalizeOrder(orderDataFromStorage, photographer)
+      .FinalizeOrder(orderDataFromStorage, photographer, authUser, setAuthUser)
       .then(
         async (res) => {
           OrderService()

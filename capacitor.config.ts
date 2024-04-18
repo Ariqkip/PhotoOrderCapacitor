@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.test.app',
-  appName: 'testapp',
+  appName: 'Photo order beta',
   webDir: 'build',
   server: {
     androidScheme: 'https'

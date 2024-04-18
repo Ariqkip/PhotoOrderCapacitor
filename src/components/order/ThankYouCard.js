@@ -1,5 +1,5 @@
 //Core
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 //Components
 
@@ -19,6 +19,7 @@ import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -66,11 +67,9 @@ const ThankYouCard = (props) => {
   const { t } = useTranslation();
 
   const [photographer] = usePhotographer();
+  const { authUser, setAuthUser } = useContext(AuthContext);
   const [order, orderDispatch] = useOrder();
-
-  const orderService = OrderService();
-  const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
-
+  
   return (
     <Container maxWidth='md' className={classes.conatiner} >
       <Paper square className={classes.paper}>
@@ -89,14 +88,14 @@ const ThankYouCard = (props) => {
           </Grid>
           <Grid item>
             {
-              order.orderId || orderDataFromStorage?.orderId
+              (order.orderId || authUser.lastOrderId)
                 ? (
                   <>
                     <Typography variant='h5' component='p' align='center'>
                       Order no:
                     </Typography>
                     <Typography variant='h4' component='h1' align='center'>
-                      {order.orderId || orderDataFromStorage?.orderId}
+                      {order.orderId || authUser.lastOrderId}
                     </Typography>
                   </>
                 ) : (
@@ -127,21 +126,6 @@ const ThankYouCard = (props) => {
               </a>
             </Typography>
           </Grid>
-          <Grid item>
-            <ActiveButton
-              size='large'
-              onClick={() => orderDispatch({ type: 'NEW' })}
-            >
-              {t('Order more photos')}
-            </ActiveButton>
-          </Grid>
-          {photographer.website && (
-            <Grid item>
-              <a href={`//${photographer.website}`} className={classes.link}>
-                {t('thankyou-exit')}
-              </a>
-            </Grid>
-          )}
         </Grid>
       </Paper>
     </Container>

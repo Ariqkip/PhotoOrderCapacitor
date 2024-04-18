@@ -41,8 +41,6 @@ public class MainActivity extends BridgeActivity {
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, permissions[i] + " permission granted", Toast.LENGTH_LONG).show();
-                } else {
-                    showPermissionRequestDialog(permissions[i]);
                 }
             }
         }

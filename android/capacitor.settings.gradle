@@ -15,4 +15,4 @@ include ':capawesome-capacitor-file-picker'
 project(':capawesome-capacitor-file-picker').projectDir = new File('../node_modules/@capawesome/capacitor-file-picker/android')
 
 include ':capacitor-content-uri-resolver'
-project(':capacitor-content-uri-resolver').projectDir = new File('../../capacitor-content-uri-resolver/android')
+project(':capacitor-content-uri-resolver').projectDir = new File('../capacitor-content-uri-resolver/android')
