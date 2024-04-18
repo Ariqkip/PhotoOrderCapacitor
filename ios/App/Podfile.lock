@@ -1,22 +1,67 @@
 PODS:
   - Capacitor (5.6.0):
     - CapacitorCordova
+  - CapacitorCamera (5.0.9):
+    - Capacitor
+  - CapacitorCommunitySqlite (5.5.1):
+    - Capacitor
+    - SQLCipher
+    - ZIPFoundation
+  - CapacitorContentUriResolver (0.0.1):
+    - Capacitor
   - CapacitorCordova (5.6.0)
+  - CapacitorFilesystem (5.2.0):
+    - Capacitor
+  - CapawesomeCapacitorFilePicker (5.3.0):
+    - Capacitor
+  - SQLCipher (4.5.6):
+    - SQLCipher/standard (= 4.5.6)
+  - SQLCipher/common (4.5.6)
+  - SQLCipher/standard (4.5.6):
+    - SQLCipher/common
+  - ZIPFoundation (0.9.19)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
+  - "CapacitorCommunitySqlite (from `../../node_modules/@capacitor-community/sqlite`)"
+  - CapacitorContentUriResolver (from `../../capacitor-content-uri-resolver`)
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
+  - "CapawesomeCapacitorFilePicker (from `../../node_modules/@capawesome/capacitor-file-picker`)"
+
+SPEC REPOS:
+  trunk:
+    - SQLCipher
+    - ZIPFoundation
 
 EXTERNAL SOURCES:
   Capacitor:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorCamera:
+    :path: "../../node_modules/@capacitor/camera"
+  CapacitorCommunitySqlite:
+    :path: "../../node_modules/@capacitor-community/sqlite"
+  CapacitorContentUriResolver:
+    :path: "../../capacitor-content-uri-resolver"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorFilesystem:
+    :path: "../../node_modules/@capacitor/filesystem"
+  CapawesomeCapacitorFilePicker:
+    :path: "../../node_modules/@capawesome/capacitor-file-picker"
 
 SPEC CHECKSUMS:
   Capacitor: ebfc16cdb8116d04c101686b080342872da42d43
+  CapacitorCamera: 4892c5c392f60039d853dde78bc50ba19fbd113e
+  CapacitorCommunitySqlite: 0a9f7f810b1694a8197c62c56fab33ef901e22af
+  CapacitorContentUriResolver: b72f20c8d955fef277776ab6ce5070a6843eeef2
   CapacitorCordova: 931b48fcdbc9bc985fc2f16cec9f77c794a27729
+  CapacitorFilesystem: 02f9a9053b96e1881ba1fc98d846869413c195c2
+  CapawesomeCapacitorFilePicker: 41f486cb4a89c6a7c8a4f5d683dbf96658894182
+  SQLCipher: 838309284f29953a28ad2e81d87d55ea6b7c74fd
+  ZIPFoundation: b8c29ea7ae353b309bc810586181fd073cb3312c
 
-PODFILE CHECKSUM: 8ab55909c5de2b217f9841e5e5b329f5ec901553
+PODFILE CHECKSUM: 0d904073785b4acab8bcc290960b3da47ba5d31d
 
 COCOAPODS: 1.15.2
