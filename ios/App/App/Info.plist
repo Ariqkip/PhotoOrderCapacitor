@@ -5,7 +5,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
+<<<<<<< HEAD
         <string>Photo order beta</string>
+=======
+	<string>testapp</string>
+>>>>>>> b57d82d1001b34e5b79d804065966c3beec9b109
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
