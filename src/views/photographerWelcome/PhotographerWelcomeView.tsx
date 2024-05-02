@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexFlow: 'column'
   },
   gridItem: {
     display: 'flex',
@@ -102,7 +103,7 @@ const PhotographerWelcomeView: ComponentType<any> = ({ userId }) => {
 
   const [photographer, dispatch] = usePhotographer();
   const { data } = photographerQuery;
-  
+
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
@@ -145,7 +146,7 @@ const PhotographerWelcomeView: ComponentType<any> = ({ userId }) => {
                         className={classes.logo}
                       />
                     ) : (
-                      <CircularProgress className={classes.spinner} /> 
+                      <CircularProgress className={classes.spinner} />
                     )
                 }
               </Grid>
@@ -159,7 +160,7 @@ const PhotographerWelcomeView: ComponentType<any> = ({ userId }) => {
                 <a href={photographer.website} className={classes.link}>
                   {photographer.website}
                 </a>
-                <Button 
+                <Button
                   className={classes.callButton}
                   variant="contained"
                   onClick={() => {window.location.href = `tel:${photographer.phone}`}}

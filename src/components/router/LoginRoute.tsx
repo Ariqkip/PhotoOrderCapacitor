@@ -1,15 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Route } from 'react-router-dom';
+import React, {useContext, useEffect, useState} from 'react';
+import {Route} from 'react-router-dom';
 import DatabaseService from "../../services/TokenService";
-import { AuthContext } from "../../contexts/AuthContext";
+import {AuthContext} from "../../contexts/AuthContext";
 import authService from '../../services/AuthService';
 import WelcomeView from "../../views/welcome/WelcomeView";
 import PhotographerWelcomeView from '../../views/photographerWelcome/PhotographerWelcomeView';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { Camera } from '@capacitor/camera';
+import {Camera} from '@capacitor/camera';
 
 const LoginRoute: React.FC = (props) => {
-    const { authUser, setAuthUser } = useContext(AuthContext);
+    const {authUser, setAuthUser} = useContext(AuthContext);
     const [isOldTokenExist, setIsOldTokenExist] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [hasPermissions, setHasPermissions] = useState(false);
@@ -35,15 +35,15 @@ const LoginRoute: React.FC = (props) => {
 
         const checkPermisstions = async () => {
             const requestPermissions = async () => {
-              const { camera, photos } = await Camera.requestPermissions();
-              setHasPermissions(camera === 'granted' && photos === 'granted');
+                const {camera, photos} = await Camera.requestPermissions();
+                setHasPermissions(camera === 'granted' && photos === 'granted');
             };
-        
+
             const status = await Camera.checkPermissions()
             setHasPermissions(status.camera === 'granted' && status.photos === 'granted');
-        
+
             if (!hasPermissions) {
-              requestPermissions();
+                requestPermissions();
             }
         }
 
@@ -53,8 +53,8 @@ const LoginRoute: React.FC = (props) => {
 
     if (isLoading) {
         return (
-            <div 
-                style={{ 
+            <div
+                style={{
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
@@ -62,19 +62,19 @@ const LoginRoute: React.FC = (props) => {
                     height: '100vh',
                 }}
             >
-                <CircularProgress />
+                <CircularProgress/>
             </div>
         )
     }
 
     return (
-        <Route 
+        <Route
             {...props}
-            render={(props) => 
+            render={(props) =>
                 authUser || isOldTokenExist
-                    ? <PhotographerWelcomeView userId={authUser.id} />
+                    ? <PhotographerWelcomeView userId={authUser.id}/>
                     : <WelcomeView {...props} />
-            } 
+            }
         />
     )
 };
