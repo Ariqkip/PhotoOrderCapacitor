@@ -2,6 +2,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FilePicker } from '@capawesome/capacitor-file-picker';
+import {Capacitor} from '@capacitor/core'
 
 //Components
 import RoundButton from './../core/RoundButton';
@@ -165,7 +166,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       block: 'start',
       inline: 'nearest',
     });
-    
+
   const executeOptionsScroll = () =>
     scrollOptionsRef.current.scrollIntoView({
       behavior: 'smooth',
@@ -175,7 +176,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
 
   const getShortImagePath = (path) => {
     const slashIndices = [];
-  
+
     for (let i = 0; i < path?.length; i++) {
         if (path[i] === '/') {
             slashIndices.push(i);
@@ -194,35 +195,45 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       const result = await FilePicker.pickImages({
         multiple: true
       });
-  
+
       const iterator = result.files[Symbol.iterator]();
       let nextFile = iterator.next();
-  
+
       const updatedOrderData = { ...orderDataFromStorage };
       const updatedUnsavedFiles = [];
-  
+
       const processNextFile = async () => {
         if (!nextFile.done) {
           const file = nextFile.value;
           const trackingGuid = createGuid();
-          
-          const { absolutePath } = await ContentUriResolver.getAbsolutePathFromContentUri({ context: context, contentUri: file.path });
-          const shortPath = getShortImagePath(absolutePath);
 
-          const readedFile = await Filesystem.readFile({
-            path: shortPath,
-            directory: Directory.ExternalStorage
-          });
+          let absolutePath = null
+            let readFileResult
 
-          const base64Data = readedFile.data;
-          
+          if (Capacitor.getPlatform() === 'android') {
+            const pathResult = await ContentUriResolver.getAbsolutePathFromContentUri({ context: context, contentUri: file.path });
+            absolutePath = pathResult.absolutePath
+            const shortPath = getShortImagePath(absolutePath);
+
+            readFileResult = await Filesystem.readFile({
+                  path: shortPath,
+                  directory: Directory.ExternalStorage
+              });
+          } else {
+              readFileResult = await Filesystem.readFile({
+                  path: file.path,
+              });
+          }
+
+          const base64Data = readFileResult.data;
+
           const compressedFile = await getCompressedImage({
             width: file.width,
             height: file.height,
             maxSize: product.size,
             file: { data: base64Data, name: file.name }
           });
-          
+
           const orderItem = {
             price: formatPrice(calculatePrice()),
             maxSize: product.size,
@@ -237,36 +248,36 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             qty: 1,
             status: 'idle',
           };
-  
+
           if (!updatedOrderData?.orderItems) {
             updatedOrderData.orderItems = [];
           }
           updatedOrderData?.orderItems.push(orderItem);
           updatedUnsavedFiles.push({ filePath: file.path, guid: trackingGuid });
-  
+
           orderDispatch({ type: 'ADD_ORDER_ITEM', payload: {...orderItem, fileAsBase64: compressedFile.fileAsBase64 } });
           executeScroll();
-  
+
           nextFile = iterator.next();
           processNextFile();
         } else {
           orderService.setCurrentOrderToStorage(
-            { 
-              ...updatedOrderData, 
+            {
+              ...updatedOrderData,
               unsavedFiles: updatedUnsavedFiles
             },
             photographer.photographId
           );
         }
       };
-  
+
       processNextFile();
     } catch (error) {
       alert(error)
       alert(JSON.stringify(error))
       console.error('Error picking images:', error);
     }
-  }, [product, pack, orderDispatch, executeScroll]);  
+  }, [product, pack, orderDispatch, executeScroll]);
 
   const isAllImagesDone = () => {
     return order?.orderItems.every(item => item.status === "success");
@@ -276,12 +287,12 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     const reuploadData = async () => {
       const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
       const isThereAnyUnsavedFiles = orderDataFromStorage?.unsavedFiles?.length;
-  
+
       if (isThereAnyUnsavedFiles) {
         setIsReadyReupload(true);
         setItemsToReupload(orderDataFromStorage?.unsavedFiles);
       }
-      
+
       if (orderDataFromStorage?.readyToReupload) {
         await handleReupload(orderDataFromStorage?.unsavedFiles);
       }
@@ -292,7 +303,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
 
   useEffect(() => {
     if (orderDataFromStorage?.orderItems?.length > 0 && orderDataFromStorage?.orderItems?.length !== order?.orderItems?.length) {
-      const successsOrderData = orderDataFromStorage?.orderItems 
+      const successsOrderData = orderDataFromStorage?.orderItems
         ? orderDataFromStorage?.orderItems?.filter(item => item.status === 'success')
         : orderDataFromStorage
 
@@ -309,7 +320,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const handleRemoveAll = () => {
     const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
     const updatedOrderData = { ...orderDataFromStorage, orderItems: [], unsavedFiles: [] };
-    
+
     orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
 
     localStorage.setItem("isUnsavedImagesUploaded", "true");
@@ -323,7 +334,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
   const isNextDisabled = () => {
     const files = order?.orderItems.filter((item) => item.productId === product.id);
     return files.length === 0;
-  };  
+  };
 
   const handleNext = () => {
     closeFn();
@@ -376,11 +387,11 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           qty: 1,
           status: 'idle',
         };
-        
+
         const updatedOrderData = { ...orderDataFromStorage, unsavedFiles: [] };
         updatedOrderData?.orderItems.push(orderItem);
         orderService.setCurrentOrderToStorage(updatedOrderData, photographer.photographId);
-        
+
         orderDispatch({ type: 'ADD_ORDER_ITEM', payload: { ...orderItem, fileAsBase64: imgObj.data } });
       } catch (error) {
         console.error('Error fetching image:', error);
