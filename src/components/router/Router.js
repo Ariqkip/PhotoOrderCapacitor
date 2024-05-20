@@ -40,7 +40,7 @@ const WelcomeView = React.lazy(() =>
   import(/* webpackChunkName: "views-404" */ '../../views/welcome/WelcomeView.tsx')
 );
 
-const PhotographerWelcomeView = React.lazy(() => 
+const PhotographerWelcomeView = React.lazy(() =>
   import(/* webpackChunkName: "views-404" */ '../../views/photographerWelcome/PhotographerWelcomeView')
 );
 
@@ -81,11 +81,11 @@ const Router = (props) => {
       <BrowserRouter>
         <AuthProvider>
           <Switch>
-            <Route
-              exact
-              path='/cookie'
-              render={(props) => <CookiePage {...props} />}
-            />
+            {/*<Route*/}
+            {/*  exact*/}
+            {/*  path='/cookie'*/}
+            {/*  render={(props) => <CookiePage {...props} />}*/}
+            {/*/>*/}
             <LoginRoute exact path="/login" />
             <PrivateRoute
               exact
