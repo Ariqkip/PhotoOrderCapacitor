@@ -47,13 +47,13 @@ const useStyles = makeStyles((theme) => ({
   appBar: {
     backgroundColor: '#fff',
     color: '#8f8f8f',
-    height: '64px',
     justifyContent: 'center',
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
+    paddingTop: 'env(safe-area-inset-top)',
   },
   appBarShift: {
     marginLeft: drawerWidth,

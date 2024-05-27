@@ -30,7 +30,8 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     display: 'flex',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    paddingTop: 'env(safe-area-inset-top)'
   },
   drawerClose: {
     transition: theme.transitions.create('width', {
@@ -65,9 +66,9 @@ const MenuDrawer = (props) => {
     const year = currentDate.getFullYear().toString().slice(-2);
     const month = (currentDate.getMonth() + 1).toString();
     const day = currentDate.getDate().toString();
-  
+
     return `ver 1.${year}.${month}.${day}`;
-  };  
+  };
 
   return (
     <Drawer

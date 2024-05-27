@@ -11,15 +11,16 @@ import { I18nextProvider } from 'react-i18next';
 ReactDOM.render(
   <React.StrictMode>
     <I18nextProvider i18n={i18n}>
-      <Helmet>
-        <meta charSet='utf-8' />
-        <meta property='og:title' content='oistigmes photo-order' />
-        <meta property='og:description' content='' />
-      </Helmet>
-      <App />
+        <Helmet>
+            <meta charSet='utf-8'/>
+            <meta property='og:title' content='oistigmes photo-order'/>
+            <meta property='og:description' content=''/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+        </Helmet>
+        <App/>
     </I18nextProvider>
   </React.StrictMode>,
-  document.getElementById('root')
+    document.getElementById('root')
 );
 
 // If you want to start measuring performance in your app, pass a function
