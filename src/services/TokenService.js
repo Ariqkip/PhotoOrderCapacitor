@@ -1,5 +1,7 @@
-import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite';
+import { CapacitorSQLite, SQLiteConnection } from '@capacitor-community/sqlite';
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { registerPlugin, Capacitor } from '@capacitor/core';
+const FindDBFileIniOS = registerPlugin('FindDBFile');
 
 class DatabaseService {
     constructor() {
@@ -8,13 +10,24 @@ class DatabaseService {
 
     async createDbConnection() {
         const sqlite = new SQLiteConnection(CapacitorSQLite);
+        if (Capacitor.getPlatform() === 'ios') {
+            // connect junkiSQLite.db
+            return await sqlite.createConnection(
+                'junki',
+                false,
+                'no-encryption',
+                1,
+                false
+            );
+        }
+
         return await sqlite.createConnection(
-            '/data/user/0/photoorder.droid/files/junki', 
-            false, 
-            'no-encryption', 
-            1, 
+            '/data/user/0/photoorder.droid/files/junki',
+            false,
+            'no-encryption',
+            1,
             false
-        );        
+        );
     }
 
     async getDbConnection() {
@@ -26,14 +39,29 @@ class DatabaseService {
 
     async getOldToken() {
         try {
-            await Filesystem.rename({
-                from: '/data/user/0/photoorder.droid/files/junki.sql',
-                to: '/data/user/0/photoorder.droid/files/junkiSQLite.db',
-            });
+            if (Capacitor.getPlatform() === 'android') {
+                await Filesystem.rename({
+                    from: '/data/user/0/photoorder.droid/files/junki.sql',
+                    to: '/data/user/0/photoorder.droid/files/junkiSQLite.db',
+                });
+            } else if (Capacitor.getPlatform() === 'ios') {
+                // find previous db file
+                try {
+                    const result = await FindDBFileIniOS.findDBFile({ fileName: 'junki.sql', createIfNotExist: false });
+                    console.log("ios previous db file found at path ", result.path, "fileIsNewCreated ", result.fileIsNewCreated)
+                } catch (error) {
+                    console.log("ios previous db file path not found with err", error);
+                }
+
+                // move junki.sql to junkiSQLite.db if needed
+                const result = await FindDBFileIniOS.renameDBFile({ previousName: "junki.sql", freshName: "junkiSQLite.db" })
+                console.log("rename file result ", result)
+            }
 
             console.log('dbConnection1', JSON.stringify(this.dbConnection));
             const db = await this.getDbConnection();
 
+            console.log('start open db');
             await db.open();
 
             const query = "SELECT * FROM Settings WHERE key='OriginalUserEnteredToken';";
@@ -82,7 +110,7 @@ class DatabaseService {
             const result = await db.query(query);
 
             if (!result) return;
-            
+
             const formattedImages = result?.values?.map(image => ({
                 ProductId: image.ProductId,
                 Count: image.Count,
@@ -92,7 +120,7 @@ class DatabaseService {
             }));
 
             await this.addImageDataToFormattedImages(formattedImages);
-            
+
             return formattedImages;
         } catch (error) {
             console.error('Error getting unsaved images:', error);
@@ -103,7 +131,7 @@ class DatabaseService {
     async getImageData(imagePath) {
         try {
             const imageData = await this.getImageFromDevice(imagePath);
-            
+
             return imageData;
         } catch (error) {
             console.error('Error fetching image data:', error);
@@ -126,7 +154,7 @@ class DatabaseService {
                 path: path,
                 directory: Directory.ExternalStorage
             });
-            
+
             return file;
         } catch (error) {
             console.error('Error getting image from device:', error);
@@ -136,7 +164,7 @@ class DatabaseService {
 
     getShortImagePath(path) {
         const slashIndices = [];
-      
+
         for (let i = 0; i < path?.length; i++) {
             if (path[i] === '/') {
                 slashIndices.push(i);
@@ -163,7 +191,7 @@ class DatabaseService {
                 });
             } catch (error) {
                 console.error(`Error reading file from path1: ${path1}`, error);
-                
+
                 file = await Filesystem.readFile({
                     path: path2,
                     directory: Directory.ExternalStorage
@@ -203,7 +231,7 @@ class DatabaseService {
             const file = await Filesystem.readFile({
                 path: initPath
             });
-            
+
             return file
         } catch (error) {
             console.error('Error getting image from device:', error);
