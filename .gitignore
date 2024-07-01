@@ -65,3 +65,7 @@ build/
 .history
 
 .idea
+
+ios/App/App.xcodeproj/xcuserdata
+ios/App/App.xcworkspace/xcuserdata
+capacitor-content-uri-resolver/package-lock.json

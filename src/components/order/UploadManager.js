@@ -1,6 +1,6 @@
 //Core
 import React, { useContext, useEffect, useState } from 'react';
-
+import { Capacitor } from '@capacitor/core';
 //Components
 
 //Hooks
@@ -35,7 +35,9 @@ const UploadManager = (props) => {
   const { authUser, setAuthUser } = useContext(AuthContext);
 
   const getOrderFromStorage = () => {
-    return JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+    return JSON.parse(
+      orderService.getCurrentOrderFromStorage(photographer.photographId)
+    );
   };
 
   const uploadFiles = async () => {
@@ -89,14 +91,24 @@ const UploadManager = (props) => {
             url: res.data.ImageUri,
             fileGuid: res.data.ImageGuid,
             filePath: orderDataFromStorage2?.filePath,
-            unsavedFiles: getNewUnsavedList(res.data.TrackingGuid, unsavedFiles)
+            unsavedFiles: getNewUnsavedList(
+              res.data.TrackingGuid,
+              unsavedFiles
+            ),
           });
+          if (Capacitor.getPlatform() === 'ios') {
+            setTimeout(() => {
+              OrderService().removeBase64DataWithFilePath(
+                itemToUpload.filePath
+              );
+            }, 1);
+          }
         },
         (err) => {
           setCurrentOrderToStorage({
             guid: itemToUpload.guid,
             status: 'failed',
-            unsavedFiles
+            unsavedFiles,
           });
         }
       )
@@ -104,13 +116,15 @@ const UploadManager = (props) => {
         setCurrentOrderToStorage({
           guid: itemToUpload.guid,
           status: 'failed',
-          unsavedFiles
+          unsavedFiles,
         });
       });
   };
 
   const getNewUnsavedList = (guidToRemove, fileList) => {
-    const updatedFileList = fileList.filter(item => item.guid !== guidToRemove);
+    const updatedFileList = fileList.filter(
+      (item) => item.guid !== guidToRemove
+    );
     return updatedFileList;
   };
 
@@ -118,30 +132,35 @@ const UploadManager = (props) => {
     try {
       const orderDataFromStorage = getOrderFromStorage();
 
-      const updatedOrderItems = orderDataFromStorage?.orderItems.map(item => {
-        if (item.guid === updatedOrderData.guid) {
-          if (updatedOrderData.status === 'processing') {
-            item.status = 'processing';
-          } else if (updatedOrderData.status === 'success') {
-            item.status = 'success';
-            item.fileAsBase64 = null;
-            item.fileUrl = updatedOrderData.url;
-            item.imageGuid = updatedOrderData.fileGuid;
-          } else if (updatedOrderData.status === 'failed') {
-            item.status = 'failed';
+      const updatedOrderItems = orderDataFromStorage?.orderItems
+        .map((item) => {
+          if (item.guid === updatedOrderData.guid) {
+            if (updatedOrderData.status === 'processing') {
+              item.status = 'processing';
+            } else if (updatedOrderData.status === 'success') {
+              item.status = 'success';
+              item.fileAsBase64 = null;
+              item.fileUrl = updatedOrderData.url;
+              item.imageGuid = updatedOrderData.fileGuid;
+            } else if (updatedOrderData.status === 'failed') {
+              item.status = 'failed';
+            }
           }
-        }
-        return item;
-      }).filter(item => item.status !== 'failed');
-      
-      const updatedOrder = { 
-        ...orderDataFromStorage, 
-        status: 'INITIALIZED', 
+          return item;
+        })
+        .filter((item) => item.status !== 'failed');
+
+      const updatedOrder = {
+        ...orderDataFromStorage,
+        status: 'INITIALIZED',
         orderItems: updatedOrderItems,
-        unsavedFiles: updatedOrderData?.unsavedFiles
+        unsavedFiles: updatedOrderData?.unsavedFiles,
       };
-      
-      orderService.setCurrentOrderToStorage(updatedOrder, photographer.photographId)
+
+      orderService.setCurrentOrderToStorage(
+        updatedOrder,
+        photographer.photographId
+      );
       setOrderData(updatedOrder);
     } catch (error) {
       console.error('Error updating order state:', error);
@@ -150,64 +169,77 @@ const UploadManager = (props) => {
 
   const tryFinalizeOrder = async () => {
     const orderDataFromStorage = getOrderFromStorage();
-    
+
     if (!orderDataFromStorage) return;
     if (order.status !== 'FINALIZING') return;
-    
+
     const notDeliveredFiles = order.orderItems.filter(
       (item) => item.status !== 'success'
     );
     if (!notDeliveredFiles) return;
     if (notDeliveredFiles.length > 0) return;
 
-    changeOrderStatus('PROCESSING')
+    changeOrderStatus('PROCESSING');
     orderDispatch({ type: 'FINALIZE_REQUESTED' });
-    
-    orderDataFromStorage?.status === "FINALIZE" && await orderService
-      .FinalizeOrder(orderDataFromStorage, photographer, authUser, setAuthUser)
-      .then(
-        async (res) => {
-          OrderService()
-            .CreateOrder(photographer.photographId)
-            .then((resp) => {
-              orderService.setCurrentOrderToStorage({
-                photographerId: photographer.photographId,
-                orderId: resp.data.Id,
-                orderGuid: resp.data.OrderGuid,
-                phone: "",
-                email: "",
-                firstName: "",
-                lastName: "",
-                shippingSelected: false,
-                status: 'INITIALIZED',
-                orderItems: [],
-                orderItemsConfig: []
-              }, photographer.photographId);
-            })
-          orderDispatch({ type: 'SUCCESS' });
-          orderDispatch({
-            type: 'REMOVE_ORDER_ITEMS_FOR_PRODUCT',
-            payload: { productId: orderDataFromStorage.orderItems[0].productId },
-          });
-          await orderService
-            .MarkOrderAsDone(orderDataFromStorage)
-        },
-        (err) => {
-          changeOrderStatus('FAILED')
+
+    orderDataFromStorage?.status === 'FINALIZE' &&
+      (await orderService
+        .FinalizeOrder(
+          orderDataFromStorage,
+          photographer,
+          authUser,
+          setAuthUser
+        )
+        .then(
+          async (res) => {
+            OrderService()
+              .CreateOrder(photographer.photographId)
+              .then((resp) => {
+                orderService.setCurrentOrderToStorage(
+                  {
+                    photographerId: photographer.photographId,
+                    orderId: resp.data.Id,
+                    orderGuid: resp.data.OrderGuid,
+                    phone: '',
+                    email: '',
+                    firstName: '',
+                    lastName: '',
+                    shippingSelected: false,
+                    status: 'INITIALIZED',
+                    orderItems: [],
+                    orderItemsConfig: [],
+                  },
+                  photographer.photographId
+                );
+              });
+            orderDispatch({ type: 'SUCCESS' });
+            orderDispatch({
+              type: 'REMOVE_ORDER_ITEMS_FOR_PRODUCT',
+              payload: {
+                productId: orderDataFromStorage.orderItems[0].productId,
+              },
+            });
+            await orderService.MarkOrderAsDone(orderDataFromStorage);
+          },
+          (err) => {
+            changeOrderStatus('FAILED');
+            orderDispatch({ type: 'FAILED' });
+          }
+        )
+        .catch((err) => {
+          changeOrderStatus('FAILED');
           orderDispatch({ type: 'FAILED' });
-        }
-      )
-      .catch((err) => {
-        changeOrderStatus('FAILED')
-        orderDispatch({ type: 'FAILED' });
-      });
+        }));
   };
 
   const changeOrderStatus = (status) => {
     const orderDataFromStorage = getOrderFromStorage();
     const updatedOrder = { ...orderDataFromStorage, status };
-    
-    orderService.setCurrentOrderToStorage(updatedOrder, photographer.photographId);
+
+    orderService.setCurrentOrderToStorage(
+      updatedOrder,
+      photographer.photographId
+    );
     setOrderData(updatedOrder);
   };
 

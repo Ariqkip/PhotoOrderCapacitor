@@ -13,6 +13,7 @@ class PluginAddController: CAPBridgeViewController {
     // additional code
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(FindDBFilePlugin())
+        bridge?.registerPluginInstance(FindPhotoPlugin())
     }
 }
 

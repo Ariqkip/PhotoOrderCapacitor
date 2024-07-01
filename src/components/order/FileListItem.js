@@ -71,15 +71,20 @@ const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
   const [unsavedImgData, setUnsavedImgData] = useState();
 
   const handleAddQuantity = () => {
-    const orderData = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
-    const updatedOrderItems = orderData.orderItems.map(item => {
+    const orderData = JSON.parse(
+      orderService.getCurrentOrderFromStorage(photographer.photographId)
+    );
+    const updatedOrderItems = orderData.orderItems.map((item) => {
       if (item.guid === file.guid) {
         item.qty++;
       }
       return item;
     });
-    orderService.setCurrentOrderToStorage({ ...orderData, orderItems: updatedOrderItems }, photographer.photographId);
-  
+    orderService.setCurrentOrderToStorage(
+      { ...orderData, orderItems: updatedOrderItems },
+      photographer.photographId
+    );
+
     setQty(qty + 1);
     orderDispatch({
       type: 'INCREASE_ORDER_ITEM_QTY',
@@ -88,9 +93,11 @@ const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
   };
 
   const handleRemoveQuantity = () => {
-    const orderData = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+    const orderData = JSON.parse(
+      orderService.getCurrentOrderFromStorage(photographer.photographId)
+    );
     const updatedOrderItems = orderData.orderItems
-      .map(item => {
+      .map((item) => {
         if (item.guid === file.guid) {
           if (item.qty > 1) {
             item.qty--;
@@ -98,9 +105,12 @@ const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
         }
         return item;
       })
-      .filter(item => item.qty > 0);
-    orderService.setCurrentOrderToStorage({ ...orderData, orderItems: updatedOrderItems }, photographer.photographId);
-    
+      .filter((item) => item.qty > 0);
+    orderService.setCurrentOrderToStorage(
+      { ...orderData, orderItems: updatedOrderItems },
+      photographer.photographId
+    );
+
     setQty(qty - 1 >= 1 ? qty - 1 : 1);
     orderDispatch({
       type: 'DECRESE_ORDER_ITEM_QTY',
@@ -111,7 +121,7 @@ const FileListItem = ({ file, key, hideIncrease, hideQuantity }) => {
   return (
     <Paper square key={key} className={classes.root}>
       <img
-        src={file.fileUrl || unsavedImgData}
+        src={file.fileUrl || unsavedImgData || 'test'}
         className={classes.thumbnail}
         alt={file.fileName}
       />

@@ -1,3 +1,4 @@
+import { Filesystem, Directory } from '@capacitor/filesystem';
 import legacy from '../core/legacyAPI';
 import api from '../core/newAPI';
 
@@ -104,23 +105,25 @@ const OrderService = () => {
       return result;
     });
 
-    const orderData = JSON.parse(getCurrentOrderFromStorage(photographer.photographId));
-    
+    const orderData = JSON.parse(
+      getCurrentOrderFromStorage(photographer.photographId)
+    );
+
     const body = {
       FirstName: orderData?.firstName,
       LastName: orderData?.lastName,
       Phone: orderData?.phone,
       Email: orderData?.email,
-      StreetAddress: orderData?.shippingStreet || "",
-      City: orderData?.shippingCity || "",
-      Country: orderData?.shippingCountry || "",
-      ZipCode: orderData?.shippingZip || "",
+      StreetAddress: orderData?.shippingStreet || '',
+      City: orderData?.shippingCity || '',
+      Country: orderData?.shippingCountry || '',
+      ZipCode: orderData?.shippingZip || '',
       IsShippingChoosen: orderData.shippingSelected,
       OrderGuid: order.orderGuid,
       OrderItems: orderedItems,
       PaymentMethod: order.paymentMethod,
     };
-    
+
     setAuthUser({
       ...authUser,
       firstName: orderData.firstName,
@@ -132,21 +135,18 @@ const OrderService = () => {
       city: orderData.shippingCity,
       country: orderData.shippingCountry,
       lastOrderId: orderData.orderId,
-    })
+    });
 
     const totalCost = order.orderItems.reduce((accumulator, currentItem) => {
       return accumulator + parseFloat(currentItem.price);
     }, 0);
-    
-    await setLocalStorageOrder(
-      photographer.photographId, 
-      { 
-        ...body, 
-        Price: totalCost || 0, 
-        OrderId: orderData.orderId, 
-        Status: 'Sent'
-      }
-    )
+
+    await setLocalStorageOrder(photographer.photographId, {
+      ...body,
+      Price: totalCost || 0,
+      OrderId: orderData.orderId,
+      Status: 'Sent',
+    });
 
     removeOrderFromLocalStorage(photographer.photographId);
 
@@ -156,8 +156,8 @@ const OrderService = () => {
       window.open(vivawalletUrl);
     }
     const response = legacy.put(endpoint, body);
-    return response
-  }
+    return response;
+  };
 
   function MarkOrderAsDone(order) {
     const endpoint = `orders/${order.orderId}/done`;
@@ -174,7 +174,7 @@ const OrderService = () => {
       TrackingGuid: model.fileGuid,
       Attributes: model.attributes,
     };
-    console.log('image data from device' ,JSON.stringify(body, null, 3))
+    console.log('image data from device', JSON.stringify(body, null, 3));
     return legacy.post(endpoint, body);
   }
 
@@ -182,7 +182,7 @@ const OrderService = () => {
     try {
       const currentTime = new Date().getTime().toString();
       const serializedValue = JSON.stringify({ ...orderData, currentTime });
-      
+
       localStorage.setItem(`${userId}_${currentTime}`, serializedValue);
     } catch (error) {
       console.error('Error setting localStorage item:', error);
@@ -193,7 +193,7 @@ const OrderService = () => {
     const items = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      
+
       if (key.startsWith(`${userId}_`)) {
         const value = localStorage.getItem(key);
         items.push({ key, value });
@@ -206,37 +206,45 @@ const OrderService = () => {
     try {
       const currentData = localStorage.getItem(userId);
       let mergedData = {};
-      
+
       if (currentData) {
         mergedData = JSON.parse(currentData);
       }
-  
+
       mergedData = { ...mergedData, ...orderData };
-      
+
       if (mergedData.orderItems && mergedData.orderItems.length > 0) {
-        mergedData.orderItems.forEach(orderItem => {
-            orderItem.fileAsBase64 = "";
+        mergedData.orderItems.forEach((orderItem) => {
+          orderItem.fileAsBase64 = '';
         });
       }
-  
+
       if (mergedData.shippingSelected === false) {
-        const { shippingCountry, shippingStreet, shippingZip, shippingCity, ...rest } = mergedData;
+        const {
+          shippingCountry,
+          shippingStreet,
+          shippingZip,
+          shippingCity,
+          ...rest
+        } = mergedData;
         mergedData = rest;
       }
-  
+
       const serializedValue = JSON.stringify(mergedData);
-      
       localStorage.setItem(userId, serializedValue);
+      if (!serializedValue.endsWith('}')) {
+        debugger;
+      }
     } catch (err) {
       console.error('Error setting localStorage item:', err);
     }
-  };  
+  };
 
   const getCurrentOrderFromStorage = (userId) => {
     try {
       return localStorage.getItem(userId);
     } catch (err) {
-      console.error('Error setting localStorage item:', err);
+      console.error('Error getting localStorage item:', err);
     }
   };
 
@@ -246,7 +254,68 @@ const OrderService = () => {
     } catch (err) {
       console.error('Error setting localStorage item:', err);
     }
-  }
+  };
+
+  const shortPathForFile = (path) => {
+    return 'file-with-path' + path?.split('/').slice(-2).join('-');
+  };
+  const setBase64DataWithFilePath = async (path, base64data) => {
+    if (!path || !base64data) {
+      return;
+    }
+    console.log(
+      'setBase64DataWithFilePath:',
+      path,
+      'data length ',
+      base64data?.length,
+      'short',
+      shortPathForFile(path)
+    );
+    try {
+      await Filesystem.writeFile({
+        path: shortPathForFile(path),
+        data: base64data,
+        directory: Directory.Documents,
+        encoding: 'utf8',
+      });
+    } catch (error) {
+      console.error('Error setting file data:', error);
+    }
+  };
+
+  const getBase64DataWithFilePath = async (path) => {
+    console.log(
+      'getBase64DataWithFilePath:',
+      path,
+      'short',
+      shortPathForFile(path)
+    );
+    try {
+      const file = await Filesystem.readFile({
+        path: shortPathForFile(path),
+        directory: Directory.Documents,
+        encoding: 'utf8',
+      });
+      return file.data;
+    } catch (err) {
+      console.error('Error getting file data:', err);
+    }
+  };
+
+  const removeBase64DataWithFilePath = async (path) => {
+    try {
+      await Filesystem.deleteFile({
+        path: shortPathForFile(path),
+      });
+    } catch (err) {
+      console.error(
+        'Error setting localStorage item:',
+        err,
+        'short',
+        shortPathForFile(path)
+      );
+    }
+  };
 
   return {
     GetPhotographer,
@@ -260,7 +329,10 @@ const OrderService = () => {
     setCurrentOrderToStorage,
     getCurrentOrderFromStorage,
     setLocalStorageOrder,
-    removeOrderFromLocalStorage
+    removeOrderFromLocalStorage,
+    getBase64DataWithFilePath,
+    removeBase64DataWithFilePath,
+    setBase64DataWithFilePath,
   };
 };
 

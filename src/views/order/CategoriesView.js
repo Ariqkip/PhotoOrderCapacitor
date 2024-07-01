@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: '60px',
     paddingRight: '60px',
     paddingTop: '8px',
-    paddingBottom: '8px'
+    paddingBottom: '8px',
   },
   grid: {
     flexGrow: 1,
@@ -71,7 +71,7 @@ function RenderSkeletonList() {
 const CategoriesView = (props) => {
   const classes = useStyles();
   const { t } = useTranslation();
-  const history = useHistory(); 
+  const history = useHistory();
 
   const [photographer, dispatch] = usePhotographer();
   const productsQuery = useGetProducts(photographer?.photographId ?? 0);
@@ -80,156 +80,164 @@ const CategoriesView = (props) => {
 
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState({
-    modalTitle: "",
-    modalButtonText: "",
-    modalButtonPath: ""
+    modalTitle: '',
+    modalButtonText: '',
+    modalButtonPath: '',
   });
 
   useEffect(() => {
     async function initOrder() {
+
+      // read xamarin unsaved image
+      const isUnsavedImagesUploaded = localStorage.getItem(
+        'isUnsavedImagesUploaded'
+      );
       let unsavedImages = [];
-      
-      try {
-        unsavedImages = await DatabaseService.getUnsavedImages();
-      } catch (error) {
-        console.error('Error getting unsaved images:', error);
+      if (!isUnsavedImagesUploaded) {
+        try {
+          unsavedImages = await DatabaseService.getUnsavedImages();
+        } catch (error) {
+          console.error('Error getting unsaved images from xamarin db:', error);
+        }
+        console.log('unsavedImages', unsavedImages);
       }
 
-      const isUnsavedImagesUploaded = localStorage.getItem("isUnsavedImagesUploaded");
+      const isHaveUnsavedImages =
+        unsavedImages && unsavedImages?.length > 0 && !isUnsavedImagesUploaded;
 
-      const isHaveUnsavedImages = 
-        unsavedImages && 
-        unsavedImages?.length > 0 && 
-        !isUnsavedImagesUploaded
-
-      const orderDataFromStorage = JSON.parse(orderService.getCurrentOrderFromStorage(photographer.photographId));
+      const orderDataFromStorage =
+        JSON.parse(
+          orderService.getCurrentOrderFromStorage(photographer.photographId)
+        ) || {};
 
       const isHasOrderItems = orderDataFromStorage?.orderItems?.length > 0;
-      const isUnsavedFilesExists = orderDataFromStorage?.orderItems?.every(item => item.status === "success");
-      
-      if (isHaveUnsavedImages) { 
+      const isUnsavedFilesExists = orderDataFromStorage?.orderItems?.every(
+        (item) => item.status === 'success'
+      );
+
+      if (isHaveUnsavedImages) {
         setShowModal(true);
 
         setModalContent({
-          modalTitle: 'Your last order was not finish, please open "Last Orders" tab and reload orders',
-          modalButtonText: "Go to the order details",
-          modalButtonPath: "last-orders"
-        })
+          modalTitle:
+            'Your last order was not finish, please open "Last Orders" tab and reload orders',
+          modalButtonText: 'Go to the order details',
+          modalButtonPath: 'last-orders',
+        });
 
-        const preparedUnsavedImages = unsavedImages.map(item => {
+        const preparedUnsavedImages = unsavedImages.map((item) => {
           return {
             filePath: item.ImagePath,
             categoryId: item.categoryId,
             productId: item.ProductId,
-            guid: createGuid() 
-          }
-        }) 
+            guid: createGuid(),
+          };
+        });
+
+        OrderService().setLocalStorageOrder(photographer.photographId, {
+          FirstName: '',
+          LastName: '',
+          Phone: '',
+          Email: '',
+          StreetAddress: '',
+          City: '',
+          Country: '',
+          ZipCode: '',
+          IsShippingChoosen: false,
+          OrderGuid: orderDataFromStorage.orderGuid,
+          OrderItems: preparedUnsavedImages,
+          PaymentMethod: orderDataFromStorage.paymentMethod,
+          Status: 'Unsent',
+          UnsavedFiles: [],
+        });
+
+        OrderService().removeOrderFromLocalStorage(photographer.photographId);
 
         OrderService()
-          .setLocalStorageOrder(
-            photographer.photographId, 
-            {
-              FirstName: "",
-              LastName: "",
-              Phone: "",
-              Email: "",
-              StreetAddress: "",
-              City: "",
-              Country: "",
-              ZipCode: "",
-              IsShippingChoosen: false,
-              OrderGuid: orderDataFromStorage.orderGuid,
-              OrderItems: preparedUnsavedImages,
-              PaymentMethod: orderDataFromStorage.paymentMethod,
-              Status: 'Unsent',
-              UnsavedFiles: []
-            }
-          )
-        
-        OrderService().removeOrderFromLocalStorage(photographer.photographId)
-
-        OrderService()
-            .CreateOrder(photographer.photographId)
-            .then((resp) => {
-              orderService.setCurrentOrderToStorage({
+          .CreateOrder(photographer.photographId)
+          .then((resp) => {
+            orderService.setCurrentOrderToStorage(
+              {
                 photographerId: photographer.photographId,
                 orderId: resp.data.Id,
                 orderGuid: resp.data.OrderGuid,
-                phone: "",
-                email: "",
-                firstName: "",
-                lastName: "",
+                phone: '',
+                email: '',
+                firstName: '',
+                lastName: '',
                 shippingSelected: resp.data.IsShippingChoosen,
                 status: 'INITIALIZED',
                 unsavedFiles: [],
                 orderItems: [],
-                orderItemsConfig: []
-              }, photographer.photographId)
-              orderDispatch({
-                type: 'CREATE',
-                payload: {
-                  PhotographerId: photographer.photographId,
-                  OrderId: resp.data.Id,
-                  OrderGuid: resp.data.OrderGuid,
-                  Phone: resp.data.Phone,
-                  Email: resp.data.Email,
-                  FirstName: resp.data.FirstName,
-                  LastName: resp.data.LastName,
-                  IsShippingChoosen: resp.data.IsShippingChoosen,
-                },
-              });
-            })
+                orderItemsConfig: [],
+              },
+              photographer.photographId
+            );
+            orderDispatch({
+              type: 'CREATE',
+              payload: {
+                PhotographerId: photographer.photographId,
+                OrderId: resp.data.Id,
+                OrderGuid: resp.data.OrderGuid,
+                Phone: resp.data.Phone,
+                Email: resp.data.Email,
+                FirstName: resp.data.FirstName,
+                LastName: resp.data.LastName,
+                IsShippingChoosen: resp.data.IsShippingChoosen,
+              },
+            });
+          });
 
-        localStorage.setItem("isUnsavedImagesUploaded", "true");
+        localStorage.setItem('isUnsavedImagesUploaded', 'true');
       } else if (isHasOrderItems) {
         setShowModal(true);
         if (!isUnsavedFilesExists) {
           setModalContent({
-            modalTitle: 'Your last order was not finish, please open "Last Orders" tab and reload orders',
-            modalButtonText: "Go to the order details",
-            modalButtonPath: "last-orders"
-          })
-  
-          OrderService()
-            .setLocalStorageOrder(
-              photographer.photographId, 
-              {
-                FirstName: orderDataFromStorage?.firstName || "",
-                LastName: orderDataFromStorage?.lastName || "",
-                Phone: orderDataFromStorage?.phone || "",
-                Email: orderDataFromStorage?.email || "",
-                StreetAddress: orderDataFromStorage?.shippingStreet || "",
-                City: orderDataFromStorage?.shippingCity || "",
-                Country: orderDataFromStorage?.shippingCountry || "",
-                ZipCode: orderDataFromStorage?.shippingZip || "",
-                IsShippingChoosen: orderDataFromStorage.shippingSelected || false,
-                OrderGuid: orderDataFromStorage.orderGuid,
-                OrderItems: orderDataFromStorage.orderItems,
-                PaymentMethod: orderDataFromStorage.paymentMethod,
-                Status: 'Unsent',
-                UnsavedFiles: orderDataFromStorage?.unsavedFiles
-              }
-            )
-          
-          OrderService().removeOrderFromLocalStorage(photographer.photographId)
-          
+            modalTitle:
+              'Your last order was not finish, please open "Last Orders" tab and reload orders',
+            modalButtonText: 'Go to the order details',
+            modalButtonPath: 'last-orders',
+          });
+
+          OrderService().setLocalStorageOrder(photographer.photographId, {
+            FirstName: orderDataFromStorage?.firstName || '',
+            LastName: orderDataFromStorage?.lastName || '',
+            Phone: orderDataFromStorage?.phone || '',
+            Email: orderDataFromStorage?.email || '',
+            StreetAddress: orderDataFromStorage?.shippingStreet || '',
+            City: orderDataFromStorage?.shippingCity || '',
+            Country: orderDataFromStorage?.shippingCountry || '',
+            ZipCode: orderDataFromStorage?.shippingZip || '',
+            IsShippingChoosen: orderDataFromStorage.shippingSelected || false,
+            OrderGuid: orderDataFromStorage.orderGuid,
+            OrderItems: orderDataFromStorage.orderItems,
+            PaymentMethod: orderDataFromStorage.paymentMethod,
+            Status: 'Unsent',
+            UnsavedFiles: orderDataFromStorage?.unsavedFiles,
+          });
+
+          OrderService().removeOrderFromLocalStorage(photographer.photographId);
+
           OrderService()
             .CreateOrder(photographer.photographId)
             .then((resp) => {
-              orderService.setCurrentOrderToStorage({
-                photographerId: photographer.photographId,
-                orderId: resp.data.Id,
-                orderGuid: resp.data.OrderGuid,
-                phone: "",
-                email: "",
-                firstName: "",
-                lastName: "",
-                shippingSelected: resp.data.IsShippingChoosen,
-                status: 'INITIALIZED',
-                unsavedFiles: [],
-                orderItems: [],
-                orderItemsConfig: []
-              }, photographer.photographId)
+              orderService.setCurrentOrderToStorage(
+                {
+                  photographerId: photographer.photographId,
+                  orderId: resp.data.Id,
+                  orderGuid: resp.data.OrderGuid,
+                  phone: '',
+                  email: '',
+                  firstName: '',
+                  lastName: '',
+                  shippingSelected: resp.data.IsShippingChoosen,
+                  status: 'INITIALIZED',
+                  unsavedFiles: [],
+                  orderItems: [],
+                  orderItemsConfig: [],
+                },
+                photographer.photographId
+              );
               orderDispatch({
                 type: 'CREATE',
                 payload: {
@@ -243,14 +251,15 @@ const CategoriesView = (props) => {
                   IsShippingChoosen: resp.data.IsShippingChoosen,
                 },
               });
-            })
+            });
         } else {
-          const { productId, categoryId } = orderDataFromStorage?.orderItems?.[0]
+          const { productId, categoryId } =
+            orderDataFromStorage?.orderItems?.[0];
           setModalContent({
             modalTitle: 'You have photos ready to send',
-            modalButtonText: "Ok",
-            modalButtonPath: ""
-          })
+            modalButtonText: 'Ok',
+            modalButtonPath: '',
+          });
         }
       }
     }
@@ -306,13 +315,17 @@ const CategoriesView = (props) => {
       <BanerSlider photographerId={photographer.photographId} />
       <Dialog open={showModal} onClose={() => setShowModal(false)}>
         <DialogTitle>{modalContent.modalTitle}</DialogTitle>
-        <DialogActions style={{ justifyContent: "center"}}>
-          <Button onClick={() => {
-            setShowModal(false)
-            if (modalContent.modalButtonPath) {
-              history.push(`/photographer/${photographer.photographId}/${modalContent.modalButtonPath}`);
-            }
-          }}>
+        <DialogActions style={{ justifyContent: 'center' }}>
+          <Button
+            onClick={() => {
+              setShowModal(false);
+              if (modalContent.modalButtonPath) {
+                history.push(
+                  `/photographer/${photographer.photographId}/${modalContent.modalButtonPath}`
+                );
+              }
+            }}
+          >
             {modalContent.modalButtonText}
           </Button>
         </DialogActions>
