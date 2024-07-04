@@ -92,9 +92,20 @@ export function OrderReducer(state = INIT_STATE, action) {
       return { ...state, orderItems: [...state.orderItems, action.payload] };
 
     case 'ADD_ORDER_ITEMS_AT_END':
-      const newItems = action.payload.filter((newItem) => !state.orderItems.some((existingItem) => existingItem.guid === newItem.guid));
+      const newItems = action.payload.filter(
+        (newItem) =>
+          !state.orderItems.some(
+            (existingItem) => existingItem.guid === newItem.guid
+          )
+      );
       return { ...state, orderItems: [...state.orderItems, ...newItems] };
-      
+    case 'REMOVE_ORDER_ITEM':
+      return {
+        ...state,
+        orderItems: state.orderItems.filter(
+          (item) => item.guid != action.payload.guid
+        ),
+      };
     case 'REPLACE_ORDER_ITEM':
       const replacedOrderItems = [
         ...state.orderItems.map((item) => {

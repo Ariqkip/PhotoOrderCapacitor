@@ -174,7 +174,15 @@ const OrderService = () => {
       TrackingGuid: model.fileGuid,
       Attributes: model.attributes,
     };
-    console.log('image data from device', JSON.stringify(body, null, 3));
+    console.log(
+      'image data from device',
+      JSON.stringify(body, (k, v) => {
+        if (k === 'FileAsBase64') {
+          return v.length;
+        }
+        return v;
+      })
+    );
     return legacy.post(endpoint, body);
   }
 
@@ -202,6 +210,7 @@ const OrderService = () => {
     return items;
   };
 
+  var previousCount = 0;
   const setCurrentOrderToStorage = (orderData, userId) => {
     try {
       const currentData = localStorage.getItem(userId);
@@ -228,6 +237,14 @@ const OrderService = () => {
           ...rest
         } = mergedData;
         mergedData = rest;
+      }
+
+      if (previousCount != mergedData.orderItems?.length) {
+        previousCount = mergedData.orderItems?.length;
+        console.log(
+          'setCurrentOrderToStorage order count',
+          mergedData.orderItems?.length
+        );
       }
 
       const serializedValue = JSON.stringify(mergedData);

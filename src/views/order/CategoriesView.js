@@ -87,7 +87,6 @@ const CategoriesView = (props) => {
 
   useEffect(() => {
     async function initOrder() {
-
       // read xamarin unsaved image
       const isUnsavedImagesUploaded = localStorage.getItem(
         'isUnsavedImagesUploaded'
@@ -101,7 +100,7 @@ const CategoriesView = (props) => {
         }
         console.log('unsavedImages', unsavedImages);
       }
-
+      
       const isHaveUnsavedImages =
         unsavedImages && unsavedImages?.length > 0 && !isUnsavedImagesUploaded;
 

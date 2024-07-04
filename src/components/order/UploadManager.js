@@ -96,27 +96,24 @@ const UploadManager = (props) => {
               unsavedFiles
             ),
           });
-          if (Capacitor.getPlatform() === 'ios') {
-            setTimeout(() => {
-              OrderService().removeBase64DataWithFilePath(
-                itemToUpload.filePath
-              );
-            }, 1);
-          }
         },
         (err) => {
           setCurrentOrderToStorage({
+            fileName: itemToUpload.fileName,
             guid: itemToUpload.guid,
             status: 'failed',
             unsavedFiles,
+            err,
           });
         }
       )
       .catch((err) => {
         setCurrentOrderToStorage({
+          fileName: itemToUpload.fileName,
           guid: itemToUpload.guid,
           status: 'failed',
           unsavedFiles,
+          err,
         });
       });
   };
@@ -130,8 +127,23 @@ const UploadManager = (props) => {
 
   const setCurrentOrderToStorage = async (updatedOrderData) => {
     try {
-      const orderDataFromStorage = getOrderFromStorage();
+      // if upload fail, item in order will be removed
+      if (updatedOrderData.status === 'failed') {
+        console.log(
+          'upload file fail and will be removed',
+          updatedOrderData.fileName,
+          'err',
+          updatedOrderData.err
+        );
+        orderDispatch({
+          type: 'REMOVE_ORDER_ITEM',
+          payload: {
+            guid: updatedOrderData.guid,
+          },
+        });
+      }
 
+      const orderDataFromStorage = getOrderFromStorage();
       const updatedOrderItems = orderDataFromStorage?.orderItems
         .map((item) => {
           if (item.guid === updatedOrderData.guid) {

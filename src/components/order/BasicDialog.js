@@ -44,6 +44,7 @@ import Divider from '@material-ui/core/Divider';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { ContentUriResolver } from 'capacitor-content-uri-resolver';
+import TokenService from '../../services/TokenService';
 
 const placeholderImg = 'https://via.placeholder.com/400?text=No%20image';
 
@@ -194,11 +195,18 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
 
   const fileInputHandler = useCallback(async () => {
     try {
-      const result = await FilePicker.pickImages({
-        multiple: true,
-      });
+      var files = [];
+      if (Capacitor.getPlatform() === 'ios') {
+        const result = await TokenService.pickPhotoFromIOS();
+        files = result.files;
+      } else {
+        const result = await FilePicker.pickImages({
+          multiple: true,
+        });
+        files = result.files;
+      }
 
-      const iterator = result.files[Symbol.iterator]();
+      const iterator = files[Symbol.iterator]();
       let nextFile = iterator.next();
 
       const updatedOrderData = { ...orderDataFromStorage };
@@ -225,6 +233,9 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
               path: shortPath,
               directory: Directory.ExternalStorage,
             });
+          } else if (Capacitor.getPlatform() === 'ios') {
+            // for ios , do not read image data again
+            readFileResult = { data: file.data };
           } else {
             readFileResult = await Filesystem.readFile({
               path: file.path,
@@ -232,15 +243,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           }
 
           const base64Data = readFileResult.data;
-          if (Capacitor.getPlatform() === 'ios') {
-            setTimeout(() => {
-              OrderService().setBase64DataWithFilePath(
-                absolutePath || file.path,
-                base64Data
-              );
-            }, 1);
-          }
-
           const compressedFile = await getCompressedImage({
             width: file.width,
             height: file.height,
@@ -256,7 +258,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             fileUrl: 'test',
             fileName: compressedFile.file.name,
             productId: product.id,
-            filePath: absolutePath || file.path,
+            filePath: absolutePath || file.path || file.localId,
             categoryId: getProductCategory(location.pathname),
             set: pack,
             qty: 1,
@@ -277,7 +279,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
             },
           });
           executeScroll();
-
           nextFile = iterator.next();
           processNextFile();
         } else {
@@ -328,6 +329,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       orderDataFromStorage?.orderItems?.length > 0 &&
       orderDataFromStorage?.orderItems?.length !== order?.orderItems?.length
     ) {
+      // handle succeed orders
       const successsOrderData = orderDataFromStorage?.orderItems
         ? orderDataFromStorage?.orderItems?.filter(
             (item) => item.status === 'success'
@@ -356,21 +358,6 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       orderItems: [],
       unsavedFiles: [],
     };
-    if (Capacitor.getPlatform() == 'ios') {
-      setTimeout(() => {
-        orderDataFromStorage.orderItem?.map((item) => {
-          if (item.filePath) {
-            OrderService().removeBase64DataWithFilePath(item.filePath);
-          }
-        });
-        orderDataFromStorage.unsavedFiles?.map((item) => {
-          if (item.filePath) {
-            OrderService().removeBase64DataWithFilePath(item.filePath);
-          }
-        });
-      }, 1);
-    }
-
     orderService.setCurrentOrderToStorage(
       updatedOrderData,
       photographer.photographId
@@ -416,34 +403,39 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     );
     console.log('handleReupload ', reuploadItems);
 
+    const updatedOrderData = { ...orderDataFromStorage, unsavedFiles: [] };
     for (const itemObj of filesToReupload) {
       try {
         let imgObj = {};
-
         try {
           if (Capacitor.getPlatform() === 'ios') {
-            if (itemObj.fileAsBase64) {
-              imgObj = {
-                data: itemObj.fileAsBase64,
-                name: itemObj.fileName,
-              };
-            } else if (itemObj.filePath.startsWith('file://')) {
+            if (itemObj.filePath.startsWith('file://')) {
               // for ios is from doc dir
               const base64data = await OrderService().getBase64DataWithFilePath(
                 itemObj.filePath
               );
               imgObj = {
                 data: base64data,
-                name: itemObj.filePath.split('/').pop(),
+                name: itemObj.fileName ?? itemObj.filePath.split('/').pop(),
               };
             } else {
               // for ios is from photo library
-              const base64data = await DatabaseService.getImageData({
-                LocalImageId: itemObj.filePath,
+              const photo = await TokenService.fetchiOSPhotoDataByID(
+                itemObj.filePath
+              );
+              const compressedFile = await getCompressedImage({
+                width: photo.width,
+                height: photo.height,
+                maxSize: product.size,
+                file: { data: photo.data, name: itemObj.fileName },
               });
+
               imgObj = {
-                data: base64data,
-                name: itemObj.filePath.split('/').pop(),
+                data: compressedFile.fileAsBase64,
+                name:
+                  photo.name ||
+                  itemObj.fileName ||
+                  itemObj.filePath.split('/').pop(),
               };
             }
           } else {
@@ -476,13 +468,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
           status: 'idle',
         };
 
-        const updatedOrderData = { ...orderDataFromStorage, unsavedFiles: [] };
         updatedOrderData?.orderItems.push(orderItem);
-        orderService.setCurrentOrderToStorage(
-          updatedOrderData,
-          photographer.photographId
-        );
-
         orderDispatch({
           type: 'ADD_ORDER_ITEM',
           payload: { ...orderItem, fileAsBase64: imgObj.data },
@@ -491,6 +477,10 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
         console.error('Error fetching image:', error);
       }
     }
+    orderService.setCurrentOrderToStorage(
+      updatedOrderData,
+      photographer.photographId
+    );
 
     setIsReadyReupload(false);
   };

@@ -7,7 +7,7 @@ export const isHeicFile = (fileName) => {
 
 const replaceFileName = (fileName) => {
   return fileName?.replace('.heic', '.jpg');
-}
+};
 
 const convertHeicToJpg = async (heicBlob) => {
   try {
@@ -31,18 +31,23 @@ const getScaleFactor = (maxSize, maxDimension) => {
       return maxSize / maxDimension;
     }
   } else if (maxDimension > maxFinalSize) {
-    return  maxFinalSize / maxDimension;
+    return maxFinalSize / maxDimension;
   }
 
   return baseScaleFactor;
-}
+};
 
-export const getCompressedImage = async ({ width, height, maxSize = 0, file }) => {
+export const getCompressedImage = async ({
+  width,
+  height,
+  maxSize = 0,
+  file,
+}) => {
   const maxDimension = Math.max(width, height);
   const scaleFactor = getScaleFactor(maxSize, maxDimension);
   const newWidth = Math.round(width * scaleFactor);
   const newHeight = Math.round(height * scaleFactor);
-  
+
   const options = {
     maxSizeMB: 3,
     maxWidthOrHeight: Math.max(newWidth, newHeight),
@@ -60,13 +65,21 @@ export const getCompressedImage = async ({ width, height, maxSize = 0, file }) =
 
   try {
     // If the file is HEIC, use its converted Blob for compression
-    const compressedBlob = isHeic ? convertedBlob : await imageCompression(blob, options);
+    const compressedBlob = isHeic
+      ? convertedBlob
+      : await imageCompression(blob, options);
 
     // Create a file to send to the server
-    const resultFile = new File([compressedBlob], isHeic ? file.name : replaceFileName(file.name), { type: "image/jpeg" });
+    const resultFile = new File(
+      [compressedBlob],
+      isHeic ? file.name : replaceFileName(file.name),
+      { type: 'image/jpeg' }
+    );
 
     // If the file is HEIC, convert its base64 data to JPEG format
-    const fileAsBase64 = isHeic ? await convertBlobToBase64(compressedBlob) : file.data;
+    const fileAsBase64 = isHeic
+      ? await convertBlobToBase64(compressedBlob)
+      : file.data;
 
     return { file: resultFile, fileAsBase64 };
   } catch (error) {

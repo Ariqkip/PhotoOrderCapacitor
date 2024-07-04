@@ -145,18 +145,9 @@ class DatabaseService {
 
   async getImageData(imgObj) {
     try {
-      if (Capacitor.getPlatform() == 'ios') {
+      if (Capacitor.getPlatform() === 'ios') {
         //从相册读取照片
-        const imageData = await FindPhotoIniOS.fetchPhotoData({
-          localIdentifier: imgObj.LocalImageId,
-        });
-        console.log(
-          'fetchPhotoData id',
-          imgObj.LocalImageId,
-          'imageData',
-          imageData
-        );
-        return imageData.data;
+        return await this.fetchiOSPhotoDataByID(imgObj.LocalImageId)?.data;
       } else {
         const imageData = await this.getImageFromDevice(imgObj.imagePath);
         return imageData;
@@ -193,6 +184,18 @@ class DatabaseService {
       console.error('Error getting image from device:', error);
       throw error;
     }
+  }
+
+  async pickPhotoFromIOS() {
+    // {files:[{localId,data}]} // data is represent by base64 of jpeg data
+    return await FindPhotoIniOS.pickPhotos();
+  }
+
+  // return data is represent by base64 of jpeg data
+  async fetchiOSPhotoDataByID(localID) {
+    return await FindPhotoIniOS.fetchPhotoData({
+      localIdentifier: localID,
+    });
   }
 
   getShortImagePath(path) {

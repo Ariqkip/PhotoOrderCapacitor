@@ -161,64 +161,64 @@ const LastOrdersView = () => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (orders.length) {
-        try {
-          const updatedOrders = await Promise.all(
-            orders.map(async (order) => {
-              const imageUrlsPromises = order.OrderItems.map(async (item) => {
-                try {
-                  if (Capacitor.getPlatform() === 'ios') {
-                    if (item.filePath.startsWith('file://')) {
-                      return await OrderService().getBase64DataWithFilePath(
-                        item.filePath
-                      );
-                    } else {
-                      return await DatabaseService.getImageData({
-                        LocalImageId: item.filePath,
-                      });
-                    }
-                  }
-                  const imageUrl =
-                    await DatabaseService.getLastOrderImageFromDevice(
-                      item.FilePath
-                    );
-                  return imageUrl.data;
-                } catch (error) {
-                  console.error(
-                    `Error fetching image for item ${item.FilePath}:`,
-                    error
-                  );
-                  return null;
-                }
-              });
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (orders.length) {
+  //       try {
+  //         const updatedOrders = await Promise.all(
+  //           orders.map(async (order) => {
+  //             const imageUrlsPromises = order.OrderItems.map(async (item) => {
+  //               try {
+  //                 if (Capacitor.getPlatform() === 'ios') {
+  //                   if (item.filePath.startsWith('file://')) {
+  //                     return await OrderService().getBase64DataWithFilePath(
+  //                       item.filePath
+  //                     );
+  //                   } else {
+  //                     return await TokenService.fetchiOSPhotoDataByID(
+  //                       item.filePath
+  //                     );
+  //                   }
+  //                 }
+  //                 const imageUrl =
+  //                   await DatabaseService.getLastOrderImageFromDevice(
+  //                     item.FilePath
+  //                   );
+  //                 return imageUrl.data;
+  //               } catch (error) {
+  //                 console.error(
+  //                   `Error fetching image for item ${item.FilePath}:`,
+  //                   error
+  //                 );
+  //                 return null;
+  //               }
+  //             });
 
-              const imageUrls = (await Promise.all(imageUrlsPromises)).filter(
-                (url) => url !== null
-              );
+  //             const imageUrls = (await Promise.all(imageUrlsPromises)).filter(
+  //               (url) => url !== null
+  //             );
 
-              return { ...order, imageUrls };
-            })
-          );
-          setOrders(updatedOrders);
-        } catch (err) {
-          console.error('Error fetching images:', err);
-          throw err;
-        }
-      }
-    };
+  //             return { ...order, imageUrls };
+  //           })
+  //         );
+  //         setOrders(updatedOrders);
+  //       } catch (err) {
+  //         console.error('Error fetching images:', err);
+  //         throw err;
+  //       }
+  //     }
+  //   };
 
-    fetchData();
-  }, [orders.length]);
+  //   fetchData();
+  // }, [orders.length]);
 
-  const toggleImages = (index) => {
-    setOrders((prevOrders) => {
-      const updatedOrders = [...prevOrders];
-      updatedOrders[index].expanded = !updatedOrders[index].expanded;
-      return updatedOrders;
-    });
-  };
+  // const toggleImages = (index) => {
+  //   setOrders((prevOrders) => {
+  //     const updatedOrders = [...prevOrders];
+  //     updatedOrders[index].expanded = !updatedOrders[index].expanded;
+  //     return updatedOrders;
+  //   });
+  // };
 
   const getOrderTime = (timestamp) => {
     const date = new Date(parseInt(timestamp, 10));
@@ -264,6 +264,7 @@ const LastOrdersView = () => {
         guid: orderData.guid,
         productId: orderData.productId,
         status: orderData.status,
+        fileName: orderData.fileName,
       };
     });
     const successOrderItems = order?.OrderItems.filter(
