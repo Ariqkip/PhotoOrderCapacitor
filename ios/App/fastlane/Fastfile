@@ -1,0 +1,9 @@
+platform :ios do
+  desc "Export iOS app as .xcarchive"
+  lane :export_ipa do
+    increment_build_number
+    build_app(scheme: "App")
+    export_ipa(export_method: "app-store")
+  end
+end
+
