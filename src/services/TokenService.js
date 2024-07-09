@@ -149,7 +149,7 @@ class DatabaseService {
         //从相册读取照片
         return await this.fetchiOSPhotoDataByID(imgObj.LocalImageId)?.data;
       } else {
-        const imageData = await this.getImageFromDevice(imgObj.imagePath);
+        const imageData = await this.getImageFromDevice(imgObj?.ImagePath);
         return imageData;
       }
     } catch (error) {
