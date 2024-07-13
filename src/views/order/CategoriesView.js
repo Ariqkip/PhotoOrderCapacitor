@@ -212,6 +212,7 @@ const CategoriesView = (props) => {
             OrderItems: orderDataFromStorage.orderItems,
             PaymentMethod: orderDataFromStorage.paymentMethod,
             Status: 'Unsent',
+            OrderId: orderDataFromStorage?.orderId,
             UnsavedFiles: orderDataFromStorage?.unsavedFiles,
           });
 

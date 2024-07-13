@@ -2,6 +2,9 @@
   "name": "photo-order-react-2",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "20.x.x"
+  },
   "dependencies": {
     "@capacitor-community/sqlite": "^5.5.1-4",
     "@capacitor/android": "^5.6.0",
@@ -20,7 +23,7 @@
     "@testing-library/user-event": "^12.8.3",
     "axios": "^0.21.1",
     "browser-image-compression": "^2.0.2",
-    "capacitor-content-uri-resolver": "file:./capacitor-content-uri-resolver",
+    "capacitor-content-uri-resolver": "file:../capacitor-content-uri-resolver",
     "cropperjs": "^1.5.12",
     "env-cmd": "^10.1.0",
     "heic2any": "^0.0.4",

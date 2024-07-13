@@ -40,7 +40,7 @@ public class MainActivity extends BridgeActivity {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, permissions[i] + " permission granted", Toast.LENGTH_LONG).show();
+                    // Toast.makeText(this, permissions[i] + " permission granted", Toast.LENGTH_LONG).show();
                 }
             }
         }
