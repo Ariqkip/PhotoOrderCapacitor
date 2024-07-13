@@ -223,6 +223,19 @@ const UploadManager = (props) => {
                   },
                   photographer.photographId
                 );
+                orderDispatch({
+                  type: 'CREATE',
+                  payload: {
+                    PhotographerId: photographer.photographId,
+                    OrderId: resp.data.Id,
+                    OrderGuid: resp.data.OrderGuid,
+                    Phone: resp.data.Phone,
+                    Email: resp.data.Email,
+                    FirstName: resp.data.FirstName,
+                    LastName: resp.data.LastName,
+                    IsShippingChoosen: resp.data.IsShippingChoosen,
+                  },
+                });
               });
             orderDispatch({ type: 'SUCCESS' });
             orderDispatch({
