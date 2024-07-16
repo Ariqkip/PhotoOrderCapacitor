@@ -1,5 +1,5 @@
 //Core
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 //Components
 import SummaryTab from '../../components/order/SummaryTab';
@@ -28,13 +28,29 @@ const CheckoutView = (props) => {
   const { t } = useTranslation();
 
   const [order] = useOrder();
+  const [showThankYou, setShowThankYou] = useState(false);
 
-  const showThankYou = order.status === 'SUCCESS';
+  useEffect(() => {
+    let timer;
+
+    if (order.status === 'SUCCESS') {
+      setShowThankYou(true)
+    }
+
+    if (order.status !== 'SUCCESS') {
+      timer = setTimeout(() => {
+        setShowThankYou(false);
+      }, 4000);
+    }
+
+    return () => clearTimeout(timer);
+  }, [order.status]);
 
   return (
-    <>
-      {showThankYou && <ThankYouCard />}
-      {!showThankYou && (
+    <div className={classes.root}>
+      {showThankYou ? (
+        <ThankYouCard />
+      ) : (
         <>
           <SummaryTab />
           <UserBasicInfo />
@@ -42,7 +58,7 @@ const CheckoutView = (props) => {
           <UserPaymentInfo />
         </>
       )}
-    </>
+    </div>
   );
 };
 
