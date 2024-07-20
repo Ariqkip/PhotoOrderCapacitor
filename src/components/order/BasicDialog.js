@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FilePicker } from '@capawesome/capacitor-file-picker';
 import { Capacitor } from '@capacitor/core';
+import { Camera } from '@capacitor/camera';
 
 //Components
 import RoundButton from './../core/RoundButton';
@@ -402,6 +403,18 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       (item) => item.productId === product.id
     );
     console.log('handleReupload ', reuploadItems);
+
+    // check and request photo access
+    const status = await Camera.checkPermissions();
+    if (status.photos != 'granted' && status.photos === 'limited') {
+      const result = await Camera.requestPermissions({
+        permissions: ['photos'],
+      });
+      if (result.photos != 'granted' && result.photos != 'limited') {
+        alert(`Error: user deny photo access`);
+        return;
+      }
+    }
 
     const updatedOrderData = { ...orderDataFromStorage, unsavedFiles: [] };
     for (const itemObj of filesToReupload) {

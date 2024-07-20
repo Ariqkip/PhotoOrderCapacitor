@@ -68,4 +68,5 @@ build/
 
 ios/App/App.xcodeproj/xcuserdata
 ios/App/App.xcworkspace/xcuserdata
+ios/App/fastlane/report.xml
 capacitor-content-uri-resolver/package-lock.json

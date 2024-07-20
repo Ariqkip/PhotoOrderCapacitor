@@ -100,7 +100,7 @@ const CategoriesView = (props) => {
         }
         console.log('unsavedImages', unsavedImages);
       }
-      
+
       const isHaveUnsavedImages =
         unsavedImages && unsavedImages?.length > 0 && !isUnsavedImagesUploaded;
 
@@ -126,7 +126,8 @@ const CategoriesView = (props) => {
 
         const preparedUnsavedImages = unsavedImages.map((item) => {
           return {
-            filePath: item.ImagePath,
+            fileName: item.FileName,
+            filePath: item.LocalImageId,
             categoryId: item.categoryId,
             productId: item.ProductId,
             guid: createGuid(),
