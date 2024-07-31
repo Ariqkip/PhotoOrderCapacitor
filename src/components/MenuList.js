@@ -62,6 +62,7 @@ const MenuList = (props) => {
   };
 
   const renderCategories = () => {
+    const temporaryHiddenCategories = ["Calendars", "Albums"];
     return (
       <>
         <ListItem
@@ -84,23 +85,26 @@ const MenuList = (props) => {
           unmountOnExit
         >
           <List component='div' disablePadding>
-            {photographer.productCategories.map((category) => {
-              return (
-                <ListItem
-                  key={`mobile_category_${category.Id}`}
-                  className={classes.gutters}
-                  button
-                  onClick={() => props.requestClose && props.requestClose()}
-                  component={Link}
-                  to={`/photographer/${photographer.photographId}/categories/${category.Id}`}
-                >
-                  <ListItemIcon>
-                    <ArrowRightIcon />
-                  </ListItemIcon>
-                  <ListItemText>{category.Name}</ListItemText>
-                </ListItem>
-              );
-            })}
+            {photographer.productCategories
+              .filter(category => !temporaryHiddenCategories.includes(category.Name))
+              .map((category) => {
+                return (
+                  <ListItem
+                    key={`mobile_category_${category.Id}`}
+                    className={classes.gutters}
+                    button
+                    onClick={() => props.requestClose && props.requestClose()}
+                    component={Link}
+                    to={`/photographer/${photographer.photographId}/categories/${category.Id}`}
+                  >
+                    <ListItemIcon>
+                      <ArrowRightIcon />
+                    </ListItemIcon>
+                    <ListItemText>{category.Name}</ListItemText>
+                  </ListItem>
+                );
+              })
+            }
             <ListItem
               key={`mobile_uncategorized`}
               className={classes.gutters}

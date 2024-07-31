@@ -62,10 +62,10 @@ const HtmlTooltip = withStyles((theme) => ({
 const SendOrderButton = () => {
   const classes = useStyles();
   const { t } = useTranslation();
-
+  
   const orderService = OrderService();
-  const { authUser } = useContext(AuthContext);
-
+  const { authUser } = useContext(AuthContext); 
+  
   const getOrderFromStorage = () => {
     return JSON.parse(orderService.getCurrentOrderFromStorage(authUser.id));
   };
@@ -75,8 +75,7 @@ const SendOrderButton = () => {
   const [errors, setErrors] = useState([]);
   const [orderData, setOrderData] = useState();
 
-  const clearMissingValue = (value) =>
-    value === undefined || value === 'missing' ? '' : value;
+  const clearMissingValue = (value) => (value === undefined || value === 'missing' ? '' : value);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -89,29 +88,18 @@ const SendOrderButton = () => {
     const validateSendOrder = () => {
       const orderData = getOrderFromStorage();
       const newErrors = [];
-      if (!orderData) return newErrors;
 
       const validateField = (fieldName, value, options) => {
-        const error = valueValidationHelper(
-          t(fieldName),
-          clearMissingValue(value),
-          options
-        );
+        const error = valueValidationHelper(t(fieldName), clearMissingValue(value), options);
         if (error) newErrors.push(error);
       };
 
-      validateField('First name', orderData?.firstName || '', {
-        minLength: 2,
-        maxLength: 50,
-      });
-      validateField('Last name', orderData?.lastName || '', {
-        minLength: 2,
-        maxLength: 50,
-      });
-      validateField('Email', orderData?.email || '', { validate: 'email' });
-      validateField('Phone', orderData?.phone || '', { validate: 'phone' });
+      validateField('First name', orderData?.firstName || "", { minLength: 2, maxLength: 50 });
+      validateField('Last name', orderData?.lastName || "", { minLength: 2, maxLength: 50 });
+      validateField('Email', orderData?.email || "", { validate: 'email' });
+      validateField('Phone', orderData?.phone || "", { validate: 'phone' });
 
-      if (orderData.orderItems.reduce((sum, item) => sum + item.qty, 0) === 0) {
+      if (orderData?.orderItems?.reduce((sum, item) => sum + item.qty, 0) === 0) {
         newErrors.push(t('No products in the cart'));
       }
 
@@ -120,28 +108,24 @@ const SendOrderButton = () => {
 
     setErrors(validateSendOrder());
   }, [
-    order.orderItems,
-    orderData?.firstName,
-    orderData?.lastName,
-    orderData?.email,
-    orderData?.phone,
+    order.orderItems, 
+    orderData?.firstName, 
+    orderData?.lastName, 
+    orderData?.email, 
+    orderData?.phone
   ]);
 
   const handleSendOrder = () => {
     const orderData = getOrderFromStorage();
     orderDispatch({ type: 'FINALIZE' });
-    orderService.setCurrentOrderToStorage(
-      { ...orderData, status: 'FINALIZE' },
-      authUser.id
-    );
+    orderService.setCurrentOrderToStorage({ ...orderData, status: 'FINALIZE' }, authUser.id)
   };
 
   const renderChildren = () => {
     if (order.status === 'FINALIZING') {
       return (
         <>
-          {t('Sending')}{' '}
-          <CircularProgress size={22} className={classes.progress} />
+          {t('Sending')} <CircularProgress size={22} className={classes.progress} />
         </>
       );
     }
@@ -163,7 +147,7 @@ const SendOrderButton = () => {
         {renderChildren()}
       </ActiveButton>
     );
-  }
+  };
 
   return (
     <ClickAwayListener onClickAway={() => setTooltipOpen(false)}>

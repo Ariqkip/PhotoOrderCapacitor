@@ -45,8 +45,8 @@ export const getCompressedImage = async ({
 }) => {
   const maxDimension = Math.max(width, height);
   const scaleFactor = getScaleFactor(maxSize, maxDimension);
-  const newWidth = Math.round(width * scaleFactor);
-  const newHeight = Math.round(height * scaleFactor);
+  const newWidth = Math.round(width * (scaleFactor || 1));
+  const newHeight = Math.round(height * (scaleFactor || 1));
 
   const options = {
     maxSizeMB: 3,

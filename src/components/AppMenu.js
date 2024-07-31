@@ -198,6 +198,7 @@ const AppMenu = ({ photographerId }) => {
   };
 
   const renderCategories = () => {
+    const temporaryHiddenCategories = ["Calendars", "Albums"];
     return (
       <div>
         <Typography
@@ -225,8 +226,9 @@ const AppMenu = ({ photographerId }) => {
             <ListItemText primary={t('All categoires')} />
           </MenuItem>
           <Divider />
-          {photographer.productCategories.map((category) => {
-            return (
+          {photographer.productCategories
+            .filter(category => !temporaryHiddenCategories.includes(category.Name))
+            .map(category => (
               <MenuItem
                 key={category.Id}
                 onClick={() => redirectToCategory(category.Id)}
@@ -236,8 +238,8 @@ const AppMenu = ({ photographerId }) => {
                 </ListItemIcon>
                 <ListItemText primary={category.Name} />
               </MenuItem>
-            );
-          })}
+            ))
+          }
           <MenuItem key='show_uncategorized' onClick={redirectToUncategorized}>
             <ListItemIcon>
               <ArrowRightIcon fontSize='small' />

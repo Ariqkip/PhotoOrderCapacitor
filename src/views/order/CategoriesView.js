@@ -100,7 +100,7 @@ const CategoriesView = (props) => {
         }
         console.log('unsavedImages', unsavedImages);
       }
-
+      
       const isHaveUnsavedImages =
         unsavedImages && unsavedImages?.length > 0 && !isUnsavedImagesUploaded;
 
@@ -126,8 +126,7 @@ const CategoriesView = (props) => {
 
         const preparedUnsavedImages = unsavedImages.map((item) => {
           return {
-            fileName: item.FileName,
-            filePath: item.LocalImageId,
+            filePath: item.ImagePath,
             categoryId: item.categoryId,
             productId: item.ProductId,
             guid: createGuid(),
@@ -278,13 +277,18 @@ const CategoriesView = (props) => {
   }
 
   const renderCategories = () => {
+    const temporaryHiddenCategories = ["Calendars", "Albums"];
+
     return (
       <Grid container spacing={3}>
-        {photographer.productCategories.map((category) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={category.Id}>
-            <CategoryCard key={category.Id} category={category} />
-          </Grid>
-        ))}
+        {photographer.productCategories
+          .filter(category => !temporaryHiddenCategories.includes(category.Name))
+          .map((category) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={category.Id}>
+              <CategoryCard key={category.Id} category={category} />
+            </Grid>
+          ))
+        }
         {showOtherCategory(photographer) && (
           <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key='uncategorized'>
             <UncategorizedCard />
