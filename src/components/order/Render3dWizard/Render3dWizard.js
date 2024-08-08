@@ -1,5 +1,8 @@
 //Core
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { FilePicker } from '@capawesome/capacitor-file-picker';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 //Components
 import View3d from '../../3d/View3d';
@@ -7,12 +10,17 @@ import RoundButton from './../../core/RoundButton';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useOrder } from '../../../contexts/OrderContext';
 
 //Utils
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { createGuid } from '../../../core/helpers/guidHelper';
+import OrderService from '../../../services/OrderService';
+import TokenService from '../../../services/TokenService';
+import { ContentUriResolver } from 'capacitor-content-uri-resolver';
+import { getCompressedImage } from '../../../core/helpers/uploadImageHelper';
+import { formatPrice, getLabelPrice } from '../../../core/helpers/priceHelper';
 
 //UI
 import AddPhotoAlternateOutlined from '@material-ui/icons/AddPhotoAlternateOutlined';
@@ -38,12 +46,12 @@ import shareImg from '../../../assets/share2.jpg';
 import { useStyles, NextButton, OtherButton} from './Buttons';
 
 
-const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
+const Render3dWizard = ({ product, isOpen, closeFn, pack, photographer }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const history = useHistory();
-
-  let fileInput = null;
+  const context = useOrder();
+  const location = useLocation();
 
   const [copied, setCopied] = useState(false);
   const [activeStep, setActiveStep] = React.useState(0);
@@ -54,14 +62,15 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   const [editorRatio, setEditorRatio] = useState(0);
   const [hideSelectors, setHideSelectors] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(-1);
-
+  
+  const orderService = OrderService();
   const [order, orderDispatch] = useOrder();
-
+  
   const drawingCanvasRef = useRef(null);
 
   const handleNext = () => {
     closeFn();
-    history.push(`/photographer/${product.photographerId}/checkout`);
+    history.push(`/photographer/${photographer.photographId}/checkout`);
   };
 
   const handleClose = () => {
@@ -90,12 +99,15 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
 
   const steps = React.useMemo(() => {
     function getSteps() {
-      const images = order.orderItems.filter(
-        (i) => i.productId === product.id && i.isLayerItem === true
-      );
+      const images = order?.orderItems.filter(
+        (i) => i.productId === product.id
+      ); 
+
       images.forEach((s, index) => {
         const sizeConfig = getProductConfig(index);
-        if (sizeConfig) s.productConfig = sizeConfig;
+        if (sizeConfig) {
+          s["productConfig"] = sizeConfig
+        };
       });
 
       const editStep = {
@@ -113,9 +125,7 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
 
     const newSteps = getSteps();
     return newSteps;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order.orderItems]);
-
+  }, [order.orderItems.length]);
   useEffect(() => {
     let last = steps.length - 1;
     if (last < 0) last = 0;
@@ -126,21 +136,56 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     setActiveStep(step);
   };
 
+  const getOrderFromStorage = () => {
+    return JSON.parse(
+      orderService.getCurrentOrderFromStorage(photographer.photographId)
+    );
+  };
+
   function saveTexture(model) {
     const trackingGuid = createGuid();
-    const newOrderItem = {
-      maxSize: product.size,
-      guid: trackingGuid,
-      fileAsBase64: model,
-      fileUrl: '',
-      fileName: `${trackingGuid}.jpg`,
-      productId: product.id,
-      set: pack,
-      qty: 1,
-      status: 'idle',
-    };
+    const orderDataFromStorage = getOrderFromStorage();
 
-    orderDispatch({ type: 'ADD_ORDER_ITEM_TEXTURE_3D', payload: newOrderItem });
+    orderService
+      .UploadImage({
+        orderId: order?.orderId || orderDataFromStorage?.orderId,
+        orderGuid: order?.orderGuid || orderDataFromStorage?.orderGuid,
+        productId: product.id,
+        fileAsBase64: model,
+        fileName: `${trackingGuid}.jpg`,
+        fileGuid: trackingGuid,
+        attributes: [],
+      }).then((res) => {
+        const orderDataFromStorage = getOrderFromStorage();
+        const updatedOrderItems = orderDataFromStorage?.orderItems;
+        updatedOrderItems.push({
+          status: 'success',
+          price: 0,
+          fileAsBase64: null,
+          imageGuid: trackingGuid,
+          fileUrl: res.data.ImageUri,
+          fileName: `${trackingGuid}.jpg`,
+          productId: product.id,
+          set: pack,
+          qty: 1,
+          itemAttributes: [],
+          filePath: ""
+        })
+
+        const updatedOrder = {
+          ...orderDataFromStorage,
+          // status: 'FINALIZING',
+          orderItems: updatedOrderItems,
+          unsavedFiles: [],
+        };
+
+        orderService.setCurrentOrderToStorage(
+          updatedOrder,
+          photographer.photographId
+        );
+      })
+
+    
     setIsShareOpen(true);
   }
 
@@ -152,7 +197,6 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     if (!order) return true;
 
     const { orderItems } = order;
-
     const item = getOrderItem(orderItems);
     if (!item) return true;
 
@@ -179,9 +223,8 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
   }
 
   function showAcceptButton() {
-    const isShareDisabledResult = isShareDisabled();
     const last = activeStep + 1 >= steps.length;
-    const result = last && isShareDisabledResult;
+    const result = last 
 
     return result;
   }
@@ -203,80 +246,137 @@ const Render3dWizard = ({ product, isOpen, closeFn, pack }) => {
     return `${baseUrl}/share3d/${photographerId}/${id}/${encodedGuid}`;
   };
 
-  const handleUploadClick = () => {
-    fileInput.click();
-  };
-  const fileInputAddHandler = (event) => {
-    // const limit = getMaxFileLimit();
-    // const actual = getUploadedFilesCount();
-    //
-    // if (limit <= actual) return;
+  const getShortImagePath = (path) => {
+    const slashIndices = [];
 
-    const { files } = event.target;
-    for (let i = 0; i < files.length; i++) {
-      // if (actual + 1 + i > limit) return;
-      const file = files[i];
-      const trackingGuid = createGuid();
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        var tempImg = new Image();
-        tempImg.src = reader.result;
-        tempImg.onload = function () {
+    for (let i = 0; i < path?.length; i++) {
+      if (path[i] === '/') {
+        slashIndices.push(i);
+      }
+    }
+
+    if (slashIndices.length < 4) {
+      return path;
+    }
+
+    return path.substring(slashIndices[3]);
+  };
+
+  const calculatePrice = () => {
+    return getLabelPrice(product.id, 1, photographer, order);
+  };
+
+  const getProductCategory = (url) => {
+    const urlPaths = url.split('/');
+    return urlPaths[urlPaths.length - 2];
+  };
+
+  const fileInputAddHandler = useCallback(async () => {
+    try {
+      var files = [];
+
+      if (Capacitor.getPlatform() === 'ios') {
+        const result = await TokenService.pickPhotoFromIOS();
+        files = result.files;
+      } else {
+        const result = await FilePicker.pickImages({
+          multiple: true,
+        });
+
+        files = result.files;
+      }
+
+      const iterator = files[Symbol.iterator]();
+      let nextFile = iterator.next();
+
+      const updatedOrderData = { ...order.orderItems };
+      const updatedUnsavedFiles = [];
+
+      const processNextFile = async () => {
+        if (!nextFile.done) {
+          const file = nextFile.value;
+          const trackingGuid = createGuid();
+
+          let absolutePath = null;
+          let readFileResult;
+
+          if (Capacitor.getPlatform() === 'android') {
+
+            const pathResult =
+              await ContentUriResolver.getAbsolutePathFromContentUri({
+                context: context,
+                contentUri: file.path,
+              });
+            absolutePath = pathResult.absolutePath;
+            const shortPath = getShortImagePath(absolutePath);
+
+            readFileResult = await Filesystem.readFile({
+              path: shortPath,
+              directory: Directory.ExternalStorage,
+            });
+          } else if (Capacitor.getPlatform() === 'ios') {
+            // for ios , do not read image data again
+            readFileResult = { data: file.data };
+          } else {
+            readFileResult = await Filesystem.readFile({
+              path: file.path,
+            });
+          }
+
+          const base64Data = readFileResult.data;
+          const compressedFile = await getCompressedImage({
+            width: file.width,
+            height: file.height,
+            maxSize: product.size,
+            file: { data: base64Data, name: file.name },
+          });
+
           const orderItem = {
+            price: formatPrice(calculatePrice()),
             maxSize: product.size,
             guid: trackingGuid,
-            fileAsBase64: reader.result,
-            fileUrl: URL.createObjectURL(file),
-            fileName: file.name,
+            fileAsBase64: null,
+            fileUrl: 'test',
+            fileName: compressedFile.file.name,
             productId: product.id,
+            filePath: absolutePath || file.path || file.localId,
+            categoryId: getProductCategory(location.pathname),
             set: pack,
             qty: 1,
             status: 'idle',
-            isLayerItem: true,
-            width: tempImg.width,
-            height: tempImg.height,
           };
-console.log("create img with id: ", trackingGuid)
-          orderDispatch({ type: 'ADD_ORDER_ITEM_AT_END', payload: orderItem });
-          // executeScroll();
-        };
+
+          if (!updatedOrderData?.orderItems) {
+            updatedOrderData.orderItems = [];
+          }
+          updatedOrderData?.orderItems.push(orderItem);
+          updatedUnsavedFiles.push({ filePath: file.path, guid: trackingGuid });
+
+          orderDispatch({
+            type: 'ADD_ORDER_ITEM',
+            payload: {
+              ...orderItem,
+              fileAsBase64: compressedFile.fileAsBase64,
+            },
+          });
+          nextFile = iterator.next();
+          processNextFile();
+        } else {
+          orderService.setCurrentOrderToStorage(
+            {
+              ...updatedOrderData,
+              unsavedFiles: updatedUnsavedFiles,
+            },
+            photographer.photographId
+          );
+        }
       };
+
+      processNextFile();
+    } catch (error) {
+      console.error('Error picking images:', error);
     }
-  };
-  const fileInputUpateHandler = (e) => {
-    const { files } = e.target;
-    const newFile = files[0] ?? null;
-    if (!newFile) return;
-
-    const trackingGuid = createGuid();
-    const reader = new FileReader();
-    reader.readAsDataURL(newFile);
-    const currentItem = steps[activeStep].data[selectedPhoto] ?? null;
-
-    reader.onloadend = () => {
-      var tempImg = new Image();
-      tempImg.src = reader.result;
-      tempImg.onload = function () {
-        const orderItem = {
-          oldGuid: currentItem.guid,
-          newGuid: trackingGuid,
-          maxSize: product.size,
-          fileAsBase64: reader.result,
-          fileUrl: URL.createObjectURL(newFile),
-          fileName: newFile.name,
-          productId: product.id,
-          set: pack,
-          qty: 1,
-          status: 'idle',
-          isLayerItem: true,
-          width: tempImg.width,
-          height: tempImg.height,
-        };
-        orderDispatch({ type: 'REPLACE_ORDER_ITEM', payload: orderItem });
-      };
-    };
-  };
+}, [product, pack, orderDispatch]);
 
   useEffect(() => {
     const last = activeStep + 1 == steps.length;
@@ -348,21 +448,12 @@ console.log("create img with id: ", trackingGuid)
                 setHideSelectors(false);
                 setFinalImage(null);
               }
-              const stepImages = step.data.map(d=>(<img src={d.fileUrl} naturalWidth={d.width} naturalHeight={d.height}/>));
+              const stepImages = step.data.map(d=>(<img src={d.fileUrl} naturalWidth={d?.productConfig?.width} naturalHeight={d?.productConfig?.height}/>));
               const replaceFileBtn = (
                 <div>
-                  <input
-                    type='file'
-                    style={{ display: 'none' }}
-                    inputprops={{ accept: 'image/*' }}
-                    onChange={fileInputUpateHandler}
-                    ref={(input) => {
-                      fileInput = input;
-                    }}
-                  />
                   <RoundButton
                     size='small'
-                    onClick={() => handleUploadClick()}
+                    onClick={fileInputAddHandler}
                     disabled={selectedPhoto<0}
                     className={
                       index == activeStep ? classes.visible : classes.hidden
@@ -394,18 +485,9 @@ console.log("create img with id: ", trackingGuid)
               )
               const addFloatingImageBtn = (
                 <div>
-                  <input
-                    type='file'
-                    style={{ display: 'none' }}
-                    inputprops={{ accept: 'image/*' }}
-                    onChange={fileInputAddHandler}
-                    ref={(input) => {
-                      fileInput = input;
-                    }}
-                  />
                   <RoundButton
                     size='small'
-                    onClick={() => handleUploadClick()}
+                    onClick={fileInputAddHandler}
                     disabled={false}
                     className={
                       index == activeStep ? classes.visible : classes.hidden

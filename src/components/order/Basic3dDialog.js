@@ -1,5 +1,8 @@
 //Core
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { FilePicker } from '@capawesome/capacitor-file-picker';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 //Components
 import RoundButton from '../core/RoundButton';
@@ -11,13 +14,15 @@ import Render3dWizard from './Render3dWizard/Render3dWizard';
 
 //Hooks
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useOrder } from '../../contexts/OrderContext';
 import { usePhotographer } from '../../contexts/PhotographerContext';
 
 //Utils
 import { createGuid } from '../../core/helpers/guidHelper';
 import { formatPrice, getLabelPrice } from '../../core/helpers/priceHelper';
+import { getCompressedImage } from '../../core/helpers/uploadImageHelper';
+import DatabaseService from '../../services/TokenService';
 
 //UI
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -36,6 +41,9 @@ import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
 import Typography from '@material-ui/core/Typography';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Divider from '@material-ui/core/Divider';
+import OrderService from '../../services/OrderService';
+import TokenService from '../../services/TokenService';
+import { ContentUriResolver } from 'capacitor-content-uri-resolver';
 
 const placeholderImg = 'https://via.placeholder.com/400?text=No%20image';
 
@@ -123,12 +131,18 @@ const RemoveButton = withStyles((theme) => ({
   },
 }))(Button);
 
+const getProductCategory = (url) => {
+  const urlPaths = url.split('/');
+  return urlPaths[urlPaths.length - 2];
+};
+
 const Basic3dDialog = ({ product, isOpen, closeFn }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const history = useHistory();
+  const location = useLocation();
+  const context = useOrder();
 
-  let fileInput = null;
   const scrollToRef = useRef(null);
   const scrollOptionsRef = useRef(null);
 
@@ -136,6 +150,43 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
   const [open3d, setOpen3d] = useState(false);
   const [order, orderDispatch] = useOrder();
   const [photographer] = usePhotographer();
+  const orderService = OrderService();
+
+  const [isReadyReupload, setIsReadyReupload] = useState(false);
+  const [itemsToReupload, setItemsToReupload] = useState([]);
+
+  const orderDataFromStorage = JSON.parse(
+    orderService.getCurrentOrderFromStorage(photographer.photographId)
+  );
+
+  const executeScroll = () =>
+    scrollToRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+      inline: 'nearest',
+    });
+  const executeOptionsScroll = () =>
+    scrollOptionsRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+      inline: 'nearest',
+    });
+
+  const getShortImagePath = (path) => {
+    const slashIndices = [];
+
+    for (let i = 0; i < path?.length; i++) {
+      if (path[i] === '/') {
+        slashIndices.push(i);
+      }
+    }
+
+    if (slashIndices.length < 4) {
+      return path;
+    }
+
+    return path.substring(slashIndices[3]);
+  };
 
   const getMaxFileLimit = () => {
     const max = product?.sizes?.length ?? 1;
@@ -158,65 +209,164 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
     return current >= limit;
   };
 
-  const executeScroll = () =>
-    scrollToRef.current.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-      inline: 'nearest',
-    });
-  const executeOptionsScroll = () =>
-    scrollOptionsRef.current.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-      inline: 'nearest',
-    });
-  const fileInputHandler = (event) => {
-    const limit = getMaxFileLimit();
-    const actual = getUploadedFilesCount();
+  const fileInputHandler = useCallback(async () => {
+    try {
+      const limit = getMaxFileLimit();
+      const actual = getUploadedFilesCount();
 
-    if (limit <= actual) return;
+      if (limit <= actual) return;
 
-    const { files } = event.target;
-    for (let i = 0; i < files.length; i++) {
-      if (actual + 1 + i > limit) return;
-      const file = files[i];
-      const trackingGuid = createGuid();
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        var tempImg = new Image();
-        tempImg.src = reader.result;
-        tempImg.onload = function () {
+      var files = [];
+      if (Capacitor.getPlatform() === 'ios') {
+        const result = await TokenService.pickPhotoFromIOS();
+        files = result.files;
+      } else {
+        const result = await FilePicker.pickImages({
+          multiple: true,
+        });
+        files = result.files;
+      }
+
+      const iterator = files[Symbol.iterator]();
+      let nextFile = iterator.next();
+
+      const updatedOrderData = { ...orderDataFromStorage };
+      const updatedUnsavedFiles = [];
+
+      const processNextFile = async () => {
+        if (!nextFile.done) {
+          const file = nextFile.value;
+          const trackingGuid = createGuid();
+
+          let absolutePath = null;
+          let readFileResult;
+
+          if (Capacitor.getPlatform() === 'android') {
+            const pathResult =
+              await ContentUriResolver.getAbsolutePathFromContentUri({
+                context: context,
+                contentUri: file.path,
+              });
+            absolutePath = pathResult.absolutePath;
+            const shortPath = getShortImagePath(absolutePath);
+
+            readFileResult = await Filesystem.readFile({
+              path: shortPath,
+              directory: Directory.ExternalStorage,
+            });
+          } else if (Capacitor.getPlatform() === 'ios') {
+            // for ios , do not read image data again
+            readFileResult = { data: file.data };
+          } else {
+            readFileResult = await Filesystem.readFile({
+              path: file.path,
+            });
+          }
+
+          const base64Data = readFileResult.data;
+          
+          const compressedFile = await getCompressedImage({
+            width: file.width,
+            height: file.height,
+            maxSize: product.size,
+            file: { data: base64Data, name: file.name },
+          });
+          
           const orderItem = {
+            price: formatPrice(calculatePrice()),
             maxSize: product.size,
             guid: trackingGuid,
-            fileAsBase64: reader.result,
-            fileUrl: URL.createObjectURL(file),
-            fileName: file.name,
+            fileAsBase64: null,
+            fileUrl: 'test',
+            fileName: compressedFile.file.name,
             productId: product.id,
+            filePath: absolutePath || file.path || file.localId,
+            categoryId: getProductCategory(location.pathname),
             set: pack,
             qty: 1,
             status: 'idle',
-            isLayerItem: true,
-            width: tempImg.width,
-            height: tempImg.height,
           };
 
-          orderDispatch({ type: 'ADD_ORDER_ITEM', payload: orderItem });
+          if (!updatedOrderData?.orderItems) {
+            updatedOrderData.orderItems = [];
+          }
+          updatedOrderData?.orderItems.push(orderItem);
+          updatedUnsavedFiles.push({ filePath: file.path, guid: trackingGuid });
+
+          orderDispatch({
+            type: 'ADD_ORDER_ITEM',
+            payload: {
+              ...orderItem,
+              fileAsBase64: compressedFile.fileAsBase64,
+            },
+          });
           executeScroll();
-        };
+          nextFile = iterator.next();
+          processNextFile();
+        } else {
+          orderService.setCurrentOrderToStorage(
+            {
+              ...updatedOrderData,
+              unsavedFiles: updatedUnsavedFiles,
+            },
+            photographer.photographId
+          );
+        }
       };
+
+      processNextFile();
+    } catch (error) {
+      console.error('Error picking images:', error);
     }
+  }, [product, pack, orderDispatch, executeScroll]);
+
+  const isAllImagesDone = () => {
+    return order?.orderItems.every((item) => item.status === 'success');
   };
 
-  const handleUploadClick = () => {
-    fileInput.click();
-  };
+  useEffect(() => {
+    const reuploadData = async () => {
+      const orderDataFromStorage = JSON.parse(
+        orderService.getCurrentOrderFromStorage(photographer.photographId)
+      );
+      const isThereAnyUnsavedFiles = orderDataFromStorage?.unsavedFiles?.length;
+
+      if (isThereAnyUnsavedFiles) {
+        setIsReadyReupload(true);
+        setItemsToReupload(orderDataFromStorage?.unsavedFiles);
+      }
+
+      if (orderDataFromStorage?.readyToReupload) {
+        await handleReupload(orderDataFromStorage?.unsavedFiles);
+      }
+    };
+
+    reuploadData();
+  }, [orderDataFromStorage?.id]);
+
+  useEffect(() => {
+    if (
+      orderDataFromStorage?.orderItems?.length > 0 &&
+      orderDataFromStorage?.orderItems?.length !== order?.orderItems?.length
+    ) {
+      // handle succeed orders
+      const successsOrderData = orderDataFromStorage?.orderItems
+        ? orderDataFromStorage?.orderItems?.filter(
+            (item) => item.status === 'success'
+          )
+        : orderDataFromStorage;
+
+      orderDispatch({
+        type: 'ADD_ORDER_ITEMS_AT_END',
+        payload: successsOrderData,
+      });
+    }
+  }, [orderDataFromStorage?.orderItems?.length]);
 
   const renderFiles = () => {
     return order.orderItems
       .filter(
-        (item) => item.productId === product.id && item.isLayerItem === true
+        (item) => item.productId === product.id
       )
       ?.map((item) => (
         <FileListItem
@@ -229,6 +379,21 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
   };
 
   const handleRemoveAll = () => {
+    const orderDataFromStorage = JSON.parse(
+      orderService.getCurrentOrderFromStorage(photographer.photographId)
+    );
+    const updatedOrderData = {
+      ...orderDataFromStorage,
+      orderItems: [],
+      unsavedFiles: [],
+    };
+    orderService.setCurrentOrderToStorage(
+      updatedOrderData,
+      photographer.photographId
+    );
+
+    localStorage.setItem('isUnsavedImagesUploaded', 'true');
+
     orderDispatch({
       type: 'REMOVE_ORDER_ITEMS_FOR_PRODUCT',
       payload: { productId: product.id },
@@ -236,16 +401,10 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
   };
 
   const isNextDisabled = () => {
-    const files = order.orderItems.filter(
-      (item) =>
-        item.productId === product.id &&
-        item.isLayerItem === true &&
-        item.status === 'success'
-    );
-
     const limit = getMaxFileLimit();
-
-    return files.length !== limit;
+    const current = getUploadedFilesCount();
+    
+    return current !== limit;
   };
 
   const calculatePrice = () => {
@@ -262,17 +421,92 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
     return product.attributes.length > 0;
   };
 
-  function isUploadingFiles() {
-    const { orderItems } = order;
+  const handleReupload = async (reuploadItems) => {
+    const filesToReupload = reuploadItems.filter(
+      (item) => item.productId === product.id
+    );
+    console.log('handleReupload ', reuploadItems);
 
-    const items = orderItems.filter(
-      (i) => i.productId == product.id && i.status != 'success'
+    const updatedOrderData = { ...orderDataFromStorage, unsavedFiles: [] };
+    for (const itemObj of filesToReupload) {
+      try {
+        let imgObj = {};
+        try {
+          if (Capacitor.getPlatform() === 'ios') {
+            if (itemObj.filePath.startsWith('file://')) {
+              // for ios is from doc dir
+              const base64data = await OrderService().getBase64DataWithFilePath(
+                itemObj.filePath
+              );
+              imgObj = {
+                data: base64data,
+                name: itemObj.fileName ?? itemObj.filePath.split('/').pop(),
+              };
+            } else {
+              // for ios is from photo library
+              const photo = await TokenService.fetchiOSPhotoDataByID(
+                itemObj.filePath
+              );
+              const compressedFile = await getCompressedImage({
+                width: photo.width,
+                height: photo.height,
+                maxSize: product.size,
+                file: { data: photo.data, name: itemObj.fileName },
+              });
+
+              imgObj = {
+                data: compressedFile.fileAsBase64,
+                name:
+                  photo.name ||
+                  itemObj.fileName ||
+                  itemObj.filePath.split('/').pop(),
+              };
+            }
+          } else {
+            imgObj = itemObj.filePath.startsWith('content://media')
+              ? await DatabaseService.readImageContent(itemObj.filePath)
+              : await DatabaseService.getLastOrderImageFromDevice(
+                  itemObj.filePath
+                );
+          }
+        } catch (error) {
+          if (!imgObj.data) {
+            return;
+          }
+        }
+
+        const orderItem = {
+          price: formatPrice(calculatePrice()),
+          maxSize: product.size,
+          guid: createGuid(),
+          fileAsBase64: imgObj.data,
+          fileUrl: null,
+          filePath: itemObj.filePath,
+          fileName: imgObj.name ?? createGuid(),
+          categoryId: getProductCategory(location.pathname),
+          productId: product.id,
+          set: pack,
+          isLayerItem: true,
+          qty: 1,
+          status: 'idle',
+        };
+
+        updatedOrderData?.orderItems.push(orderItem);
+        orderDispatch({
+          type: 'ADD_ORDER_ITEM',
+          payload: { ...orderItem, fileAsBase64: imgObj.data },
+        });
+      } catch (error) {
+        console.error('Error fetching image:', error);
+      }
+    }
+    orderService.setCurrentOrderToStorage(
+      updatedOrderData,
+      photographer.photographId
     );
 
-    if (!items || items.length == 0) return false;
-
-    return true;
-  }
+    setIsReadyReupload(false);
+  };
 
   return (
     <>
@@ -298,18 +532,8 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
                   {t('filesLimit', { limit: getMaxFileLimit() })}
                 </Box>
                 <Box className={classes.centerContent}>
-                  <input
-                    type='file'
-                    style={{ display: 'none' }}
-                    inputprops={{ accept: 'image/*' }}
-                    multiple
-                    onChange={fileInputHandler}
-                    ref={(input) => {
-                      fileInput = input;
-                    }}
-                  />
                   <RoundButton
-                    onClick={() => handleUploadClick()}
+                    onClick={fileInputHandler}
                     disabled={disableUploadButton()}
                   >
                     <Box className={classes.centerContent}>
@@ -375,12 +599,16 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
               <NextButton
                 onClick={() => setOpen3d(true)}
                 color='primary'
-                disabled={isNextDisabled()}
+                disabled={
+                  isNextDisabled() || 
+                  !isAllImagesDone()}
               >
-                {isUploadingFiles() ? (
+                {!isAllImagesDone() ? (
                   <CircularProgress size={18} />
                 ) : (
-                  t('Next step')
+                  <>
+                    {t('Next step')} <ShoppingCartIcon fontSize='small' />
+                  </>
                 )}
               </NextButton>
             </Grid>
@@ -400,13 +628,16 @@ const Basic3dDialog = ({ product, isOpen, closeFn }) => {
           </Grid>
         </DialogActions>
       </Dialog>
-      <Render3dWizard
-        key={`3d_pr_dialog_${product.id}`}
-        isOpen={open3d}
-        closeFn={() => setOpen3d(false)}
-        product={product}
-        pack={pack}
-      />
+      {open3d ? (
+        <Render3dWizard
+          key={`3d_pr_dialog_${product.id}`}
+          isOpen={open3d}
+          closeFn={() => setOpen3d(false)}
+          product={product}
+          pack={pack}
+          photographer={photographer}
+        />
+      ) : <></>}
     </>
   );
 };

@@ -4,7 +4,7 @@ import {
   updateAttributesGroupItemSelection,
 } from '../../core/helpers/attributesConfigHelper';
 import { getPixelCrop } from '../../components/3d/helpers/cropConfigHelper';
-
+import OrderService from '../../services/OrderService';
 export const INIT_STATE = {
   photographerId: 0,
   orderId: '',
@@ -334,6 +334,8 @@ export function OrderReducer(state = INIT_STATE, action) {
       };
 
     case 'ORDER_ITEM_SET_ATTRIBUTES':
+      const orderService = OrderService();
+      const photographerId = action.payload.photographId;
       //check if config container is on the list, add if needed
       let newOrderItemsConfig = addProductAttributesConfig(
         state.orderItemsConfig,
@@ -349,6 +351,18 @@ export function OrderReducer(state = INIT_STATE, action) {
 
         return newConfig;
       });
+
+      const orderDataFromStorage = JSON.parse(
+        orderService.getCurrentOrderFromStorage(photographerId)
+      );
+      
+      orderService.setCurrentOrderToStorage(
+        {
+          ...orderDataFromStorage,
+          orderItemsConfig: [...newOrderItemsConfig],
+        },
+        photographerId
+      );
 
       return {
         ...state,

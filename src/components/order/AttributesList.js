@@ -140,6 +140,7 @@ const AttributesList = ({ product, pack }) => {
       pack: pack,
       groupId: groupId,
       selected: attributeId,
+      photographId: photographer.photographId
     };
 
     orderDispatch({ type: 'ORDER_ITEM_SET_ATTRIBUTES', payload: newConfig });
