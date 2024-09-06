@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+
 public class ContentUriResolver {
 
     public String echo(String value) {

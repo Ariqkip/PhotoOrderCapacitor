@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 
 import com.getcapacitor.BridgeActivity;
 import com.devsoln.plugins.capacitorcontenturiresolver.ContentUriResolverPlugin;
+import com.deveric.plugins.imagepickermiui.ImagePickerMiuiPlugin;
 
 public class MainActivity extends BridgeActivity {
     private static final int PERMISSION_REQUEST_CODE = 1;
@@ -31,6 +32,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         registerPlugin(ContentUriResolverPlugin.class);
+        registerPlugin(ImagePickerMiuiPlugin.class);
         checkPermissions(this);
     }
 

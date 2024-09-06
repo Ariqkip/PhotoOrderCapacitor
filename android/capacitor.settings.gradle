@@ -16,3 +16,6 @@ project(':capawesome-capacitor-file-picker').projectDir = new File('../node_modu
 
 include ':capacitor-content-uri-resolver'
 project(':capacitor-content-uri-resolver').projectDir = new File('../capacitor-content-uri-resolver/android')
+
+include ':image-picker-miui'
+project(':image-picker-miui').projectDir = new File('../../image-picker-miui/android')

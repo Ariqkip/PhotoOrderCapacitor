@@ -16,6 +16,7 @@ def capacitor_pods
   pod 'CapacitorFilesystem', :path => '../../node_modules/@capacitor/filesystem'
   pod 'CapawesomeCapacitorFilePicker', :path => '../../node_modules/@capawesome/capacitor-file-picker'
   pod 'CapacitorContentUriResolver', :path => '../../capacitor-content-uri-resolver'
+  pod 'ImagePickerMiui', :path => '../../../image-picker-miui'
 end
 
 target 'App' do

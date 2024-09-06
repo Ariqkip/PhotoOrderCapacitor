@@ -45,8 +45,8 @@ import Divider from '@material-ui/core/Divider';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { ContentUriResolver } from 'capacitor-content-uri-resolver';
+import { ImagePickerMiui} from 'image-picker-miui';
 import TokenService from '../../services/TokenService';
-
 const placeholderImg = 'https://via.placeholder.com/400?text=No%20image';
 
 const useStyles = makeStyles((theme) => ({
@@ -194,17 +194,17 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
     return path.substring(slashIndices[3]);
   };
 
+
   const fileInputHandler = useCallback(async () => {
+   
     try {
       var files = [];
       if (Capacitor.getPlatform() === 'ios') {
         const result = await TokenService.pickPhotoFromIOS();
         files = result.files;
       } else {
-        const result = await FilePicker.pickImages({
-          multiple: true,
-        });
-        files = result.files;
+        const result = await ImagePickerMiui.imagePickerMiui();  // Invoke the plugin method
+      files = result.files;  // Get the list of files (including file details)
       }
 
       const iterator = files[Symbol.iterator]();
@@ -213,6 +213,7 @@ const BasicDialog = ({ product, isOpen, closeFn }) => {
       const updatedOrderData = { ...orderDataFromStorage };
       const updatedUnsavedFiles = [];
 
+    
       const processNextFile = async () => {
         if (!nextFile.done) {
           const file = nextFile.value;
